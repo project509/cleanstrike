@@ -1,0 +1,1725 @@
+{
+ "_about": "Customs layout traced from re3mr's Customs v1.1E map (https://reemr.se/customs/, CC BY-NC-SA 4.0). Units: meters on re3mr's grid (7.38 px/m); x = east, z = south (Godot's +Z). The generator recentres on 'origin'. Heights are approximate: re3mr's map is top-down, so elevations are design estimates.",
+ "license": "CC BY-NC-SA 4.0, derived from re3mr's Customs map",
+ "origin": [
+  540,
+  340
+ ],
+ "playable_boundary": [
+  [
+   50,
+   236
+  ],
+  [
+   140,
+   238
+  ],
+  [
+   230,
+   240
+  ],
+  [
+   260,
+   249
+  ],
+  [
+   343,
+   255
+  ],
+  [
+   343,
+   220
+  ],
+  [
+   395,
+   210
+  ],
+  [
+   445,
+   202
+  ],
+  [
+   480,
+   180
+  ],
+  [
+   513,
+   168
+  ],
+  [
+   528,
+   215
+  ],
+  [
+   555,
+   236
+  ],
+  [
+   600,
+   237
+  ],
+  [
+   653,
+   225
+  ],
+  [
+   660,
+   258
+  ],
+  [
+   700,
+   252
+  ],
+  [
+   737,
+   245
+  ],
+  [
+   790,
+   258
+  ],
+  [
+   800,
+   205
+  ],
+  [
+   845,
+   193
+  ],
+  [
+   875,
+   185
+  ],
+  [
+   935,
+   184
+  ],
+  [
+   990,
+   186
+  ],
+  [
+   1008,
+   180
+  ],
+  [
+   1035,
+   196
+  ],
+  [
+   1040,
+   207
+  ],
+  [
+   1040,
+   300
+  ],
+  [
+   1030,
+   304
+  ],
+  [
+   905,
+   355
+  ],
+  [
+   850,
+   380
+  ],
+  [
+   840,
+   393
+  ],
+  [
+   800,
+   390
+  ],
+  [
+   790,
+   440
+  ],
+  [
+   780,
+   452
+  ],
+  [
+   725,
+   455
+  ],
+  [
+   700,
+   445
+  ],
+  [
+   678,
+   452
+  ],
+  [
+   665,
+   445
+  ],
+  [
+   630,
+   448
+  ],
+  [
+   600,
+   470
+  ],
+  [
+   560,
+   498
+  ],
+  [
+   520,
+   507
+  ],
+  [
+   480,
+   492
+  ],
+  [
+   440,
+   485
+  ],
+  [
+   400,
+   475
+  ],
+  [
+   383,
+   461
+  ],
+  [
+   370,
+   462
+  ],
+  [
+   340,
+   478
+  ],
+  [
+   312,
+   480
+  ],
+  [
+   300,
+   487
+  ],
+  [
+   280,
+   495
+  ],
+  [
+   250,
+   505
+  ],
+  [
+   230,
+   514
+  ],
+  [
+   205,
+   505
+  ],
+  [
+   185,
+   492
+  ],
+  [
+   160,
+   487
+  ],
+  [
+   125,
+   465
+  ],
+  [
+   115,
+   445
+  ],
+  [
+   85,
+   439
+  ],
+  [
+   45,
+   442
+  ],
+  [
+   22,
+   432
+  ],
+  [
+   37,
+   380
+  ],
+  [
+   50,
+   360
+  ],
+  [
+   50,
+   320
+  ],
+  [
+   28,
+   307
+  ],
+  [
+   48,
+   300
+  ]
+ ],
+ "roads": [
+  {
+   "name": "main_road",
+   "width": 9,
+   "points": [
+    [
+     20,
+     336
+    ],
+    [
+     150,
+     337
+    ],
+    [
+     280,
+     343
+    ],
+    [
+     380,
+     356
+    ],
+    [
+     460,
+     366
+    ],
+    [
+     540,
+     372
+    ],
+    [
+     620,
+     378
+    ],
+    [
+     690,
+     378
+    ],
+    [
+     735,
+     362
+    ],
+    [
+     800,
+     352
+    ],
+    [
+     870,
+     340
+    ],
+    [
+     950,
+     322
+    ],
+    [
+     1000,
+     310
+    ],
+    [
+     1035,
+     300
+    ]
+   ]
+  },
+  {
+   "name": "industrial_apron",
+   "width": 7,
+   "points": [
+    [
+     55,
+     327
+    ],
+    [
+     180,
+     328
+    ],
+    [
+     270,
+     333
+    ],
+    [
+     330,
+     340
+    ],
+    [
+     380,
+     344
+    ]
+   ]
+  },
+  {
+   "name": "north_south_road",
+   "width": 7,
+   "points": [
+    [
+     714,
+     240
+    ],
+    [
+     712,
+     270
+    ],
+    [
+     700,
+     310
+    ],
+    [
+     690,
+     345
+    ],
+    [
+     690,
+     378
+    ]
+   ]
+  },
+  {
+   "name": "shoreline_road",
+   "width": 6,
+   "points": [
+    [
+     690,
+     378
+    ],
+    [
+     688,
+     410
+    ],
+    [
+     678,
+     452
+    ]
+   ]
+  },
+  {
+   "name": "dorms_road",
+   "width": 6,
+   "points": [
+    [
+     517,
+     372
+    ],
+    [
+     517,
+     410
+    ],
+    [
+     515,
+     448
+    ]
+   ]
+  },
+  {
+   "name": "reserve_dirt_road",
+   "width": 5,
+   "surface": "dirt",
+   "points": [
+    [
+     60,
+     345
+    ],
+    [
+     52,
+     380
+    ],
+    [
+     56,
+     410
+    ],
+    [
+     56,
+     445
+    ]
+   ]
+  },
+  {
+   "name": "east_road",
+   "width": 7,
+   "points": [
+    [
+     1030,
+     304
+    ],
+    [
+     1032,
+     260
+    ],
+    [
+     1030,
+     220
+    ],
+    [
+     1030,
+     196
+    ]
+   ]
+  },
+  {
+   "name": "trailer_park_road",
+   "width": 6,
+   "points": [
+    [
+     860,
+     216
+    ],
+    [
+     950,
+     216
+    ],
+    [
+     1030,
+     216
+    ]
+   ]
+  },
+  {
+   "name": "gas_station_lot",
+   "width": 5,
+   "points": [
+    [
+     365,
+     222
+    ],
+    [
+     395,
+     222
+    ]
+   ]
+  }
+ ],
+ "rails": [
+  {
+   "name": "north_rail",
+   "points": [
+    [
+     50,
+     249
+    ],
+    [
+     150,
+     249
+    ],
+    [
+     240,
+     252
+    ],
+    [
+     300,
+     252
+    ],
+    [
+     340,
+     258
+    ],
+    [
+     400,
+     240
+    ],
+    [
+     450,
+     222
+    ],
+    [
+     500,
+     190
+    ],
+    [
+     520,
+     170
+    ]
+   ]
+  },
+  {
+   "name": "yard_rail_2",
+   "points": [
+    [
+     420,
+     230
+    ],
+    [
+     470,
+     205
+    ],
+    [
+     510,
+     182
+    ]
+   ]
+  },
+  {
+   "name": "south_spur",
+   "points": [
+    [
+     455,
+     222
+    ],
+    [
+     405,
+     280
+    ],
+    [
+     383,
+     356
+    ],
+    [
+     370,
+     395
+    ],
+    [
+     300,
+     435
+    ],
+    [
+     250,
+     465
+    ],
+    [
+     212,
+     510
+    ]
+   ]
+  },
+  {
+   "name": "scav_base_rail",
+   "points": [
+    [
+     455,
+     222
+    ],
+    [
+     460,
+     260
+    ],
+    [
+     470,
+     300
+    ]
+   ]
+  },
+  {
+   "name": "east_rail",
+   "points": [
+    [
+     844,
+     180
+    ],
+    [
+     844,
+     260
+    ],
+    [
+     843,
+     330
+    ],
+    [
+     841,
+     395
+    ]
+   ]
+  }
+ ],
+ "bridges": [
+  {
+   "name": "road_bridge",
+   "from": [
+    735,
+    352
+   ],
+   "to": [
+    805,
+    349
+   ],
+   "width": 9,
+   "deck_height": 2.0
+  },
+  {
+   "name": "rail_bridge",
+   "from": [
+    735,
+    366
+   ],
+   "to": [
+    805,
+    363
+   ],
+   "width": 6,
+   "deck_height": 2.0
+  }
+ ],
+ "river": {
+  "bed_depth": 9,
+  "points": [
+   [
+    790,
+    200
+   ],
+   [
+    785,
+    250
+   ],
+   [
+    775,
+    300
+   ],
+   [
+    770,
+    357
+   ],
+   [
+    760,
+    400
+   ],
+   [
+    750,
+    450
+   ],
+   [
+    760,
+    520
+   ]
+  ],
+  "width": 55
+ },
+ "terrain": {
+  "base": 0.0,
+  "mounds": [
+   {
+    "name": "construction_spoil",
+    "center": [
+     520,
+     255
+    ],
+    "radius": 45,
+    "height": 6
+   },
+   {
+    "name": "construction_spoil_2",
+    "center": [
+     470,
+     245
+    ],
+    "radius": 25,
+    "height": 4
+   },
+   {
+    "name": "east_ravine_rocks",
+    "center": [
+     745,
+     300
+    ],
+    "radius": 40,
+    "height": 5
+   }
+  ],
+  "forest_south": {
+   "polygon": [
+    [
+     60,
+     360
+    ],
+    [
+     700,
+     395
+    ],
+    [
+     690,
+     455
+    ],
+    [
+     520,
+     505
+    ],
+    [
+     250,
+     505
+    ],
+    [
+     120,
+     470
+    ],
+    [
+     40,
+     440
+    ]
+   ],
+   "undulation": 3.0
+  },
+  "south_slope": {
+   "from_z": 395,
+   "to_z": 510,
+   "drop": 6.0
+  }
+ },
+ "buildings": [
+  {
+   "name": "WH7",
+   "kind": "warehouse",
+   "rect": [
+    130,
+    250,
+    170,
+    280
+   ],
+   "height": 11,
+   "roof": "gable"
+  },
+  {
+   "name": "WH6",
+   "kind": "warehouse",
+   "rect": [
+    125,
+    282,
+    148,
+    317
+   ],
+   "height": 9,
+   "roof": "flat"
+  },
+  {
+   "name": "WH5",
+   "kind": "warehouse",
+   "rect": [
+    205,
+    280,
+    250,
+    325
+   ],
+   "height": 12,
+   "roof": "gable"
+  },
+  {
+   "name": "TankFarmOffice",
+   "kind": "industrial",
+   "rect": [
+    83,
+    247,
+    108,
+    262
+   ],
+   "height": 8,
+   "roof": "flat"
+  },
+  {
+   "name": "WH3",
+   "kind": "warehouse",
+   "rect": [
+    280,
+    263,
+    339,
+    297
+   ],
+   "height": 12,
+   "roof": "gable"
+  },
+  {
+   "name": "WH4",
+   "kind": "warehouse_compound",
+   "rect": [
+    346,
+    273,
+    380,
+    331
+   ],
+   "height": 10,
+   "roof": "gable"
+  },
+  {
+   "name": "IndustrialPlant",
+   "kind": "factory",
+   "rect": [
+    409,
+    287,
+    449,
+    349
+   ],
+   "height": 16,
+   "roof": "flat"
+  },
+  {
+   "name": "ScavBase",
+   "kind": "factory",
+   "rect": [
+    481,
+    229,
+    514,
+    286
+   ],
+   "height": 18,
+   "roof": "gable"
+  },
+  {
+   "name": "ConstructionFrame",
+   "kind": "concrete_frame",
+   "rect": [
+    469,
+    329,
+    531,
+    354
+   ],
+   "height": 9,
+   "roof": "none"
+  },
+  {
+   "name": "BoilerBuilding",
+   "kind": "boiler",
+   "rect": [
+    571,
+    297,
+    614,
+    329
+   ],
+   "height": 14,
+   "roof": "flat"
+  },
+  {
+   "name": "Lab",
+   "kind": "office",
+   "rect": [
+    610,
+    237,
+    627,
+    254
+   ],
+   "height": 7,
+   "roof": "flat"
+  },
+  {
+   "name": "WH17",
+   "kind": "warehouse",
+   "rect": [
+    626,
+    291,
+    677,
+    326
+   ],
+   "height": 10,
+   "roof": "flat"
+  },
+  {
+   "name": "SteelFrame",
+   "kind": "steel_frame",
+   "rect": [
+    606,
+    330,
+    634,
+    350
+   ],
+   "height": 8,
+   "roof": "none"
+  },
+  {
+   "name": "NewGasStation",
+   "kind": "gas_station",
+   "rect": [
+    269,
+    354,
+    309,
+    391
+   ],
+   "height": 6,
+   "roof": "canopy"
+  },
+  {
+   "name": "Checkpoint",
+   "kind": "checkpoint",
+   "rect": [
+    105,
+    352,
+    130,
+    380
+   ],
+   "height": 5,
+   "roof": "canopy"
+  },
+  {
+   "name": "OldGasStation",
+   "kind": "gas_station_old",
+   "rect": [
+    362,
+    214,
+    398,
+    240
+   ],
+   "height": 6,
+   "roof": "canopy"
+  },
+  {
+   "name": "DormsWest",
+   "kind": "dorm_2storey",
+   "rect": [
+    459,
+    439,
+    480,
+    467
+   ],
+   "height": 8,
+   "roof": "flat",
+   "floors": 2
+  },
+  {
+   "name": "DormsEast",
+   "kind": "dorm_3storey",
+   "rect": [
+    511,
+    450,
+    534,
+    483
+   ],
+   "height": 11,
+   "roof": "flat",
+   "floors": 3
+  },
+  {
+   "name": "RedWarehouse",
+   "kind": "warehouse_red",
+   "rect": [
+    890,
+    237,
+    923,
+    289
+   ],
+   "height": 12,
+   "roof": "gable"
+  },
+  {
+   "name": "StorageRowA",
+   "kind": "storage_sheds",
+   "rect": [
+    961,
+    229,
+    980,
+    289
+   ],
+   "height": 4,
+   "roof": "gable"
+  },
+  {
+   "name": "StorageRowB",
+   "kind": "storage_sheds",
+   "rect": [
+    984,
+    229,
+    1003,
+    289
+   ],
+   "height": 4,
+   "roof": "gable"
+  },
+  {
+   "name": "StorageLongShed",
+   "kind": "storage_sheds",
+   "rect": [
+    1009,
+    225,
+    1017,
+    290
+   ],
+   "height": 4,
+   "roof": "flat"
+  },
+  {
+   "name": "ShorelineBooth",
+   "kind": "booth",
+   "rect": [
+    668,
+    415,
+    678,
+    428
+   ],
+   "height": 3,
+   "roof": "flat"
+  }
+ ],
+ "fences": [
+  {
+   "name": "red_yard",
+   "closed": true,
+   "points": [
+    [
+     856,
+     220
+    ],
+    [
+     940,
+     220
+    ],
+    [
+     940,
+     337
+    ],
+    [
+     856,
+     337
+    ]
+   ],
+   "height": 2.5,
+   "gates": [
+    [
+     900,
+     337,
+     10
+    ]
+   ]
+  }
+ ],
+ "tanks": [
+  {
+   "center": [
+    77,
+    272
+   ],
+   "radius": 10,
+   "height": 14
+  },
+  {
+   "center": [
+    100,
+    269
+   ],
+   "radius": 10,
+   "height": 14
+  },
+  {
+   "center": [
+    73,
+    295
+   ],
+   "radius": 10,
+   "height": 14
+  },
+  {
+   "center": [
+    95,
+    298
+   ],
+   "radius": 10,
+   "height": 14
+  }
+ ],
+ "chimneys": [
+  {
+   "name": "WH7_chimney_1906",
+   "pos": [
+    132,
+    245
+   ],
+   "height": 42,
+   "radius": 2.6
+  },
+  {
+   "name": "WH7_chimney_b",
+   "pos": [
+    158,
+    250
+   ],
+   "height": 40,
+   "radius": 2.4
+  },
+  {
+   "name": "boiler_chimney_a",
+   "pos": [
+    574,
+    257
+   ],
+   "height": 46,
+   "radius": 2.8
+  },
+  {
+   "name": "boiler_chimney_b",
+   "pos": [
+    589,
+    266
+   ],
+   "height": 40,
+   "radius": 2.4
+  }
+ ],
+ "cranes": [
+  {
+   "name": "tower_crane",
+   "pos": [
+    525,
+    300
+   ],
+   "height": 38,
+   "jib": 30,
+   "heading": 200
+  }
+ ],
+ "pylons": [
+  [
+   168,
+   345
+  ],
+  [
+   212,
+   400
+  ],
+  [
+   300,
+   485
+  ],
+  [
+   861,
+   362
+  ],
+  [
+   928,
+   305
+  ],
+  [
+   945,
+   195
+  ]
+ ],
+ "props": [
+  {
+   "kind": "rail_tankers",
+   "rect": [
+    186,
+    285,
+    198,
+    310
+   ]
+  },
+  {
+   "kind": "rail_tankers",
+   "rect": [
+    430,
+    225,
+    445,
+    232
+   ]
+  },
+  {
+   "kind": "tanker_yard",
+   "rect": [
+    557,
+    341,
+    589,
+    370
+   ]
+  },
+  {
+   "kind": "buses",
+   "rect": [
+    437,
+    386,
+    460,
+    394
+   ]
+  },
+  {
+   "kind": "parking",
+   "rect": [
+    482,
+    455,
+    510,
+    480
+   ]
+  }
+ ],
+ "backdrop": [
+  {
+   "kind": "cooling_tower",
+   "pos": [
+    300,
+    105
+   ],
+   "radius": 22,
+   "height": 60
+  },
+  {
+   "kind": "cooling_tower",
+   "pos": [
+    215,
+    95
+   ],
+   "radius": 20,
+   "height": 55
+  },
+  {
+   "kind": "cooling_tower",
+   "pos": [
+    150,
+    160
+   ],
+   "radius": 18,
+   "height": 50
+  },
+  {
+   "kind": "factory_hall",
+   "rect": [
+    526,
+    111,
+    606,
+    180
+   ],
+   "height": 26,
+   "name": "RailroadPassageHall"
+  },
+  {
+   "kind": "city_skyline",
+   "rect": [
+    850,
+    20,
+    1060,
+    80
+   ],
+   "height": 70
+  }
+ ],
+ "exits": [
+  {
+   "name": "Reserve Checkpoint",
+   "pos": [
+    56,
+    448
+   ],
+   "to": "Village",
+   "spawn_for": "Village"
+  },
+  {
+   "name": "Admin Gate",
+   "pos": [
+    28,
+    307
+   ],
+   "to": "Village"
+  },
+  {
+   "name": "Dorms V-Ex",
+   "pos": [
+    520,
+    512
+   ],
+   "to": "Village"
+  },
+  {
+   "name": "Smugglers Boat",
+   "pos": [
+    731,
+    458
+   ],
+   "to": "Village"
+  },
+  {
+   "name": "Railroad to Reserve",
+   "pos": [
+    210,
+    508
+   ],
+   "to": "Village"
+  },
+  {
+   "name": "Old Gas Station",
+   "pos": [
+    377,
+    207
+   ],
+   "to": "Highway",
+   "spawn_for": "Highway"
+  },
+  {
+   "name": "ZB-1011",
+   "pos": [
+    72,
+    240
+   ],
+   "to": "Highway"
+  },
+  {
+   "name": "Factory Transit",
+   "pos": [
+    348,
+    210
+   ],
+   "to": "Highway"
+  },
+  {
+   "name": "Crossroads",
+   "pos": [
+    1030,
+    303
+   ],
+   "to": "Outpost",
+   "spawn_for": "Outpost"
+  },
+  {
+   "name": "Trailer Park",
+   "pos": [
+    1008,
+    182
+   ],
+   "to": "Outpost"
+  },
+  {
+   "name": "Railroad to Tarkov",
+   "pos": [
+    848,
+    190
+   ],
+   "to": "Outpost"
+  },
+  {
+   "name": "Railroad to Port",
+   "pos": [
+    840,
+    392
+   ],
+   "to": "Outpost"
+  },
+  {
+   "name": "Interchange Transit",
+   "pos": [
+    1036,
+    198
+   ],
+   "to": "Outpost"
+  }
+ ],
+ "surfaces": {
+  "_about": "Ground painting. concrete = slabs (blue layer), asphalt = green layer, dirt = red layer; later entries win.",
+  "concrete": [
+   {
+    "name": "west_industrial",
+    "polygon": [
+     [
+      55,
+      242
+     ],
+     [
+      345,
+      256
+     ],
+     [
+      345,
+      330
+     ],
+     [
+      55,
+      328
+     ]
+    ]
+   },
+   {
+    "name": "center_industrial",
+    "polygon": [
+     [
+      345,
+      256
+     ],
+     [
+      400,
+      240
+     ],
+     [
+      455,
+      226
+     ],
+     [
+      460,
+      360
+     ],
+     [
+      345,
+      350
+     ]
+    ]
+   },
+   {
+    "name": "scav_base_yard",
+    "polygon": [
+     [
+      460,
+      226
+     ],
+     [
+      540,
+      226
+     ],
+     [
+      545,
+      360
+     ],
+     [
+      460,
+      360
+     ]
+    ]
+   },
+   {
+    "name": "boiler_yard",
+    "polygon": [
+     [
+      545,
+      236
+     ],
+     [
+      700,
+      240
+     ],
+     [
+      700,
+      375
+     ],
+     [
+      545,
+      372
+     ]
+    ]
+   },
+   {
+    "name": "red_yard",
+    "polygon": [
+     [
+      856,
+      220
+     ],
+     [
+      940,
+      220
+     ],
+     [
+      940,
+      337
+     ],
+     [
+      856,
+      337
+     ]
+    ]
+   },
+   {
+    "name": "storage_lot",
+    "polygon": [
+     [
+      948,
+      200
+     ],
+     [
+      1035,
+      200
+     ],
+     [
+      1035,
+      300
+     ],
+     [
+      948,
+      300
+     ]
+    ]
+   },
+   {
+    "name": "checkpoint_pad",
+    "polygon": [
+     [
+      95,
+      345
+     ],
+     [
+      140,
+      345
+     ],
+     [
+      140,
+      385
+     ],
+     [
+      95,
+      385
+     ]
+    ]
+   },
+   {
+    "name": "tanker_yard",
+    "polygon": [
+     [
+      552,
+      336
+     ],
+     [
+      595,
+      336
+     ],
+     [
+      595,
+      374
+     ],
+     [
+      552,
+      374
+     ]
+    ]
+   }
+  ],
+  "asphalt": [
+   {
+    "name": "old_gas_lot",
+    "polygon": [
+     [
+      355,
+      210
+     ],
+     [
+      402,
+      210
+     ],
+     [
+      402,
+      245
+     ],
+     [
+      355,
+      245
+     ]
+    ]
+   },
+   {
+    "name": "new_gas_lot",
+    "polygon": [
+     [
+      262,
+      350
+     ],
+     [
+      315,
+      350
+     ],
+     [
+      315,
+      395
+     ],
+     [
+      262,
+      395
+     ]
+    ]
+   },
+   {
+    "name": "dorms_parking",
+    "polygon": [
+     [
+      480,
+      448
+     ],
+     [
+      512,
+      448
+     ],
+     [
+      512,
+      485
+     ],
+     [
+      480,
+      485
+     ]
+    ]
+   },
+   {
+    "name": "bus_lot",
+    "polygon": [
+     [
+      430,
+      380
+     ],
+     [
+      470,
+      380
+     ],
+     [
+      470,
+      398
+     ],
+     [
+      430,
+      398
+     ]
+    ]
+   }
+  ],
+  "dirt": [
+   {
+    "name": "construction_spoil",
+    "polygon": [
+     [
+      460,
+      230
+     ],
+     [
+      560,
+      232
+     ],
+     [
+      555,
+      300
+     ],
+     [
+      470,
+      305
+     ]
+    ]
+   }
+  ]
+ },
+ "vegetation": {
+  "_about": "Tree density 0..1 per area; trees keep 4 m apart like Vostok's Trees spawner.",
+  "forest": [
+   {
+    "polygon": [
+     [
+      60,
+      360
+     ],
+     [
+      700,
+      395
+     ],
+     [
+      690,
+      455
+     ],
+     [
+      520,
+      505
+     ],
+     [
+      250,
+      505
+     ],
+     [
+      120,
+      470
+     ],
+     [
+      40,
+      440
+     ]
+    ],
+    "density": 0.85
+   }
+  ],
+  "outside_density": 0.75,
+  "industrial_density": 0.04,
+  "clear_margin": {
+   "road": 3.0,
+   "rail": 4.0,
+   "building": 6.0
+  }
+ }
+}
