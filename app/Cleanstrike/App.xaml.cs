@@ -48,6 +48,11 @@ public partial class App : Application
             return;
         }
         window.Show();
+
+        var files = args.Where(a => !a.StartsWith("--") && File.Exists(a)
+            && Services.ModLibrary.Extensions.Contains(Path.GetExtension(a).ToLowerInvariant())).ToList();
+        if (files.Count > 0 || args.Contains("--play"))
+            ((ViewModels.MainViewModel)window.DataContext).QueueStartupRequests(files, args.Contains("--play"));
     }
 
     private static void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)

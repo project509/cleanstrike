@@ -28,6 +28,8 @@ public sealed class MainViewModel : ObservableObject
     private bool _toastVisible;
     private string? _banner;
     private bool _switchingProfile;
+    private readonly List<string> _pendingInstalls = new();
+    private bool _pendingPlay;
 
     public MainViewModel()
     {
@@ -194,6 +196,33 @@ public sealed class MainViewModel : ObservableObject
         _pollTimer.Start();
         Poll();
         CommandManagerRefresh();
+        RunStartupRequests();
+    }
+
+    /// <summary>
+    /// Command line: mod files to install (e.g. opening a .csmod with
+    /// Cleanstrike) and --play to start the game once everything is ready.
+    /// </summary>
+    public void QueueStartupRequests(IEnumerable<string> files, bool play)
+    {
+        _pendingInstalls.AddRange(files);
+        _pendingPlay = play;
+        if (State == AppState.Ready) RunStartupRequests();
+    }
+
+    private void RunStartupRequests()
+    {
+        if (_pendingInstalls.Count > 0)
+        {
+            var files = _pendingInstalls.ToList();
+            _pendingInstalls.Clear();
+            InstallFiles(files);
+        }
+        if (_pendingPlay)
+        {
+            _pendingPlay = false;
+            Play(false);
+        }
     }
 
     private void LocateGame()
