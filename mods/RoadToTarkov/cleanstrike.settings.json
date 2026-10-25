@@ -1,0 +1,11 @@
+{
+  "settings": [
+    { "key": "search_enabled", "type": "bool", "default": true, "label": "Search containers and bodies", "description": "Items appear one at a time while you search, like in Tarkov." },
+    { "key": "search_speed", "type": "float", "default": 1.0, "min": 0.25, "max": 4.0, "step": 0.25, "label": "Search speed", "description": "Higher is faster. 1.0 is the intended pace." },
+    { "key": "search_corpses", "type": "bool", "default": true, "label": "Search bodies too", "description": "Bodies need searching just like containers." },
+    { "key": "examine_enabled", "type": "bool", "default": true, "label": "Unknown items need examining", "description": "Items you have never seen show as '?' until you examine them (right-click > Examine)." },
+    { "key": "examine_speed", "type": "float", "default": 1.0, "min": 0.25, "max": 4.0, "step": 0.25, "label": "Examine speed", "description": "Higher is faster." },
+    { "key": "item_colors", "type": "bool", "default": true, "label": "Tarkov-style cell colors", "description": "Tint inventory cells by item category; legendary items glow violet." },
+    { "key": "reveal_sound", "type": "bool", "default": true, "label": "Sound when an item is found", "description": "" }
+  ]
+}

@@ -1,0 +1,12 @@
+[mod]
+name="Cleanstrike Self Test"
+id="cs_selftest"
+version="0.0.1"
+description="Developer test harness. Do not ship."
+priority=100
+
+[script_extend]
+res://Scripts/Menu.gd="res://CSTest/Menu.gd"
+
+[autoload]
+CSTest="res://CSTest/Runner.gd"

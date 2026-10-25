@@ -1,0 +1,10 @@
+# build output
+dist/
+**/bin/
+**/obj/
+*.user
+.vs/
+.idea/
+# never commit game files
+*.pck
+RTV.exe
