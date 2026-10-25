@@ -49,6 +49,8 @@ var L: Dictionary
 var M: Dictionary
 var H: PackedFloat32Array
 var CLS: PackedByteArray
+var COL: PackedByteArray
+var footprints: Array = []    # Rect2 in layout metres around placed buildings (trees stay out)
 var OX := 0.0
 var OZ := 0.0
 var map_root: Node3D
@@ -71,6 +73,7 @@ func _ready() -> void:
 	M = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("meta.json")))
 	H = FileAccess.get_file_as_bytes(dir.path_join("heights.f32")).to_float32_array()
 	CLS = FileAccess.get_file_as_bytes(dir.path_join("classes.u8"))
+	COL = FileAccess.get_file_as_bytes(dir.path_join("colors.u8"))
 	OX = float(L.origin[0])
 	OZ = float(L.origin[1])
 	rng.seed = 20261025
@@ -84,6 +87,7 @@ func _ready() -> void:
 	content.name = "Content"
 	map_root = content
 
+	load_swatches(dir)
 	build_terrain(dir)
 	log_step("terrain", t0)
 	build_water()
@@ -97,6 +101,7 @@ func _ready() -> void:
 	build_fences()
 	build_road_details()
 	build_backdrop()
+	build_dressing()
 	log_step("buildings & props", t0)
 	build_exits()
 	build_border()
@@ -234,6 +239,9 @@ func place(path: String, parent: Node, x: float, z: float, yaw: float, lift := 0
 		pos -= basis * Vector3(c.x, 0.0, c.z)
 	n.transform = Transform3D(basis, pos)
 	add(parent, n)
+	var a2 := Transform3D(basis, pos) * asset_aabb(path)
+	if a2.size.x * a2.size.z > 40.0:
+		footprints.append(Rect2(a2.position.x + OX, a2.position.z + OZ, a2.size.x, a2.size.z).grow(3.0))
 	return n
 
 
@@ -338,6 +346,7 @@ func build_terrain(dir: String) -> void:
 		var normals := PackedVector3Array()
 		var tangents := PackedFloat32Array()
 		var uvs := PackedVector2Array()
+		var colors := PackedColorArray()
 		var idx := PackedInt32Array()
 		var c0 := t * cols
 		var tx0: float = float(M.x0) + t * tile
@@ -357,6 +366,8 @@ func build_terrain(dir: String) -> void:
 				tan = (tan - nrm * nrm.dot(tan)).normalized()
 				tangents.append_array([tan.x, tan.y, tan.z, 1.0])
 				uvs.append(Vector2((x - tx0) / tile, (z - float(M.z0)) / tile))
+				var ci := (j * nx + i) * 3
+				colors.append(Color(COL[ci] / 255.0, COL[ci + 1] / 255.0, COL[ci + 2] / 255.0))
 		var w := cols + 1
 		for j in nz - 1:
 			for i in cols:
@@ -368,6 +379,7 @@ func build_terrain(dir: String) -> void:
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		arrays[Mesh.ARRAY_TANGENT] = tangents
 		arrays[Mesh.ARRAY_TEX_UV] = uvs
+		arrays[Mesh.ARRAY_COLOR] = colors
 		arrays[Mesh.ARRAY_INDEX] = idx
 		var mesh := ArrayMesh.new()
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
@@ -618,6 +630,8 @@ func build_buildings() -> void:
 				build_frame(holder, rect, float(b.height), MAT_CONCRETE, 0.6, 6.0, 3.3, "Concrete")
 			"steel_frame":
 				build_frame(holder, rect, float(b.height), MAT_METAL, 0.35, 5.0, 4.0, "Metal")
+			"generated":
+				build_generated(holder, b)
 			_:
 				if KINDS.has(kind):
 					var best := ""
@@ -994,9 +1008,18 @@ func build_trees(dir: String) -> void:
 		inst.free()
 	var veg := group(content, "Vegetation")
 	var chunks := {}
+	var cleared := 0
 	for t in trees:
 		var x := float(t[0])
 		var z := float(t[1])
+		var blocked := false
+		for r in footprints:
+			if (r as Rect2).has_point(Vector2(x, z)):
+				blocked = true
+				break
+		if blocked:
+			cleared += 1
+			continue
 		var key := "%d_%d" % [int(floor(x / 100.0)), int(floor(z / 100.0))]
 		if not chunks.has(key):
 			chunks[key] = []
@@ -1066,6 +1089,7 @@ func build_trees(dir: String) -> void:
 			static_trimesh(holder, obs_faces, "Obstruction", "", 1 << 10, 1)
 		total += n
 	stats["trees"] = total
+	stats["trees_cleared_by_buildings"] = cleared
 
 
 func build_grass() -> void:
@@ -1128,3 +1152,452 @@ func build_grass() -> void:
 		add(holder, mmi, "Chunk")
 		count += list.size()
 	stats["grass"] = count
+
+
+# ================================================================== generated buildings
+# Customs' signature buildings, built from boxes with real openings and
+# Vostok's own surface textures (cut into tileable swatches by textures.py).
+
+const SHELVES := ["res://Assets/Shelf_Warehouse/Shelf_Warehouse_A.tscn", "res://Assets/Shelf_Warehouse/Shelf_Warehouse_B.tscn"]
+const LOOT := ["res://Assets/Crate_Military/Crate_Military.tscn", "res://Assets/Crate_Wood/Crate_Wood.tscn", "res://Assets/Crate_Wood/Crate_Wood_Covered_A.tscn", "res://Assets/Crate_Special/Crate_Special.tscn", "res://Assets/Locker/Locker.tscn"]
+const CLUTTER := ["res://Assets/Pallet/Pallet_Group.tscn", "res://Assets/Barrel_Metal/Barrel_Metal_Group_A.tscn", "res://Assets/Barrel_Metal/Barrel_Metal_Group_B.tscn", "res://Assets/Tire/Tire_Group.tscn", "res://Assets/Pile_Cardboard/Pile_Cardboard_A.tscn", "res://Assets/Debris/Metal/Debris_Metal_Pile_A.tscn", "res://Assets/Debris/Metal/Debris_Metal_Pile_B.tscn", "res://Assets/Debris/Wood/Debris_Wood_Pile_A.tscn", "res://Assets/Plywood/Plywood_A_Leaning.tscn", "res://Assets/Cable_Reel/Cable_Reel.tscn", "res://Assets/Slab_Concrete/Slab_Concrete_Group_A.tscn", "res://Assets/Pipe_Concrete/Pipe_Concrete_Group.tscn"]
+const STYLE := {
+	"brick_red": ["brick_red", "brick_red", "roof_tar"],
+	"brick_grey": ["brick_grey", "brick_grey", "roof_tar"],
+	"metal_rust": ["brick_grey", "metal_rust", "roof_metal"],
+	"metal_red": ["concrete", "metal_red", "roof_metal"],
+	"concrete": ["concrete", "concrete", "roof_tar"],
+	"garages": ["brick_grey", "brick_grey", "roof_tar"],
+}
+
+var SW := {}
+var _sw_mats := {}
+var _batch := {}                      # material name -> SurfaceTool
+var _col := PackedVector3Array()      # collision faces for the current batch
+var _swatch_dir := ""
+
+
+func load_swatches(dir: String) -> void:
+	_swatch_dir = dir.path_join("swatches")
+	if FileAccess.file_exists(_swatch_dir.path_join("swatches.json")):
+		SW = JSON.parse_string(FileAccess.get_file_as_string(_swatch_dir.path_join("swatches.json")))
+
+
+func png_texture(path: String, file: String) -> Texture2D:
+	var img := Image.load_from_file(path)
+	img.generate_mipmaps()
+	var tex := PortableCompressedTexture2D.new()
+	tex.create_from_image(img, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSY, false, 0.85)
+	return save_res(tex, file)
+
+
+func swatch(name: String) -> Material:
+	if _sw_mats.has(name):
+		return _sw_mats[name]
+	var mat := StandardMaterial3D.new()
+	var al := _swatch_dir.path_join(name + "_AL.png")
+	if FileAccess.file_exists(al):
+		mat.albedo_texture = png_texture(al, "TX_SW_%s_AL.res" % name)
+	var nr := _swatch_dir.path_join(name + "_NR.png")
+	if FileAccess.file_exists(nr):
+		mat.normal_enabled = true
+		mat.normal_texture = png_texture(nr, "TX_SW_%s_NR.res" % name)
+	mat.roughness = 0.93
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	mat.uv1_triplanar_sharpness = 6.0
+	var m: Array = SW.get(name, {}).get("metres", [4.0, 4.0])
+	mat.uv1_scale = Vector3(1.0 / float(m[0]), 1.0 / float(m[1]), 1.0 / float(m[0]))
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	save_res(mat, "MT_SW_%s.tres" % name)
+	_sw_mats[name] = mat
+	return mat
+
+
+func batch_begin() -> void:
+	_batch = {}
+	_col = PackedVector3Array()
+
+
+func _st(mat: String) -> SurfaceTool:
+	if not _batch.has(mat):
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		_batch[mat] = st
+	return _batch[mat]
+
+
+func batch_box(mat: String, center: Vector3, size: Vector3, basis := Basis.IDENTITY, collide := true) -> void:
+	var st := _st(mat)
+	var h := size / 2.0
+	var c := [Vector3(-h.x, -h.y, -h.z), Vector3(h.x, -h.y, -h.z), Vector3(h.x, h.y, -h.z), Vector3(-h.x, h.y, -h.z),
+		Vector3(-h.x, -h.y, h.z), Vector3(h.x, -h.y, h.z), Vector3(h.x, h.y, h.z), Vector3(-h.x, h.y, h.z)]
+	var faces := [[0, 3, 2, 1, Vector3(0, 0, -1)], [4, 5, 6, 7, Vector3(0, 0, 1)], [0, 4, 7, 3, Vector3(-1, 0, 0)],
+		[1, 2, 6, 5, Vector3(1, 0, 0)], [3, 7, 6, 2, Vector3(0, 1, 0)], [0, 1, 5, 4, Vector3(0, -1, 0)]]
+	for f in faces:
+		var n: Vector3 = (basis * (f[4] as Vector3)).normalized()
+		var q := [center + basis * (c[f[0]] as Vector3), center + basis * (c[f[1]] as Vector3), center + basis * (c[f[2]] as Vector3), center + basis * (c[f[3]] as Vector3)]
+		for k in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(n)
+			st.set_uv(Vector2.ZERO)
+			st.add_vertex(q[k])
+			if collide:
+				_col.append(q[k])
+
+
+func batch_tri(mat: String, a: Vector3, b: Vector3, c: Vector3) -> void:
+	var st := _st(mat)
+	var n := (b - a).cross(c - a).normalized()
+	for v in [a, b, c]:
+		st.set_normal(n)
+		st.set_uv(Vector2.ZERO)
+		st.add_vertex(v)
+	for v in [a, c, b]:
+		st.set_normal(-n)
+		st.set_uv(Vector2.ZERO)
+		st.add_vertex(v)
+	_col.append_array([a, b, c])
+
+
+func batch_commit(parent: Node, n: String, surface := "Concrete") -> void:
+	var holder := Node3D.new()
+	add(parent, holder, n)
+	for mat in _batch:
+		var st: SurfaceTool = _batch[mat]
+		var mesh := st.commit()
+		var mi := MeshInstance3D.new()
+		mi.mesh = save_res(mesh, "MS_%s_%s_%s.res" % [parent.name, n, mat])
+		mi.set_surface_override_material(0, swatch(mat))
+		add(holder, mi, "Mesh_" + mat)
+	if _col.size() > 0:
+		static_trimesh(holder, _col, "StaticBody3D", surface)
+	_batch = {}
+	_col = PackedVector3Array()
+
+
+# A straight wall from corner a along dir with rectangular openings.
+# openings: [[offset, width, bottom, top], ...] in metres along the wall.
+func wall(a: Vector3, dir: Vector3, inward: Vector3, length: float, height: float, thick: float, openings: Array, band: float, lower: String, upper: String) -> void:
+	var xs := [0.0, length]
+	for o in openings:
+		xs.append(clampf(float(o[0]), 0.0, length))
+		xs.append(clampf(float(o[0]) + float(o[1]), 0.0, length))
+	xs.sort()
+	var basis := Basis(dir, Vector3.UP, dir.cross(Vector3.UP))
+	for i in xs.size() - 1:
+		var x0: float = xs[i]
+		var x1: float = xs[i + 1]
+		if x1 - x0 < 0.01:
+			continue
+		var gaps: Array = []
+		for o in openings:
+			if float(o[0]) <= x0 + 0.001 and float(o[0]) + float(o[1]) >= x1 - 0.001:
+				gaps.append([float(o[2]), float(o[3])])
+		gaps.sort_custom(func(p, q): return p[0] < q[0])
+		var spans: Array = []
+		var y := 0.0
+		for g in gaps:
+			if float(g[0]) > y:
+				spans.append([y, float(g[0])])
+			y = maxf(y, float(g[1]))
+		if y < height:
+			spans.append([y, height])
+		for sp in spans:
+			for part in [[float(sp[0]), minf(float(sp[1]), band), lower], [maxf(float(sp[0]), band), float(sp[1]), upper]]:
+				if float(part[1]) - float(part[0]) < 0.01:
+					continue
+				var mid_x := (x0 + x1) / 2.0
+				var mid_y := (float(part[0]) + float(part[1])) / 2.0
+				var centre := a + dir * mid_x + Vector3.UP * mid_y + inward * (thick / 2.0)
+				batch_box(String(part[2]), centre, Vector3(x1 - x0, float(part[1]) - float(part[0]), thick), basis)
+
+
+func wall_openings(length: float, height: float, long_side: bool, style: String) -> Array:
+	var out: Array = []
+	if style == "garages":
+		var n := int(length / 4.0)
+		for k in n:
+			out.append([k * 4.0 + 0.6, 2.8, 0.0, 2.6])
+		return out
+	if long_side:
+		out.append([length * 0.25, 1.4, 0.0, 2.4])
+		var rows := [minf(height - 2.5, 2.6)]
+		if height >= 12.0:
+			rows.append(height - 4.0)
+		for r in rows:
+			var n := int((length - 4.0) / 6.0)
+			for k in n:
+				var x := 3.0 + k * 6.0
+				if absf(x - length * 0.25) < 3.0 and float(r) < 3.0:
+					continue
+				out.append([x, 2.2, float(r), float(r) + 1.4])
+	else:
+		var w := minf(6.0, length * 0.35)
+		out.append([(length - w) / 2.0, w, 0.0, minf(5.5, height - 1.5)])
+		if height >= 8.0:
+			out.append([length * 0.15, 2.0, height - 3.0, height - 1.6])
+			out.append([length * 0.85 - 2.0, 2.0, height - 3.0, height - 1.6])
+	return out
+
+
+func build_generated(holder: Node, b: Dictionary) -> void:
+	var r: Array = b.rect
+	var style: String = b.get("style", "concrete")
+	var mats: Array = STYLE.get(style, STYLE.concrete)
+	var height := float(b.height)
+	var x0 := float(r[0])
+	var z0 := float(r[1])
+	var x1 := float(r[2])
+	var z1 := float(r[3])
+	var floor_y := ground((x0 + x1) / 2.0, (z0 + z1) / 2.0) + 0.05
+	var thick := 0.4
+	var band := 3.2 if style != "garages" else height + 1.0
+	var w := x1 - x0
+	var d := z1 - z0
+	var long_x := w >= d
+	batch_begin()
+	# Walls: north (along +x), east (+z), south (-x), west (-z).
+	wall(Vector3(x0 - OX, floor_y, z0 - OZ), Vector3.RIGHT, Vector3.BACK, w, height, thick, wall_openings(w, height, long_x, style), band, mats[0], mats[1])
+	wall(Vector3(x1 - OX, floor_y, z0 - OZ), Vector3.BACK, Vector3.LEFT, d, height, thick, wall_openings(d, height, not long_x, style), band, mats[0], mats[1])
+	wall(Vector3(x1 - OX, floor_y, z1 - OZ), Vector3.LEFT, Vector3.FORWARD, w, height, thick, wall_openings(w, height, long_x, style), band, mats[0], mats[1])
+	wall(Vector3(x0 - OX, floor_y, z1 - OZ), Vector3.FORWARD, Vector3.RIGHT, d, height, thick, wall_openings(d, height, not long_x, style), band, mats[0], mats[1])
+	var cx := (x0 + x1) / 2.0 - OX
+	var cz := (z0 + z1) / 2.0 - OZ
+	batch_box("slab", Vector3(cx, floor_y - 0.15, cz), Vector3(w, 0.3, d))
+	var top := floor_y + height
+	if String(b.get("roof", "flat")) == "gable":
+		var span := d if long_x else w
+		var run := w if long_x else d
+		var pitch := deg_to_rad(13.0)
+		var rise := span / 2.0 * tan(pitch)
+		var axis := Vector3.RIGHT if long_x else Vector3.BACK
+		var across := Vector3.BACK if long_x else Vector3.RIGHT
+		for s in [-1.0, 1.0]:
+			# Tilt each half so it falls away from the ridge.
+			var basis := Basis(axis, float(s) * pitch) if long_x else Basis(axis, -float(s) * pitch)
+			var centre := Vector3(cx, top + rise / 2.0, cz) + across * (float(s) * span / 4.0)
+			var slope := span / 2.0 / cos(pitch) + 0.5
+			var size := Vector3(run + 0.8, 0.25, slope) if long_x else Vector3(slope, 0.25, run + 0.8)
+			batch_box(mats[2], centre, size, basis)
+		for e in [-1.0, 1.0]:
+			var end := Vector3(cx, top, cz) + axis * (float(e) * (run / 2.0 - thick / 2.0))
+			batch_tri(mats[1], end - across * span / 2.0, end + across * span / 2.0, end + Vector3.UP * rise)
+	else:
+		batch_box(mats[2], Vector3(cx, top + 0.15, cz), Vector3(w, 0.3, d))
+		batch_box(mats[0], Vector3(cx, top + 0.6, z0 - OZ + 0.15), Vector3(w, 0.9, 0.3))
+		batch_box(mats[0], Vector3(cx, top + 0.6, z1 - OZ - 0.15), Vector3(w, 0.9, 0.3))
+		batch_box(mats[0], Vector3(x0 - OX + 0.15, top + 0.6, cz), Vector3(0.3, 0.9, d))
+		batch_box(mats[0], Vector3(x1 - OX - 0.15, top + 0.6, cz), Vector3(0.3, 0.9, d))
+	if style != "garages" and minf(w, d) > 16.0:
+		var nx := int(w / 7.0)
+		var nz := int(d / 7.0)
+		for i in range(1, nx):
+			for j in range(1, nz):
+				batch_box("metal_rust", Vector3(x0 + i * w / nx - OX, floor_y + height / 2.0, z0 + j * d / nz - OZ), Vector3(0.45, height, 0.45))
+	if style != "garages" and height >= 9.0 and minf(w, d) >= 14.0:
+		var deck := floor_y + 4.5
+		if long_x:
+			batch_box("metal_rust", Vector3(cx, deck, z0 - OZ + thick + 1.3), Vector3(w - 2.0 * thick - 0.2, 0.2, 2.4))
+			_stairs(Vector3(x0 - OX + 3.0, floor_y, z0 - OZ + thick + 3.6), Vector3.RIGHT, 4.5)
+		else:
+			batch_box("metal_rust", Vector3(x0 - OX + thick + 1.3, deck, cz), Vector3(2.4, 0.2, d - 2.0 * thick - 0.2))
+			_stairs(Vector3(x0 - OX + thick + 3.6, floor_y, z0 - OZ + 3.0), Vector3.BACK, 4.5)
+	batch_commit(holder, "Structure", "Concrete")
+	var area := Area3D.new()
+	area.collision_layer = 512
+	area.collision_mask = 0
+	area.monitoring = false
+	area.set_script(load("res://Scripts/Area.gd"))
+	area.set("type", "Indoor")
+	area.transform.origin = Vector3(cx, floor_y + height / 2.0, cz)
+	add(holder, area, "Area")
+	var acs := CollisionShape3D.new()
+	var abox := BoxShape3D.new()
+	abox.size = Vector3(w - 0.8, height, d - 0.8)
+	acs.shape = abox
+	add(area, acs, "CollisionShape3D")
+	footprints.append(Rect2(x0, z0, w, d).grow(3.0))
+	_dress_interior(holder, x0, z0, x1, z1, floor_y, style)
+
+
+func _stairs(start: Vector3, dir: Vector3, rise: float) -> void:
+	var steps := int(rise / 0.25)
+	var side := dir.cross(Vector3.UP).normalized()
+	for k in steps:
+		var c := start + dir * (k * 0.32) + Vector3.UP * (k * 0.25 + 0.125)
+		batch_box("metal_rust", c, dir.abs() * 0.34 + side.abs() * 1.1 + Vector3(0, 0.25, 0), Basis.IDENTITY, false)
+	var length := steps * 0.32
+	var mid := start + dir * (length / 2.0) + Vector3.UP * (rise / 2.0)
+	var ang := atan2(rise, length)
+	# Sloped collider: rotate about the side axis so the slab climbs along dir.
+	var basis := Basis(side, -ang)
+	var slab := Vector3(1.1, 0.05, sqrt(length * length + rise * rise))
+	var b := Basis.looking_at(dir, Vector3.UP)
+	batch_box("metal_rust", mid, slab, Basis(b.x, ang) * b, true)
+
+
+func _dress_interior(holder: Node, x0: float, z0: float, x1: float, z1: float, floor_y: float, style: String) -> void:
+	if style == "garages":
+		return
+	var inner := Rect2(x0 + 2.0, z0 + 2.0, x1 - x0 - 4.0, z1 - z0 - 4.0)
+	var area := inner.get_area()
+	var n_loot := clampi(int(area / 140.0), 1, 8)
+	var n_clutter := clampi(int(area / 90.0), 2, 12)
+	for k in n_loot + n_clutter:
+		var path: String = LOOT[rng.randi() % LOOT.size()] if k < n_loot else CLUTTER[rng.randi() % CLUTTER.size()]
+		var x := rng.randf_range(inner.position.x + 1.0, inner.end.x - 1.0)
+		var z := rng.randf_range(inner.position.y + 1.0, inner.end.y - 1.0)
+		var n := instance(path)
+		n.transform = Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(x - OX, floor_y, z - OZ))
+		add(holder, n)
+	var long_x := (x1 - x0) >= (z1 - z0)
+	var length := (x1 - x0) if long_x else (z1 - z0)
+	var count := int(length * 0.5 / 4.0)
+	for k in count:
+		var t := 3.0 + k * 4.0
+		var p := Vector2(x0 + t, z1 - 1.6) if long_x else Vector2(x1 - 1.6, z0 + t)
+		var n := instance(SHELVES[k % 2])
+		n.transform = Transform3D(Basis(Vector3.UP, 0.0 if long_x else PI / 2.0), Vector3(p.x - OX, floor_y, p.y - OZ))
+		add(holder, n)
+
+
+# ================================================================== dressing
+
+func build_dressing() -> void:
+	var g := group(content, "Dressing")
+	var fence := "res://Assets/Fence_PO2/Fence_PO2.tscn"
+	var fa := asset_aabb(fence)
+	var panel_len := maxf(fa.size.x, fa.size.z)
+	var panel_along_x := fa.size.x >= fa.size.z
+	var walls := group(g, "ConcreteFences")
+	for wdef in L.get("walls", []):
+		var pts: Array = wdef.points
+		var gates: Array = wdef.get("gates", [])
+		for i in pts.size() - 1:
+			var a := v2(pts[i])
+			var b := v2(pts[i + 1])
+			var len := a.distance_to(b)
+			var dir := (b - a) / len
+			var n := int(len / panel_len)
+			for k in n:
+				var mid := a + dir * ((k + 0.5) * panel_len)
+				var skip := false
+				for gt in gates:
+					if mid.distance_to(Vector2(float(gt[0]), float(gt[1]))) < float(gt[2]) / 2.0:
+						skip = true
+				if skip or rng.randf() < 0.04:
+					continue
+				var yaw := yaw_of(dir) if panel_along_x else yaw_of(dir) + PI / 2.0
+				place(fence, walls, mid.x, mid.y, yaw)
+	var pipes := group(g, "Pipelines")
+	for pdef in L.get("pipelines", []):
+		var pts := resample(pdef.points, 20.0)
+		for i in pts.size() - 1:
+			var a: Vector2 = pts[i]
+			var b: Vector2 = pts[i + 1]
+			if a.distance_to(b) < 2.0:
+				continue
+			var mid := (a + b) / 2.0
+			var path := "res://Assets/Pipeline/Pipeline_C_Overpass.tscn" if _near_road(mid) else "res://Assets/Pipeline/Pipeline_C.tscn"
+			var from := W(a.x, a.y)
+			var to := W(b.x, b.y)
+			to.y = from.y
+			var n := instance(path)
+			n.transform = Transform3D(Basis.looking_at(to - from, Vector3.UP).scaled(Vector3(1, 1, a.distance_to(b) / 20.0)), from)
+			add(pipes, n)
+	var cont := "res://Assets/Container_Shipping/Container_Shipping.tscn"
+	var conts := group(g, "Containers")
+	for cdef in L.get("containers", []):
+		var c := v2(cdef.center)
+		var yaw := rng.randf() * PI
+		var dir := Vector2(cos(yaw), -sin(yaw))
+		var side := Vector2(-dir.y, dir.x)
+		for k in int(cdef.count):
+			var row := k % 3
+			var layer := 1 if k >= 3 and rng.randf() < 0.5 else 0
+			var p := c + side * (row * 2.6) + dir * rng.randf_range(-0.6, 0.6)
+			place(cont, conts, p.x, p.y, yaw + rng.randf_range(-0.06, 0.06), layer * 2.6)
+	var cars := ["res://Assets/Vehicles/Lada/Lada_White.tscn", "res://Assets/Vehicles/Lada/Lada_Blue.tscn", "res://Assets/Vehicles/Lada/Lada_Red.tscn", "res://Assets/Vehicles/Volvo/Volvo.tscn", "res://Assets/Vehicles/Nissan/Nissan.tscn", "res://Assets/Vehicles/PAZ/PAZ.tscn", "res://Assets/Vehicles/Ural/Ural.tscn", "res://Assets/Vehicles/Truck_Trailers/Truck_Trailer_Cargo/Truck_Trailer_Cargo.tscn", "res://Assets/Vehicles/Transporter/Transporter.tscn"]
+	var wrecks := group(g, "Vehicles")
+	for r in L.roads:
+		if r.get("surface", "") == "dirt":
+			continue
+		var pts := resample(r.points, 32.0)
+		for i in range(1, pts.size() - 1):
+			if rng.randf() > 0.42:
+				continue
+			var p: Vector2 = pts[i]
+			var dir: Vector2 = (pts[i + 1] - pts[i - 1]).normalized()
+			var side := Vector2(-dir.y, dir.x) * (1.0 if rng.randf() < 0.5 else -1.0)
+			var q := p + side * (float(r.width) / 2.0 - rng.randf_range(0.5, 2.0))
+			if bridge_height(q) > -INF:
+				continue
+			place(cars[rng.randi() % cars.size()], wrecks, q.x, q.y, yaw_of(dir) + PI / 2.0 + rng.randf_range(-0.35, 0.35))
+	var yard := group(g, "Clutter")
+	for b in L.buildings:
+		if b.kind != "generated":
+			continue
+		var r: Array = b.rect
+		var perim := 2.0 * ((float(r[2]) - float(r[0])) + (float(r[3]) - float(r[1])))
+		for k in int(perim / 12.0):
+			if rng.randf() > 0.55:
+				continue
+			var t := rng.randf()
+			var edge := rng.randi() % 4
+			var x := lerpf(float(r[0]), float(r[2]), t)
+			var z := lerpf(float(r[1]), float(r[3]), t)
+			match edge:
+				0: z = float(r[1]) - 2.0
+				1: z = float(r[3]) + 2.0
+				2: x = float(r[0]) - 2.0
+				3: x = float(r[2]) + 2.0
+			if _near_road(Vector2(x, z)):
+				continue
+			place(CLUTTER[rng.randi() % CLUTTER.size()], yard, x, z, rng.randf() * TAU)
+	var bar := group(g, "Barriers")
+	for p in [[118, 336], [124, 340], [1022, 300], [1018, 306], [690, 382], [517, 432]]:
+		place("res://Assets/Barrier_Construction/Barrier_Construction.tscn", bar, float(p[0]), float(p[1]), rng.randf_range(0, PI))
+	build_crane(g)
+
+
+func _near_road(p: Vector2) -> bool:
+	for r in L.roads:
+		var pts: Array = r.points
+		for i in pts.size() - 1:
+			var a := v2(pts[i])
+			var b := v2(pts[i + 1])
+			var ab := b - a
+			var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+			if p.distance_to(a + ab * t) < float(r.width) / 2.0 + 1.0:
+				return true
+	return false
+
+
+# Tower crane over the scav base: lattice mast, jib, counter-jib and cab.
+func build_crane(parent: Node) -> void:
+	if not L.has("crane"):
+		return
+	var cr: Dictionary = L.crane
+	var p := v2(cr.pos)
+	var base := W(p.x, p.y)
+	var h := float(cr.height)
+	batch_begin()
+	for cx in [-1.0, 1.0]:
+		for cz in [-1.0, 1.0]:
+			batch_box("metal_red", base + Vector3(float(cx) * 0.9, h / 2.0, float(cz) * 0.9), Vector3(0.22, h, 0.22))
+	var y := 0.0
+	while y < h:
+		for s in 4:
+			var rot := Basis(Vector3.UP, s * PI / 2.0)
+			batch_box("metal_red", base + rot * Vector3(0, 0, 0.9) + Vector3(0, y + 1.5, 0), Vector3(2.5, 0.12, 0.12), rot * Basis(Vector3.BACK, deg_to_rad(45.0)), false)
+		y += 3.0
+	var heading := deg_to_rad(float(cr.heading))
+	var dir := Vector3(sin(heading), 0, cos(heading))
+	var jib := float(cr.jib)
+	var jb := Basis.looking_at(dir, Vector3.UP)
+	batch_box("metal_red", base + Vector3(0, h + 0.6, 0) + dir * (jib / 2.0), Vector3(1.2, 1.2, jib), jb, false)
+	batch_box("metal_red", base + Vector3(0, h + 0.6, 0) - dir * 6.0, Vector3(1.2, 1.0, 12.0), jb, false)
+	batch_box("concrete", base + Vector3(0, h - 0.4, 0) - dir * 10.5, Vector3(3.0, 2.6, 2.4), jb, false)
+	batch_box("metal_red", base + Vector3(0, h + 3.5, 0), Vector3(0.5, 6.0, 0.5), Basis.IDENTITY, false)
+	batch_box("brick_grey", base + Vector3(1.6, h - 1.5, 0), Vector3(2.0, 2.4, 2.0), Basis.IDENTITY, false)
+	batch_commit(parent, "TowerCrane", "Metal")

@@ -782,7 +782,7 @@
  "buildings": [
   {
    "name": "WH7",
-   "kind": "warehouse",
+   "kind": "generated",
    "rect": [
     130,
     250,
@@ -790,11 +790,12 @@
     280
    ],
    "height": 11,
-   "roof": "gable"
+   "roof": "gable",
+   "style": "brick_red"
   },
   {
    "name": "WH6",
-   "kind": "warehouse",
+   "kind": "generated",
    "rect": [
     125,
     282,
@@ -802,11 +803,12 @@
     317
    ],
    "height": 9,
-   "roof": "flat"
+   "roof": "flat",
+   "style": "brick_grey"
   },
   {
    "name": "WH5",
-   "kind": "warehouse",
+   "kind": "generated",
    "rect": [
     205,
     280,
@@ -814,23 +816,25 @@
     325
    ],
    "height": 12,
-   "roof": "gable"
+   "roof": "gable",
+   "style": "metal_rust"
   },
   {
    "name": "TankFarmOffice",
-   "kind": "industrial",
+   "kind": "generated",
    "rect": [
     83,
     247,
     108,
     262
    ],
-   "height": 8,
-   "roof": "flat"
+   "height": 6,
+   "roof": "flat",
+   "style": "brick_grey"
   },
   {
    "name": "WH3",
-   "kind": "warehouse",
+   "kind": "generated",
    "rect": [
     280,
     263,
@@ -838,23 +842,25 @@
     297
    ],
    "height": 12,
-   "roof": "gable"
+   "roof": "gable",
+   "style": "metal_rust"
   },
   {
    "name": "WH4",
-   "kind": "warehouse_compound",
+   "kind": "generated",
    "rect": [
     346,
     273,
     380,
     331
    ],
-   "height": 10,
-   "roof": "gable"
+   "height": 9,
+   "roof": "flat",
+   "style": "brick_grey"
   },
   {
    "name": "IndustrialPlant",
-   "kind": "factory",
+   "kind": "generated",
    "rect": [
     409,
     287,
@@ -862,11 +868,12 @@
     349
    ],
    "height": 16,
-   "roof": "flat"
+   "roof": "flat",
+   "style": "concrete"
   },
   {
    "name": "ScavBase",
-   "kind": "factory",
+   "kind": "concrete_frame",
    "rect": [
     481,
     229,
@@ -890,7 +897,7 @@
   },
   {
    "name": "BoilerBuilding",
-   "kind": "boiler",
+   "kind": "generated",
    "rect": [
     571,
     297,
@@ -898,23 +905,25 @@
     329
    ],
    "height": 14,
-   "roof": "flat"
+   "roof": "flat",
+   "style": "brick_red"
   },
   {
    "name": "Lab",
-   "kind": "office",
+   "kind": "generated",
    "rect": [
     610,
     237,
     627,
     254
    ],
-   "height": 7,
-   "roof": "flat"
+   "height": 6,
+   "roof": "flat",
+   "style": "brick_grey"
   },
   {
    "name": "WH17",
-   "kind": "warehouse",
+   "kind": "generated",
    "rect": [
     626,
     291,
@@ -922,7 +931,8 @@
     326
    ],
    "height": 10,
-   "roof": "flat"
+   "roof": "flat",
+   "style": "metal_rust"
   },
   {
    "name": "SteelFrame",
@@ -1000,7 +1010,7 @@
   },
   {
    "name": "RedWarehouse",
-   "kind": "warehouse_red",
+   "kind": "generated",
    "rect": [
     890,
     237,
@@ -1008,43 +1018,47 @@
     289
    ],
    "height": 12,
-   "roof": "gable"
+   "roof": "gable",
+   "style": "metal_red"
   },
   {
    "name": "StorageRowA",
-   "kind": "storage_sheds",
+   "kind": "generated",
    "rect": [
     961,
     229,
     980,
     289
    ],
-   "height": 4,
-   "roof": "gable"
+   "height": 3.6,
+   "roof": "flat",
+   "style": "garages"
   },
   {
    "name": "StorageRowB",
-   "kind": "storage_sheds",
+   "kind": "generated",
    "rect": [
     984,
     229,
     1003,
     289
    ],
-   "height": 4,
-   "roof": "gable"
+   "height": 3.6,
+   "roof": "flat",
+   "style": "garages"
   },
   {
    "name": "StorageLongShed",
-   "kind": "storage_sheds",
+   "kind": "generated",
    "rect": [
     1009,
     225,
     1017,
     290
    ],
-   "height": 4,
-   "roof": "flat"
+   "height": 3.6,
+   "roof": "flat",
+   "style": "garages"
   },
   {
    "name": "ShorelineBooth",
@@ -1411,90 +1425,23 @@
   "_about": "Ground painting. concrete = slabs (blue layer), asphalt = green layer, dirt = red layer; later entries win.",
   "concrete": [
    {
-    "name": "west_industrial",
+    "name": "tank_farm_pad",
     "polygon": [
      [
       55,
-      242
+      250
      ],
      [
-      345,
-      256
+      120,
+      250
      ],
      [
-      345,
-      330
+      120,
+      318
      ],
      [
       55,
-      328
-     ]
-    ]
-   },
-   {
-    "name": "center_industrial",
-    "polygon": [
-     [
-      345,
-      256
-     ],
-     [
-      400,
-      240
-     ],
-     [
-      455,
-      226
-     ],
-     [
-      460,
-      360
-     ],
-     [
-      345,
-      350
-     ]
-    ]
-   },
-   {
-    "name": "scav_base_yard",
-    "polygon": [
-     [
-      460,
-      226
-     ],
-     [
-      540,
-      226
-     ],
-     [
-      545,
-      360
-     ],
-     [
-      460,
-      360
-     ]
-    ]
-   },
-   {
-    "name": "boiler_yard",
-    "polygon": [
-     [
-      545,
-      236
-     ],
-     [
-      700,
-      240
-     ],
-     [
-      700,
-      375
-     ],
-     [
-      545,
-      372
+      318
      ]
     ]
    },
@@ -1523,20 +1470,20 @@
     "name": "storage_lot",
     "polygon": [
      [
-      948,
-      200
+      952,
+      205
      ],
      [
-      1035,
-      200
+      1030,
+      205
      ],
      [
-      1035,
-      300
+      1030,
+      296
      ],
      [
-      948,
-      300
+      952,
+      296
      ]
     ]
    },
@@ -1579,6 +1526,27 @@
      [
       552,
       374
+     ]
+    ]
+   },
+   {
+    "name": "industrial_apron",
+    "polygon": [
+     [
+      60,
+      322
+     ],
+     [
+      460,
+      338
+     ],
+     [
+      460,
+      350
+     ],
+     [
+      60,
+      334
      ]
     ]
    }
@@ -1690,8 +1658,55 @@
       305
      ]
     ]
+   },
+   {
+    "name": "rail_yard",
+    "polygon": [
+     [
+      400,
+      205
+     ],
+     [
+      520,
+      175
+     ],
+     [
+      530,
+      200
+     ],
+     [
+      430,
+      240
+     ],
+     [
+      395,
+      245
+     ]
+    ]
+   },
+   {
+    "name": "boiler_yard",
+    "polygon": [
+     [
+      545,
+      240
+     ],
+     [
+      700,
+      244
+     ],
+     [
+      700,
+      290
+     ],
+     [
+      545,
+      290
+     ]
+    ]
    }
-  ]
+  ],
+  "apron_margin": 6
  },
  "vegetation": {
   "_about": "Tree density 0..1 per area; trees keep 4 m apart like Vostok's Trees spawner.",
@@ -1737,5 +1752,340 @@
    "rail": 4.0,
    "building": 6.0
   }
+ },
+ "walls": [
+  {
+   "name": "rail_side",
+   "points": [
+    [
+     52,
+     244
+    ],
+    [
+     200,
+     246
+    ],
+    [
+     340,
+     253
+    ]
+   ],
+   "kind": "po2"
+  },
+  {
+   "name": "tank_farm",
+   "points": [
+    [
+     55,
+     252
+    ],
+    [
+     120,
+     252
+    ],
+    [
+     120,
+     318
+    ],
+    [
+     55,
+     318
+    ],
+    [
+     55,
+     252
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     100,
+     318,
+     8
+    ]
+   ]
+  },
+  {
+   "name": "construction",
+   "points": [
+    [
+     458,
+     224
+    ],
+    [
+     546,
+     224
+    ],
+    [
+     546,
+     306
+    ],
+    [
+     458,
+     306
+    ],
+    [
+     458,
+     224
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     500,
+     306,
+     10
+    ],
+    [
+     546,
+     265,
+     8
+    ]
+   ]
+  },
+  {
+   "name": "dorms",
+   "points": [
+    [
+     448,
+     428
+    ],
+    [
+     545,
+     428
+    ],
+    [
+     545,
+     494
+    ],
+    [
+     448,
+     494
+    ],
+    [
+     448,
+     428
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     517,
+     428,
+     12
+    ]
+   ]
+  },
+  {
+   "name": "boiler_south",
+   "points": [
+    [
+     545,
+     374
+    ],
+    [
+     690,
+     378
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     600,
+     376,
+     10
+    ]
+   ]
+  },
+  {
+   "name": "storage",
+   "points": [
+    [
+     950,
+     203
+    ],
+    [
+     1032,
+     203
+    ],
+    [
+     1032,
+     298
+    ],
+    [
+     950,
+     298
+    ],
+    [
+     950,
+     203
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     990,
+     298,
+     10
+    ],
+    [
+     950,
+     250,
+     8
+    ]
+   ]
+  },
+  {
+   "name": "new_gas_back",
+   "points": [
+    [
+     262,
+     396
+    ],
+    [
+     316,
+     396
+    ]
+   ],
+   "kind": "po2"
+  }
+ ],
+ "pipelines": [
+  {
+   "name": "main_pipe",
+   "points": [
+    [
+     62,
+     318
+    ],
+    [
+     200,
+     321
+    ],
+    [
+     330,
+     329
+    ],
+    [
+     400,
+     334
+    ],
+    [
+     455,
+     338
+    ]
+   ]
+  },
+  {
+   "name": "tank_feed",
+   "points": [
+    [
+     110,
+     268
+    ],
+    [
+     112,
+     316
+    ]
+   ]
+  },
+  {
+   "name": "boiler_pipe",
+   "points": [
+    [
+     548,
+     333
+    ],
+    [
+     620,
+     334
+    ],
+    [
+     700,
+     338
+    ],
+    [
+     740,
+     340
+    ]
+   ]
+  },
+  {
+   "name": "plant_pipe",
+   "points": [
+    [
+     455,
+     338
+    ],
+    [
+     455,
+     300
+    ],
+    [
+     470,
+     280
+    ]
+   ]
+  }
+ ],
+ "containers": [
+  {
+   "center": [
+    228,
+    334
+   ],
+   "count": 5
+  },
+  {
+   "center": [
+    505,
+    318
+   ],
+   "count": 6
+  },
+  {
+   "center": [
+    655,
+    338
+   ],
+   "count": 4
+  },
+  {
+   "center": [
+    965,
+    212
+   ],
+   "count": 6
+  },
+  {
+   "center": [
+    300,
+    398
+   ],
+   "count": 3
+  },
+  {
+   "center": [
+    410,
+    368
+   ],
+   "count": 3
+  },
+  {
+   "center": [
+    880,
+    330
+   ],
+   "count": 4
+  }
+ ],
+ "crane": {
+  "pos": [
+   528,
+   262
+  ],
+  "height": 40,
+  "jib": 32,
+  "heading": 200
  }
 }

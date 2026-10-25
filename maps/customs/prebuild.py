@@ -176,7 +176,9 @@ for t in range(NT):
     tx0 = X0 + t * TILE
     def M(shapes, fn):
         return raster(shapes, MRES, MASK, MASK, tx0, Z0, fn)
-    concrete = M([s["polygon"] for s in L["surfaces"]["concrete"]], poly_fn)
+    apron = L["surfaces"].get("apron_margin", 0)
+    aprons = [[[r[0] - apron, r[1] - apron], [r[2] + apron, r[1] - apron], [r[2] + apron, r[3] + apron], [r[0] - apron, r[3] + apron]] for r in rects]
+    concrete = M([s["polygon"] for s in L["surfaces"]["concrete"]] + aprons, poly_fn)
     asphalt = np.maximum(M(roads_paved := [r for r in roads if r.get("surface", "asphalt") != "dirt"], line_fn("width")),
                          M([s["polygon"] for s in L["surfaces"]["asphalt"]], poly_fn))
     dirt = np.maximum(M([r for r in roads if r.get("surface") == "dirt"], line_fn("width")),
@@ -186,12 +188,35 @@ for t in range(NT):
     # Wear: dirt creeps into concrete yards, grass verges along asphalt.
     wear = ndimage.gaussian_filter(np.random.default_rng(7 + t).standard_normal((MASK, MASK)), 6)
     wear = np.clip(wear / (np.abs(wear).max() + 1e-9) * 2.2, 0, 1)
+    # Layer weights (become terrain vertex colours: R dirt, G asphalt, B slabs).
     R = np.clip(np.maximum.reduce([dirt, ballast * 0.9, banks * 0.75]) + concrete * wear * 0.6, 0, 1)
     G = ndimage.gaussian_filter(asphalt, 0.8)
     B = np.clip(ndimage.gaussian_filter(concrete, 1.2) - G, 0, 1)
-    rgb = (np.stack([R, G, B], axis=-1) * 255).astype(np.uint8)
-    Image.fromarray(rgb, "RGB").save(os.path.join(OUT, f"mask_{t}.png"))
-    masks.append(rgb)
+    layers = (np.stack([R, G, B], axis=-1) * 255).astype(np.uint8)
+    masks.append(layers)
+    # Road wear texture (the shader's roadMask): R tyre tracks on dirt,
+    # G worn wheel paths on asphalt, B darkened edges along paved roads.
+    dirt_roads = [r for r in roads if r.get("surface") == "dirt"]
+    tracks = np.zeros((MASK, MASK), np.float32)
+    for r in dirt_roads:
+        for off in (-0.9, 0.9):
+            pts = r["points"]
+            shifted = []
+            for i, (x, z) in enumerate(pts):
+                a = np.array(pts[max(i - 1, 0)], float); b = np.array(pts[min(i + 1, len(pts) - 1)], float)
+                d = b - a; n = np.array([-d[1], d[0]]) / (np.hypot(*d) + 1e-9)
+                shifted.append([x + n[0] * off, z + n[1] * off])
+            tracks = np.maximum(tracks, M([{"points": shifted, "w": 0.6}], line_fn("w")))
+    wheel = np.zeros((MASK, MASK), np.float32)
+    edges = np.zeros((MASK, MASK), np.float32)
+    for r in roads_paved:
+        wide = M([{"points": r["points"], "w": r["width"] + 1.0}], line_fn("w"))
+        inner = M([{"points": r["points"], "w": r["width"] - 1.2}], line_fn("w"))
+        edges = np.maximum(edges, np.clip(wide - inner, 0, 1))
+        wheel = np.maximum(wheel, M([{"points": r["points"], "w": r["width"] * 0.5}], line_fn("w")) * 0.35)
+    wear_rgb = np.stack([ndimage.gaussian_filter(tracks, 1.0), ndimage.gaussian_filter(wheel, 2.0),
+                         ndimage.gaussian_filter(edges, 1.5) * 0.7], axis=-1)
+    Image.fromarray((np.clip(wear_rgb, 0, 1) * 255).astype(np.uint8), "RGB").save(os.path.join(OUT, f"mask_{t}.png"))
 
 # Surface classes on the height grid (for footsteps and collision).
 classes = np.zeros((NZ, NX), dtype=np.uint8)
@@ -204,6 +229,18 @@ for t in range(NT):
     classes[sl] = cls[sl]
 classes[(H < WATER_LEVEL - 0.2) & (carve > 0.5)] = 3
 classes.tofile(os.path.join(OUT, "classes.u8"))
+
+# Vertex colours on the height grid (bilinear-ish: sampled from the layer masks, then softened).
+colors = np.zeros((NZ, NX, 3), dtype=np.float32)
+for t in range(NT):
+    sl = (GX >= X0 + t * TILE) & (GX <= X0 + (t + 1) * TILE)
+    u = np.clip(((GX - (X0 + t * TILE)) / MRES).astype(int), 0, MASK - 1)
+    v = np.clip(((GZ - Z0) / MRES).astype(int), 0, MASK - 1)
+    blurred = np.stack([ndimage.uniform_filter(masks[t][..., c].astype(np.float32), 5) for c in range(3)], -1)
+    colors[sl] = blurred[v, u][sl]
+banks_grid = 1.0 - smoothstep(half_w, half_w + 14, d_river)
+colors[..., 0] = np.maximum(colors[..., 0], banks_grid * 230)
+np.clip(colors, 0, 255).astype(np.uint8).tofile(os.path.join(OUT, "colors.u8"))
 
 # ------------------------------------------------------------------ trees (Poisson, 4 m apart)
 veg = L["vegetation"]
