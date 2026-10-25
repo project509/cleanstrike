@@ -3,7 +3,7 @@
 extends RefCounted
 
 const MOD_ID := "road_to_tarkov"
-const VERSION := "0.1.0"
+const VERSION := "0.2.0"
 
 # Defaults; each one can be changed in the Cleanstrike app (settings.json).
 const DEFAULTS := {
@@ -14,6 +14,7 @@ const DEFAULTS := {
 	"examine_speed": 1.0,
 	"item_colors": true,
 	"reveal_sound": true,
+	"customs_enabled": true,
 }
 
 # Tarkov-style cell background tints, keyed by RTV item type.
@@ -73,6 +74,10 @@ static func setting(key: String):
 
 static func searching() -> bool:
 	return active() and bool(setting("search_enabled"))
+
+
+static func customs_enabled() -> bool:
+	return active() and bool(setting("customs_enabled"))
 
 
 static func examining() -> bool:

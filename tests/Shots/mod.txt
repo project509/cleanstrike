@@ -1,0 +1,10 @@
+[mod]
+name="Cleanstrike Screenshots"
+description="Developer harness: renders UI screenshots. Do not ship."
+id="cs_shot"
+version="0.0.1"
+priority=100
+[script_extend]
+res://Scripts/Menu.gd="res://Shot/Menu.gd"
+[autoload]
+CSShot="res://Shot/Runner.gd"

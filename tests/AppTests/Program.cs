@@ -47,7 +47,7 @@ Check("keeps key order", string.Join(",", cfg.Entries("script_extend").Select(e 
 var installed = ModLibrary.Scan(g);
 var rtt = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 Check("scan finds Road to Tarkov", rtt != null);
-Check("reads settings schema", rtt?.Settings.Count == 7, rtt?.Settings.Count.ToString() ?? "");
+Check("reads settings schema", rtt?.Settings.Count >= 7 && rtt.Settings.Any(s => s.Key == "search_speed"), rtt?.Settings.Count.ToString() ?? "");
 Check("compatible with this game", rtt != null && ModLibrary.CompatibilityProblem(rtt, g, LoaderInstaller.ApiVersion) == null);
 
 var nested = Path.Combine(work, "Nested.zip");

@@ -1,0 +1,12 @@
+Customs map artwork
+
+customs_map.jpg and customs_thumb.jpg are adapted (cropped, resized, colour
+graded) from "Customs" v1.1E by re3mr (https://reemr.se/customs/), licensed
+under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+International: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+These two adapted images are shared under the same licence. They may not be
+used commercially. re3mr's original credits are preserved in the map image.
+
+school_thumb.jpg is cropped from Road to Vostok's own world map and is
+included only so the picker can show it next to Customs.

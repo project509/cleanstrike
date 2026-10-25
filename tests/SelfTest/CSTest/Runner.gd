@@ -11,7 +11,7 @@ func check(name: String, ok: bool, detail := "") -> void:
 	print("[CSTest] %s %s %s" % ["PASS" if ok else "FAIL", name, detail])
 
 func _ready() -> void:
-	get_tree().create_timer(240.0, true, false, true).timeout.connect(func(): check("timeout", false); finish())
+	get_tree().create_timer(460.0, true, false, true).timeout.connect(func(): check("timeout", false); finish())
 	run.call_deferred()
 
 func wait(s: float) -> void:
@@ -120,7 +120,84 @@ func run() -> void:
 	close_ui(ui)
 	target.UpdateTooltip()
 	check("tooltip says Open after search", target.gameData.tooltip.ends_with("[Open]"), target.gameData.tooltip)
+	await customs_tests(ui, interface)
 	finish()
+
+func map_name() -> String:
+	var m = get_node_or_null("/root/Map")
+	return m.mapName if m else ""
+
+func wait_for_map(name: String, limit: float) -> bool:
+	var t := 0.0
+	var gd = load("res://Resources/GameData.tres")
+	while t < limit:
+		if map_name() == name and not gd.isCaching and not gd.isTransitioning and get_node_or_null("/root/Map/Core/Controller") != null:
+			await wait(1.0)
+			return true
+		await wait(0.5); t += 0.5
+	return false
+
+func spawn_distance(transition_name: String) -> float:
+	for t in get_tree().get_nodes_in_group("Transition"):
+		if t.owner and t.owner.name == transition_name and t.owner.spawn:
+			return get_node("/root/Map/Core/Controller").global_position.distance_to(t.owner.spawn.global_position)
+	return -1.0
+
+func customs_tests(ui, interface) -> void:
+	var gd = load("res://Resources/GameData.tres")
+	var tr = load("res://Resources/Transition.tscn").instantiate()
+	tr.nextMap = "School"; tr.currentMap = "Village"; tr.nextZone = "Area 05"; tr.time = 1.0
+	get_tree().current_scene.add_child(tr)
+	check("transition extended", tr.has_method("RTT_OffersCustoms") and tr.RTT_OffersCustoms())
+	var hud = get_node("/root/Map/Core/UI/HUD")
+	hud.Transition(tr)
+	check("HUD prompt mentions Customs", hud.destination.text == "School / Customs", hud.destination.text)
+
+	gd.isTransitioning = true
+	tr.Interact()
+	await wait(0.3)
+	var picker = ui.get_node_or_null("RTT_DestinationPicker")
+	check("picker opens", picker != null)
+	if picker == null: return
+	check("picker has 2 cards", picker._cards.size() == 2)
+	var thumbs := 0
+	for c in picker._cards:
+		for n in c.find_children("*", "TextureRect", true, false):
+			if n.texture and n.texture.get_size().x >= 600: thumbs += 1
+	check("thumbnails loaded", thumbs == 2, "%d" % thumbs)
+	check("game frozen behind picker", gd.freeze)
+	picker._cancel()
+	await wait(0.3)
+	check("cancel closes picker", ui.get_node_or_null("RTT_DestinationPicker") == null and not gd.freeze and not gd.isTransitioning)
+
+	gd.isTransitioning = true
+	tr.Interact()
+	await wait(0.3)
+	ui.get_node("RTT_DestinationPicker").choose("Customs")
+	check("loads Customs", await wait_for_map("Customs", 90.0), map_name())
+	check("arrived at the Village road", spawn_distance("Transition_Village") >= 0.0 and spawn_distance("Transition_Village") < 3.0, "%.1f m" % spawn_distance("Transition_Village"))
+	check("Customs has 3 exits", get_tree().get_nodes_in_group("Transition").size() == 3)
+	var cui = get_node("/root/Map/Core/UI")
+	cui.ToggleInterface()
+	await wait(0.4)
+	var world: TextureRect = get_node("/root/Map/Core/UI/Interface").mapScroll.get_child(0)
+	check("map tool shows Customs map", world.texture != null and world.texture.get_size() == Vector2(3840, 2160) and world.get_node_or_null("Customs") != null, str(world.texture.get_size() if world.texture else "none"))
+	cui.ToggleInterface()
+	await wait(0.3)
+
+	var back = null
+	for t in get_tree().get_nodes_in_group("Transition"):
+		if t.owner.name == "Transition_Village": back = t.owner
+	gd.isTransitioning = true
+	back.Interact()
+	check("returns to Village", await wait_for_map("Village", 120.0), map_name())
+	check("arrived on the School road", spawn_distance("Transition_School") >= 0.0 and spawn_distance("Transition_School") < 3.0, "%.1f m" % spawn_distance("Transition_School"))
+	var vui = get_node("/root/Map/Core/UI")
+	vui.ToggleInterface()
+	await wait(0.4)
+	var vworld: TextureRect = get_node("/root/Map/Core/UI/Interface").mapScroll.get_child(0)
+	check("world map has Customs marker", vworld.get_node_or_null("Customs") != null)
+	vui.ToggleInterface()
 
 func close_ui(ui) -> void:
 	ui.gameData.interface = true

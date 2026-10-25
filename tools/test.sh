@@ -6,13 +6,18 @@ R="$(cd "$(dirname "$0")/.." && pwd)"
 T="${TESTGAME:-$R/../TestGame}"
 U="$APPDATA/Road to Vostok/cleanstrike"
 python -I "$R/tools/build_mod.py" "$R/mods/RoadToTarkov" --out "$R/dist" --install "$T" >/dev/null || exit 1
-python -I "$R/tools/build_mod.py" "$R/tests/SelfTest" --out "$R/dist" --install "$T" >/dev/null || exit 1
+python -I "$R/tools/build_mod.py" "$R/tests/SelfTest" --out "$R/dist/test" --install "$T" >/dev/null || exit 1
 # Prepare the launch with the app's own code (same as pressing Play), and
 # run the app service checks along the way.
 dotnet build "$R/tests/AppTests" -v q -nologo 2>&1 | grep -E " error " | sed 's/\[C:.*//' | sort -u
 dotnet "$R/tests/AppTests/bin/Debug/net8.0-windows/AppTests.dll" "$(cygpath -w "$T")" "$(cygpath -w "$R/dist/apptest")" || { echo "app checks failed"; exit 1; }
 rm -f "$U/selftest.json" "$U/data/road_to_tarkov/knowledge.json"
-(cd "$T" && timeout "${TIMEOUT:-300}" ./RTV.exe --headless >/dev/null 2>&1); echo "game exit: $?"
+# Travel saves the character, so snapshot the player's saves and put them back afterwards.
+SAVES="$APPDATA/Road to Vostok"; SNAP="$R/dist/test/save_snapshot"
+rm -rf "$SNAP"; mkdir -p "$SNAP"; cp "$SAVES"/*.tres "$SNAP"/ 2>/dev/null
+(cd "$T" && timeout "${TIMEOUT:-560}" ./RTV.exe --headless >/dev/null 2>&1); echo "game exit: $?"
+for f in "$SAVES"/*.tres; do [ -e "$SNAP/$(basename "$f")" ] || rm -f "$f"; done
+cp "$SNAP"/*.tres "$SAVES"/ && echo "player saves restored ($(ls "$SNAP" | wc -l) files)"
 cat "$U/cleanstrike.log"
 L=$(ls -t "$APPDATA/Road to Vostok/logs"/godot*.log | head -1)
 grep -A2 -E "SCRIPT ERROR|Parse Error" "$L" | head -40

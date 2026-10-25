@@ -29,6 +29,7 @@ func Open():
 	if not RTT.active():
 		return
 	_rtt_setup()
+	_rtt_setup_map()
 	if not RTT.is_seeded():
 		_rtt_seed_knowledge()
 	if container:
@@ -359,6 +360,53 @@ func _rtt_seed_knowledge() -> void:
 	RTT.learn_many(files)
 	RTT.mark_seeded()
 	RTT.say("Seeded item knowledge with %d owned item(s)." % files.size())
+
+
+# ---------------------------------------------------------------- map tool
+
+const CUSTOMS_MAP := "res://RoadToTarkov/Customs/customs_map.jpg"
+const CUSTOMS_MARKER_POS := Vector2(1560, 1080)   # on Vostok's world map, past the school
+var rtt_map_ready := false
+
+
+# In Customs the map tool shows re3mr's Customs map; everywhere else the
+# world map gets a Customs marker next to School.
+func _rtt_setup_map() -> void:
+	if rtt_map_ready or not RTT.customs_enabled():
+		return
+	rtt_map_ready = true
+	var scroll = mapScroll
+	if scroll == null or scroll.get_child_count() == 0:
+		return
+	var world: TextureRect = scroll.get_child(0) as TextureRect
+	if world == null:
+		return
+	var current = get_tree().current_scene.get_node_or_null("/root/Map")
+	if current and current.mapName == "Customs":
+		var Picker = load("res://RoadToTarkov/Customs/Picker.gd")
+		var tex: Texture2D = Picker.load_texture(CUSTOMS_MAP)
+		if tex:
+			world.texture = tex
+		for marker in world.get_children():
+			marker.hide()
+		var here := Control.new()
+		here.name = "Customs"
+		here.position = Vector2(1920, 1080)
+		world.add_child(here)
+	elif world.get_node_or_null("Customs") == null and world.get_node_or_null("School") != null:
+		var marker: Node = world.get_node("School").duplicate()
+		marker.name = "Customs"
+		if marker is Control:
+			marker.position = CUSTOMS_MARKER_POS
+		_rtt_relabel(marker, "CUSTOMS")
+		world.add_child(marker)
+
+
+func _rtt_relabel(node: Node, text: String) -> void:
+	if node is Label:
+		node.text = text
+	for c in node.get_children():
+		_rtt_relabel(c, text)
 
 
 # ---------------------------------------------------------------- loop
