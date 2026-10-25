@@ -8,3 +8,4 @@ dist/
 # never commit game files
 *.pck
 RTV.exe
+mods/RoadToTarkov/RoadToTarkov/Customs/Build/

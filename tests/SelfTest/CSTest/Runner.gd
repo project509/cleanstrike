@@ -176,7 +176,14 @@ func customs_tests(ui, interface) -> void:
 	ui.get_node("RTT_DestinationPicker").choose("Customs")
 	check("loads Customs", await wait_for_map("Customs", 90.0), map_name())
 	check("arrived at the Village road", spawn_distance("Transition_Village") >= 0.0 and spawn_distance("Transition_Village") < 3.0, "%.1f m" % spawn_distance("Transition_Village"))
-	check("Customs has 3 exits", get_tree().get_nodes_in_group("Transition").size() == 3)
+	var exits := get_tree().get_nodes_in_group("Transition").size()
+	check("Customs has its exits", exits >= 13, "%d" % exits)
+	var to_village := 0
+	for t in get_tree().get_nodes_in_group("Transition"):
+		if t.owner and t.owner.nextMap == "Village": to_village += 1
+	check("exits keep their destinations", to_village >= 5, "%d to Village" % to_village)
+	var player: Vector3 = get_node("/root/Map/Core/Controller").global_position
+	check("player above water line", player.y > -1.5, "y=%.1f" % player.y)
 	var cui = get_node("/root/Map/Core/UI")
 	cui.ToggleInterface()
 	await wait(0.4)

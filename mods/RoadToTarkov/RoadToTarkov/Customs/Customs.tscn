@@ -1,46 +1,17 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Map.gd" id="1"]
-[ext_resource type="PackedScene" path="res://Resources/World.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://Resources/Core.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://Terrains/Template/Terrain.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://Resources/Transition.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://RoadToTarkov/Customs/Build/Customs_Content.scn" id="2"]
+[ext_resource type="PackedScene" path="res://Resources/World.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://Resources/Core.tscn" id="4"]
 
 [node name="Map" type="Node3D"]
 script = ExtResource("1")
 mapName = "Customs"
 mapType = "Area 05"
 
-[node name="Content" type="NavigationRegion3D" parent="."]
+[node name="Content" parent="." instance=ExtResource("2")]
 
-[node name="Terrain" parent="Content" instance=ExtResource("4")]
+[node name="World" parent="." instance=ExtResource("3")]
 
-[node name="Transitions" type="Node3D" parent="Content/Terrain"]
-
-[node name="Transition_Village" parent="Content/Terrain/Transitions" instance=ExtResource("5")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -200, 0, 0)
-spawn = NodePath("Spawn")
-time = 1.0
-nextMap = "Village"
-nextZone = "Area 05"
-currentMap = "Customs"
-
-[node name="Transition_Highway" parent="Content/Terrain/Transitions" instance=ExtResource("5")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -200)
-spawn = NodePath("Spawn")
-time = 1.0
-nextMap = "Highway"
-nextZone = "Area 05"
-currentMap = "Customs"
-
-[node name="Transition_Outpost" parent="Content/Terrain/Transitions" instance=ExtResource("5")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 200, 0, 0)
-spawn = NodePath("Spawn")
-time = 2.0
-nextMap = "Outpost"
-nextZone = "Area 05"
-currentMap = "Customs"
-
-[node name="World" parent="." instance=ExtResource("2")]
-
-[node name="Core" parent="." instance=ExtResource("3")]
+[node name="Core" parent="." instance=ExtResource("4")]
