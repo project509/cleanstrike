@@ -7,6 +7,7 @@ extends Node
 #   func run(r)        checks that leave the game where it was
 #   func run_last(r)   optional, may die/travel; must end back in the Tutorial
 const MOD_TESTS := {
+	"cs_item_clarity": "res://CSTest/Mods/ItemClarity.gd",
 	"cs_sound_indicators": "res://CSTest/Mods/SoundIndicators.gd",
 	"cs_heli_go_boom": "res://CSTest/Mods/HeliGoBoom.gd",
 	"cs_airdrops": "res://CSTest/Mods/Airdrops.gd",

@@ -1,0 +1,44 @@
+{
+  "settings": [
+    {
+      "key": "task_markers",
+      "type": "bool",
+      "default": true,
+      "label": "Task markers",
+      "description": "A ! on items an open task asks for; green once you carry enough."
+    },
+    {
+      "key": "noted_only",
+      "type": "bool",
+      "default": false,
+      "label": "Only tasks in my notes",
+      "description": "Progression-friendly: mark only tasks you have noted."
+    },
+    {
+      "key": "task_tooltips",
+      "type": "bool",
+      "default": true,
+      "label": "Task needs in tooltips"
+    },
+    {
+      "key": "craft_tooltips",
+      "type": "bool",
+      "default": true,
+      "label": "Crafting uses in tooltips"
+    },
+    {
+      "key": "price_tier",
+      "type": "bool",
+      "default": true,
+      "label": "Price per slot in tooltips",
+      "description": "With a tier: Low, Fair, Good, Great or Elite."
+    },
+    {
+      "key": "highlight_compatible",
+      "type": "bool",
+      "default": true,
+      "label": "Highlight what goes together",
+      "description": "Hovering a weapon lights up its magazines, ammo and attachments."
+    }
+  ]
+}

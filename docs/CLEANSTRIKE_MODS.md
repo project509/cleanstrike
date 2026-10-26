@@ -188,7 +188,7 @@ flashlights blink on 8-20 s / off 3-10 s, off on death.
 21. Better Inventory and Equipment  22. HUD  23. Tactical Watch  24. Custom Fonts
 25. Reticles  26. Weather and Seasons  27. Death and Hit Effects  28. Faction Warfare
 29. AI Overhaul  30. Progression  31. Shelters  32. Visuals  33. Sandbox Mode
-Status: wave 1 (8 mods) done; wave 2: Immortal Cat, Infinite Bedding, Kill Counter, Save Anywhere, Scope Sensitivity, Burst Fire, Better Lean, Weapon Position, Airdrops, Heli Go Boom, Sound Indicators done.
+Status: wave 1 (8 mods) done; wave 2: Immortal Cat, Infinite Bedding, Kill Counter, Save Anywhere, Scope Sensitivity, Burst Fire, Better Lean, Weapon Position, Airdrops, Heli Go Boom, Sound Indicators, Item Clarity done.
 Hideout Lights moved next to Shelters: the original (mod/56519) adds 9 placeable
 light fixtures from vanilla lamp assets, sold by traders; that needs new furniture
 items (F scene, icon, Database entry via _get), the same groundwork Shelters needs.

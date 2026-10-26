@@ -1,0 +1,18 @@
+[mod]
+name="Item Clarity"
+id="cs_item_clarity"
+version="1.0.0"
+author="Cleanstrike"
+description="Know your items at a glance: task markers on items traders want, tooltips with task needs, crafting uses and price per slot, and hovering a gun highlights its magazines, ammo and attachments."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["UI", "QoL"]
+
+[script_extend]
+res://Scripts/Tooltip.gd="res://CSItemClarity/Ext/Tooltip.gd"
+res://Scripts/Item.gd="res://CSItemClarity/Ext/Item.gd"
+res://Scripts/Interface.gd="res://CSItemClarity/Ext/Interface.gd"
