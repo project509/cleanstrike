@@ -764,8 +764,9 @@ func gif_views():
 	print("[GIF] ", frames.size(), " frames")
 
 
-# WPSEQ: F fire, R reload, A aim on, U aim off; each step's wait after it in
-# seconds (F0.6,R1.5,...). Default: four shots, then a reload.
+# WPSEQ: F fire, H hold fire (t seconds), M full auto, R reload, A aim on,
+# U aim off; each step's wait after it in seconds (F0.6,R1.5,...).
+# Default: four shots, then a reload.
 func _gif_actions():
 	var seq := OS.get_environment("WPSEQ")
 	if seq == "":
@@ -778,6 +779,15 @@ func _gif_actions():
 			Input.action_press("aim")
 		elif k == "U":
 			Input.action_release("aim")
+		elif k == "M":                                     # full auto
+			var mgr = get_node("/root/Map/Core/Camera/Manager")
+			if mgr.get_child_count() > 0:
+				mgr.get_child(0).slotData.mode = 2
+		elif k == "H":                                     # hold the trigger for t seconds
+			Input.action_press("fire")
+			await wait(t)
+			Input.action_release("fire")
+			continue
 		else:
 			var act := "fire" if k == "F" else "reload"
 			Input.action_press(act)

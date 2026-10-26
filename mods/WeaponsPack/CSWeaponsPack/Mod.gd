@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.9.0"
+const VERSION := "1.0.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -322,6 +322,19 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 		"BoltRelease": _bone(sk, ["_Slide_Release", "_Bolt_Release", "_Bolt_Catch"]),
 	}
 	bones.Bolt = bones.Slide
+	var flip_bone := -1
+	var flip := Transform3D()
+	if g.get("mag_flip", false) and mag_bone >= 0 and L.has("mag_box"):
+		# the base magazine's path turned over about the gun's side-to-side axis,
+		# from its well to this gun's (on top): out of the grip down and forward
+		# becomes off the top up and back
+		var brest0 := sk.get_bone_global_rest(bones.Body)
+		var v_local := brest0.affine_inverse() * sk.get_bone_global_rest(mag_bone)
+		var well_new: Vector3 = brest0.affine_inverse() * L.mag_box.get_center()
+		var turn := Basis(brest0.basis.inverse() * Vector3.RIGHT, PI)
+		flip = Transform3D(Basis(), well_new) * Transform3D(turn, Vector3.ZERO) * Transform3D(Basis(), -v_local.origin)
+		flip_bone = _add_bone(sk, "CS_Magazine", bones.Body, brest0 * flip * v_local)
+		bones.Magazine = flip_bone
 	if g.get("fold", false) and L.has("sight_rear_box") and L.has("sight_front_box"):
 		# hinges at the foot of each sight; the rear one turned round so the
 		# game's single fold angle lays it forward and the front one back
@@ -373,12 +386,21 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 	hf.wrist = sk.find_bone("Wrist_L")
 	hf.body = bones.Body
 	hf.mag = bones.Magazine
+	if mag_bone >= 0 and old_mag_box.size != Vector3.ZERO:
+		hf.mag_point = sk.get_bone_global_rest(mag_bone).affine_inverse() * old_mag_box.get_center()
 	hf.charge = bones.Charge
 	if L.has("hand_rest") and g.get("hand", true):
 		hf.rest_point = brest.affine_inverse() * L.hand_rest
 		hf.rest_shift = to_body * Vector3(0, L.get("hand_dy", 0.0), 0)
 	hf.mag_shift = to_body * L.get("mag_shift", Vector3.ZERO)
 	hf.charge_shift = to_body * L.get("charge_shift", Vector3.ZERO)
+	if flip_bone >= 0:
+		hf.mag = mag_bone
+		hf.flip_bone = flip_bone
+		hf.flip = flip
+		hf.flip_side = to_body * Vector3(0.11, 0.02, 0)           # round the gun's left side
+		hf.flip_from = (brest.affine_inverse() * sk.get_bone_global_rest(mag_bone)).origin
+		hf.flip_to = brest.affine_inverse() * L.mag_box.get_center()
 	sk.add_child(hf)
 	hf.owner = rig
 	# muzzle, aiming ray and ejection on the new gun
@@ -400,6 +422,8 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 	var am: BoneAttachment3D = sk.get_node_or_null("Ammo_Magazine")
 	if am and am.has_node("Bullets") and src.has_node("Round") and L.has("round_top"):
 		_seat(am.get_node("Bullets"), src.get_node("Round").mesh, sk.get_bone_global_rest(sk.find_bone(am.bone_name)).affine_inverse(), L, arms.layers, rig)
+	elif am and am.has_node("Bullets") and not g.get("rounds", true):
+		_seat(am.get_node("Bullets"), null, Transform3D(), {"round_top": Vector3.ZERO, "round_second": Vector3.ZERO}, arms.layers, rig)
 	_fit_attachments(rig, sk, L, g, base_top, info)
 	# where the sights are, in the frame the game aims with
 	var sight: Vector3 = L.get("sight_front", Vector3(0, L.get("bore_y", 0.0), 0))
@@ -513,6 +537,8 @@ static func _magazine(id: String, g: Dictionary, src: Node3D, L: Dictionary, amm
 	if bullets and src.has_node("Round") and L.has("round_top"):
 		var layers: int = lod0.layers if lod0 else 1
 		_seat(bullets, src.get_node("Round").mesh, Transform3D(Basis(), off), L, layers, p)
+	elif bullets and not g.get("rounds", true):
+		_seat(bullets, null, Transform3D(), {"round_top": Vector3.ZERO, "round_second": Vector3.ZERO}, 1, p)
 	_set_slot(p, md, -1)
 	p.name = m.file
 	built[m.file] = _pack(p)

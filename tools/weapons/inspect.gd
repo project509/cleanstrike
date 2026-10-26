@@ -10,7 +10,7 @@ const GUNS := {
 	"raygun": "res://cs_assets/raygun/raygun.fbx",
 	"mini14": "res://cs_assets/mini14/mini14.fbx",
 	"welrod": "res://cs_assets/welrod/welrod.glb",
-	"m82": "res://cs_assets/m82/m82.fbx",
+	"m82": "res://cs_assets/m82/m82_low.glb",
 	"vector": "res://cs_assets/vector/vector.dae",
 	"p90": "res://cs_assets/p90/p90.dae",
 	"scar": "res://cs_assets/scar/SCAR_straight.fbx",
@@ -197,4 +197,4 @@ func _inspect(gun: String, path: String) -> void:
 
 
 func _v(v: Vector3) -> String:
-	return "(%.3f, %.3f, %.3f)" % [v.x, v.y, v.z]
+	return "(%.6f, %.6f, %.6f)" % [v.x, v.y, v.z]

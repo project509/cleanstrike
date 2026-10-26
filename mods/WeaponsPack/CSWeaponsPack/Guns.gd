@@ -21,6 +21,8 @@
 #   head_damage  a hit to the head (zombies take 3x; the game's AI dies at 100)
 #   bolt       bolt action fed by a magazine: Reload cycles the bolt
 #   energy     energy bolts (Energy.gd) with the pack's own sounds
+#   mag_flip   magazine on top: the base reload turned over (HandFit)
+#   rounds     false: no rounds showing at the top of the magazine
 extends RefCounted
 
 const RAIL_DONOR := ["KAR-21", "KAR-21_308"]
@@ -129,9 +131,24 @@ static func guns() -> Dictionary:
 			"data": {"caliber": "12.7×55", "damage": 75.0, "penetration": 5, "fireRate": 0.092, "weight": 6.2, "value": 14500, "rarity": 2},
 			"voice_from": "res://Items/Weapons/VSS/VSS.tres",
 			"voice": {"fireSemi": "fireSemi", "fireAuto": "fireAuto", "fireSuppressed": "fireSuppressed", "tailOutdoor": "tailOutdoor", "tailIndoor": "tailIndoor", "tailOutdoorSuppressed": "tailOutdoorSuppressed", "tailIndoorSuppressed": "tailIndoorSuppressed"},
-			"feel": {"recoil": 2.0, "kick": 1.6, "recovery": 0.6, "impulse": 0.25, "view_kick": 0.04, "climb": 0.008, "pitch": 0.8, "volume": 4.0},
+			"feel": {"recoil": 2.0, "kick": 1.15, "recovery": 0.6, "impulse": 0.25, "view_kick": 0.04, "climb": 0.008, "pitch": 0.8, "volume": 4.0},
 			"suppressed": true,
 			"shift": {"lowPosition": Vector3(0, -0.03, -0.13), "highPosition": Vector3(0, -0.03, -0.11), "inspectPosition": Vector3(0, -0.01, -0.08), "aimPosition": Vector3(0, 0, -0.05)},
+			"optics": "rail",
+			"muzzles": false,
+		},
+		"P90": {
+			"file": "CS_P90",
+			"name": "FN P90 (5.7×28)",
+			"short": "P90",
+			"display": "P90",
+			"base": ["MP7", "MP7"],
+			"magazine": {"file": "CS_P90_Magazine", "name": "P90 Magazine (5.7×28)", "rounds": 50, "value": 320, "weight": 0.27, "cells": Vector2(2, 1)},
+			"ammo": "CS_Ammo_57x28",
+			"data": {"caliber": "5.7×28", "damage": 28.0, "penetration": 3, "fireRate": 0.067, "weight": 2.6, "value": 6800, "rarity": 2},
+			"feel": {"recoil": 0.6, "kick": 0.7, "flash": 0.8, "pitch": 1.1, "volume": 0.0},
+			"mag_flip": true,
+			"rounds": false,
 			"optics": "rail",
 			"muzzles": false,
 		},
@@ -155,6 +172,12 @@ static func guns() -> Dictionary:
 # New calibres: boxes like the game's, sold by the Gunsmith.
 static func ammo() -> Dictionary:
 	return {
+		"CS_Ammo_57x28": {
+			"name": "5.7×28",
+			"base": "res://Items/Ammo/Ammo_46x30/Ammo_46x30.tres",
+			"art": "Ammo_57x28",
+			"box": 50, "stack": 300, "value": 650, "weight": 0.35,
+		},
 		"CS_Ammo_127x55": {
 			"name": "12.7×55",
 			"base": "res://Items/Ammo/Ammo_9x39/Ammo_9x39.tres",

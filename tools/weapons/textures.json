@@ -116,5 +116,17 @@
         "metal_ch": "b"
       }
     }
+  },
+  "P90": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/p90/textures",
+    "materials": {
+      "initialShadingGroup": {
+        "albedo": "initialShadingGroup_albedo.jpeg",
+        "normal": "initialShadingGroup_normal.png",
+        "metallic": "initialShadingGroup_metallic.jpeg",
+        "roughness": "initialShadingGroup_roughness.jpeg",
+        "ao": "initialShadingGroup_AO.jpeg"
+      }
+    }
   }
 }

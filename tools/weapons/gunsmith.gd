@@ -517,7 +517,7 @@ func _icons(id: String, root: Node3D, s: Dictionary) -> void:
 		holder.add_child(mag)
 		var mbx: AABB = mag.get_aabb()
 		mag.position = -mbx.get_center()
-		holder.rotation_degrees = Vector3(s.get("mag_tilt", 12.0), 0, 0)
+		holder.rotation_degrees = Vector3(s.get("mag_tilt", 12.0), 0, s.get("mag_roll", 0.0))
 		var cam2 := Camera3D.new()
 		cam2.projection = Camera3D.PROJECTION_ORTHOGONAL
 		cam2.size = max(mbx.size.y, mbx.size.z) * 1.12
