@@ -67,6 +67,25 @@ if (zombies != null && factions != null)
     var note = ModRules.Note(factions, true, new List<Cleanstrike.Models.ModInfo> { zombies }, installed);
     Check("superseded mod gets a note", note != null && note.StartsWith("No effect while") && ModRules.ConflictReason(zombies, factions) == null, note ?? "none");
 }
+// --- auto-update
+Check("update: tag parsing", Updater.ParseTag("v1.2.0") == new Version(1, 2, 0) && Updater.ParseTag("1.3") == new Version(1, 3, 0) && Updater.ParseTag("beta") == null);
+Check("update: newer only", Updater.IsNewer(new Version(1, 2, 0), new Version(1, 1, 0, 0)) && !Updater.IsNewer(new Version(1, 1, 0), new Version(1, 1, 0, 0)) && !Updater.IsNewer(new Version(1, 0, 9), new Version(1, 1, 0)));
+var relJson = "{\"tag_name\":\"v9.9.9\",\"draft\":false,\"prerelease\":false,\"assets\":[{\"name\":\"notes.txt\",\"browser_download_url\":\"x\",\"size\":1},{\"name\":\"Cleanstrike.exe\",\"browser_download_url\":\"https://example/Cleanstrike.exe\",\"size\":1234}]}";
+var rel = Updater.ParseRelease(relJson);
+Check("update: reads a release", rel != null && rel.Version == new Version(9, 9, 9) && rel.Size == 1234 && rel.Url.EndsWith("Cleanstrike.exe"));
+Check("update: skips pre-releases", Updater.ParseRelease(relJson.Replace("\"prerelease\":false", "\"prerelease\":true")) == null);
+var swapDir = Path.Combine(work, "swap");
+Directory.CreateDirectory(swapDir);
+var exeA = Path.Combine(swapDir, "Cleanstrike.exe");
+File.WriteAllText(exeA, "old");
+File.WriteAllText(exeA + ".download", "new");
+Updater.Swap(exeA, exeA + ".download");
+Check("update: swaps in the new exe", File.ReadAllText(exeA) == "new" && File.ReadAllText(exeA + ".old") == "old" && !File.Exists(exeA + ".download"));
+File.WriteAllText(exeA + ".download2", "x");
+bool rolled = false;
+try { Updater.Swap(exeA, exeA + ".missing"); } catch { rolled = File.Exists(exeA) && File.ReadAllText(exeA) == "new"; }
+Check("update: a failed swap keeps the current exe", rolled);
+Check("update: dev builds never update themselves", !Updater.Enabled());
 var rtt = installed.FirstOrDefault(m => m.Id == "tarkov_looting") ?? installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 if (rttWip != null)

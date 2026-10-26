@@ -56,11 +56,37 @@ public partial class App : Application
             return;
         }
         window.Show();
+        StartUpdate(window, args);
 
         var files = args.Where(a => !a.StartsWith("--") && File.Exists(a)
             && Services.ModLibrary.Extensions.Contains(Path.GetExtension(a).ToLowerInvariant())).ToList();
         if (files.Count > 0 || args.Contains("--play"))
             ((ViewModels.MainViewModel)window.DataContext).QueueStartupRequests(files, args.Contains("--play"));
+    }
+
+    // Auto-update: clear leftovers, say so after an update, then look for a
+    // newer release in the background and restart into it once it's in place.
+    private void StartUpdate(Views.MainWindow window, string[] args)
+    {
+        Services.Updater.Cleanup();
+        var vm = (ViewModels.MainViewModel)window.DataContext;
+        if (args.Contains("--updated"))
+            vm.Toast($"Cleanstrike updated to {Services.Updater.Current.ToString(3)}", "success");
+        _ = Task.Run(async () =>
+        {
+            var v = await Services.Updater.UpdateAsync(msg => Dispatcher.Invoke(() => vm.Toast(msg, "info")));
+            if (v == null) return;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (vm.IsRunning)
+                {
+                    vm.Toast($"Cleanstrike {v.ToString(3)} is ready and starts next time", "success");
+                    return;
+                }
+                Services.Updater.Restart(args.Where(a => a != "--updated").ToArray());
+                Shutdown();
+            });
+        });
     }
 
     private static void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)

@@ -1,16 +1,16 @@
 [mod]
-name="CleanStrike Zombies (In Progress)"
+name="Road to Hell"
 id="cs_zombies"
-version="0.4.2"
+version="1.0.0"
 author="Cleanstrike"
-description="Vostok becomes a zombie survival game: every enemy is replaced by sound-hunting packs of the dead. Shoot off limbs, watch out for crawlers, and never fire carelessly."
+description="Vostok becomes a zombie survival game: every enemy is replaced by the dead, hunting by sound in growing packs. Shoot off limbs, beware crawlers and the ones that charge when shot, trust no door, and never fire carelessly. Turn it on when you are ready."
 priority=0
 
 [cleanstrike]
 api=1
 game_min="0.2.2.0"
 godot_min="4.6.0"
-tags=["Zombies", "AI"]
+tags=["Zombies", "AI", "Survival"]
 premium=true
 opt_in=true
 

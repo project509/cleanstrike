@@ -106,6 +106,13 @@ ol.steps span{color:var(--muted);font-size:15px}
 .pill{display:inline-block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:12px}
 .pill.ok{background:rgba(93,107,58,.35);color:#b9cf86}
 .pill.wip{background:rgba(179,64,46,.25);color:#f0947f}
+.pill.gold{background:rgba(242,181,68,.18);color:#f2c66b}
+.mod.premium{border-color:rgba(242,181,68,.55);box-shadow:0 0 0 1px rgba(242,181,68,.18)}
+.mod.wide{grid-column:1/-1}
+.mod.wide .art{height:420px}
+.all{margin-top:34px;columns:3 220px;column-gap:28px;color:var(--muted);font-size:15px}
+.all li{break-inside:avoid;margin:0 0 6px 18px}
+@media (max-width:760px){.mods{grid-template-columns:1fr}.mod.wide .art{height:300px}}
 .mod ul{margin:14px 0 0 18px;color:var(--muted);font-size:15px}
 .mod li{margin:4px 0}
 
@@ -182,7 +189,7 @@ footer a:hover{color:var(--text)}
     <ol class="steps">
       <li class="reveal"><div><b>Download Cleanstrike</b><span>A single portable .exe. Nothing to install.</span></div></li>
       <li class="reveal"><div><b>Drop your mods in</b><span>Drag files onto the window or click Add mod.</span></div></li>
-      <li class="reveal"><div><b>Press Play</b><span>Cleanstrike wires itself into the game and launches it. Remove it any time with one click.</span></div></li>
+      <li class="reveal"><div><b>Press Play</b><span>Cleanstrike wires itself into the game and launches it. Remove it any time with one click. It keeps itself up to date.</span></div></li>
     </ol>
   </div>
 </div></section>
@@ -192,10 +199,25 @@ footer a:hover{color:var(--text)}
   <h2 class="stencil reveal">Tarkov, brought to Vostok.</h2>
   <p class="sub reveal">Our own mods, built to feel native to the game.</p>
   <div class="mods">
-    <article class="mod reveal">
+    <article class="mod premium wide reveal">
+      <div class="art" style="background-image:url(img/road_to_hell.jpg);background-position:center 30%"></div>
+      <div class="body">
+        <span class="pill gold">Premium · New</span>
+        <h3 class="stencil">Road to Hell</h3>
+        <p style="color:var(--muted)">Vostok becomes a zombie survival game. Every enemy is replaced by the dead, and they hunt by sound.</p>
+        <ul>
+          <li>Packs that hear your gunshots from 140 m and call the others into crowds</li>
+          <li>Shoot limbs off; legless zombies keep coming as crawlers</li>
+          <li>Slow and tough, but every blow hurts, and some charge when shot</li>
+          <li>Doors give way after ten blows; bodies can hold a few rounds or food</li>
+          <li>Off by default: switch it on in Cleanstrike when you're ready</li>
+        </ul>
+      </div>
+    </article>
+    <article class="mod premium reveal">
       <div class="art" style="background-image:url(img/loot.jpg);background-size:contain;background-repeat:no-repeat;background-color:#0b0c0d"></div>
       <div class="body">
-        <span class="pill ok">Available</span>
+        <span class="pill gold">Premium</span>
         <h3 class="stencil">Tarkov Looting</h3>
         <p style="color:var(--muted)">Every container is a gamble. Search it item by item and find out what you've got.</p>
         <ul>
@@ -220,6 +242,52 @@ footer a:hover{color:var(--text)}
       </div>
     </article>
   </div>
+  <p class="sub reveal" style="margin-top:48px">Plus 43 more, all included with Cleanstrike and switchable one by one:</p>
+  <ul class="all reveal">
+    <li>CleanStrike Fixes Overhaul (Premium)</li>
+    <li>No Permadeath</li>
+    <li>Better Traders</li>
+    <li>Loot Settings</li>
+    <li>Better Enemy Loot</li>
+    <li>Event Hints</li>
+    <li>Focus Zoom</li>
+    <li>Hold Breath</li>
+    <li>Medical Durability</li>
+    <li>Gear Spawns</li>
+    <li>Immortal Cat</li>
+    <li>Infinite Bedding</li>
+    <li>Kill Counter</li>
+    <li>Save Anywhere</li>
+    <li>Scope Sensitivity</li>
+    <li>Burst Fire</li>
+    <li>Better Lean</li>
+    <li>Weapon Position</li>
+    <li>Airdrops</li>
+    <li>Heli Go Boom</li>
+    <li>Sound Indicators</li>
+    <li>Item Clarity</li>
+    <li>Loot Highlight</li>
+    <li>Cash Money</li>
+    <li>Clothes to Rags</li>
+    <li>Multi-Use Items</li>
+    <li>Injuries Rework</li>
+    <li>Everything Lootable</li>
+    <li>Better Map</li>
+    <li>Better Inventory and Equipment</li>
+    <li>CleanStrike HUD</li>
+    <li>Tactical Watch</li>
+    <li>Custom Fonts</li>
+    <li>Reticles</li>
+    <li>Weather and Seasons</li>
+    <li>Death and Hit Effects</li>
+    <li>Faction Warfare</li>
+    <li>AI Overhaul</li>
+    <li>Progression</li>
+    <li>Hideout Lights</li>
+    <li>Shelters</li>
+    <li>Visuals</li>
+    <li>Sandbox Mode (opt-in)</li>
+  </ul>
 </div></section>
 
 <section style="padding-top:20px"><div class="wrap">

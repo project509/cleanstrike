@@ -1,9 +1,9 @@
-# CleanStrike Zombies: shared helpers used by this mod's scripts.
+# Road to Hell (CleanStrike Zombies): shared helpers used by this mod's scripts.
 # Static, so it works without an autoload and survives scene changes.
 extends RefCounted
 
 const MOD_ID := "cs_zombies"
-const VERSION := "0.4.2"
+const VERSION := "1.0.0"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {
