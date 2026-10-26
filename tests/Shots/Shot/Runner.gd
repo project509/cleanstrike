@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -317,3 +317,21 @@ func blood_views():
 	await wait(0.05)
 	await shot("shot_blood.png")
 	D.overrides = {}
+
+
+# Progression: the Skills panel on the Character view (inventory open).
+func skills_views():
+	var P = load("res://CSProgression/Mod.gd")
+	P._state = {"xp": 140, "level": 4, "points": 2, "ranks": {"endurance": 3, "strength": 2, "scavenger": 1}}
+	P._loaded = true
+	var ui = get_node("/root/Map/Core/UI")
+	ui.ToggleInterface()
+	var interface = get_node("/root/Map/Core/UI/Interface")
+	if not interface.visible:
+		interface.Open()
+		interface.show()
+	interface.PG_Build()
+	interface.pg_button.button_pressed = true
+	interface.PG_Show(true)
+	await wait(0.5)
+	await shot("shot_skills.png")

@@ -1,0 +1,20 @@
+[mod]
+name="Progression"
+id="cs_progression"
+version="1.0.0"
+author="Cleanstrike"
+description="Earn XP for kills, searching, crafting and trading. Level up and put points into six skills: Endurance, Strength, Metabolism, Steady Hands, Scavenger and Barter. Skills button on the Character panel."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gameplay", "RPG"]
+
+[script_extend]
+res://Scripts/Character.gd="res://CSProgression/Ext/Character.gd"
+res://Scripts/AI.gd="res://CSProgression/Ext/AI.gd"
+res://Scripts/LootContainer.gd="res://CSProgression/Ext/LootContainer.gd"
+res://Scripts/Loader.gd="res://CSProgression/Ext/Loader.gd"
+res://Scripts/Interface.gd="res://CSProgression/Ext/Interface.gd"
