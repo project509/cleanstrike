@@ -100,7 +100,10 @@ static func panel_lines(node: Node) -> Array:
 			out.append(["Kills: %d" % kc.total(), DIM])
 	if bool(setting("enemies")):
 		ai = ai.filter(func(a): return is_instance_valid(a) and a.is_inside_tree() and not a.dead)
-		out.append(["Hostiles in area: %d" % ai.size(), DIM])
+		var n := ai.size()
+		if ResourceLoader.exists("res://CSZombies/Mod.gd"):        # CleanStrike Zombies
+			n += load("res://CSZombies/Mod.gd").living.filter(func(z): return is_instance_valid(z) and z.active and not z.dead).size()
+		out.append(["Hostiles in area: %d" % n, DIM])
 	return out
 
 

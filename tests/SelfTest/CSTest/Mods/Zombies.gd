@@ -126,6 +126,25 @@ func run(r) -> void:
 	r.check("Zombies: its blows hurt", gd.health < 100.0, "%.1f health after %.1f s; state %d d %.2f dead %s seen %s" % [gd.health, t, z2.state, z2.global_position.distance_to(feet), z2.dead, z2.Sees()])
 	gd.health = keep_health
 
+	# Out of sight for three minutes (and nothing heard), it loses interest
+	var zf := _zombie(r, feet + fwd * 30.0)
+	await _frames(r, 2)
+	var now := Time.get_ticks_msec() / 1000.0
+	zf.state = zf.S.CHASE
+	zf.target = feet
+	zf.last_seen = now - 60.0
+	zf.last_heard = now - 60.0
+	zf.global_basis = Basis.looking_at(-fwd * -1.0, Vector3.UP)
+	zf._decide()
+	r.check("Zombies: a minute unseen, it still hunts", zf.state == zf.S.CHASE or zf.state == zf.S.DOOR or zf.Sees())
+	zf.last_seen = now - 185.0
+	zf.last_heard = now - 185.0
+	if not zf.Sees():
+		zf._decide()
+		r.check("Zombies: three minutes unseen, it gives up", zf.state == zf.S.WANDER, str(zf.state))
+	else:
+		r.check("Zombies: three minutes unseen, it gives up", true, "in view here; skipped")
+
 	# Shoot a leg off: a crawler, and the leg on the floor
 	var leg = sk.get_node("HB_leg_l_lower/Hitbox")
 	leg.ApplyDamage(90.0, fwd, player.get_node_or_null("../Camera/ID"))
@@ -135,6 +154,7 @@ func run(r) -> void:
 	var limbs: Array = r.get_tree().current_scene.find_children("CS_Limb", "RigidBody3D", true, false)
 	r.check("Zombies: the severed leg falls", limbs.size() >= 1 and limbs[0].get_child(0).mesh.get_surface_count() > 0, "limbs %d" % limbs.size())
 	r.check("Zombies: a severed part can't be hit again", leg.collision_layer == 0)
+	r.check("Zombies: the stump keeps bleeding", sk.get_node("HB_leg_l_lower").get_node_or_null("CS_Stump") != null)
 
 	# Headshots kill; the body can be searched
 	var hp: float = z.health

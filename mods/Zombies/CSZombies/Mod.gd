@@ -401,9 +401,38 @@ static func sever(z, part: String, vector: Vector3) -> void:
 	var att = z.skeleton.get_node_or_null("HB_" + part)
 	var at: Vector3 = att.global_position if att else z.global_position + Vector3.UP
 	burst(z.get_tree().current_scene, at, vector + Vector3.UP, 40, 1.2)
+	if att:
+		_stump(att)
 	var d = _dhe()
 	if d:
 		d.splatter(z, at, Vector3.DOWN, [])
+
+
+# The stump keeps dripping for a while.
+static func _stump(att: Node3D) -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.name = "CS_Stump"
+	p.amount = 24
+	p.lifetime = 0.9
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3.DOWN
+	pm.spread = 20.0
+	pm.initial_velocity_min = 0.2
+	pm.initial_velocity_max = 0.8
+	pm.gravity = Vector3(0, -9.8, 0)
+	pm.color = Color(0.7, 0.03, 0.03)
+	p.process_material = pm
+	var sm := SphereMesh.new()
+	sm.radius = 0.007
+	sm.height = 0.014
+	sm.material = blood_material()
+	p.draw_pass_1 = sm
+	att.add_child(p)
+	p.emitting = true
+	att.get_tree().create_timer(randf_range(12.0, 25.0), false).timeout.connect(func():
+		if is_instance_valid(p):
+			p.emitting = false)
+	return p
 
 
 # ---------------------------------------------------------------- death
