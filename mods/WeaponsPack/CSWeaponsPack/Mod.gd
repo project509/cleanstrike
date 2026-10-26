@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.8.0"
+const VERSION := "0.9.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -91,6 +91,7 @@ static func ammo_item(aid: String) -> Resource:
 		d.set(k, a.name)
 	d.defaultAmount = a.box
 	d.maxAmount = a.stack
+	d.gunsmith = true                            # new calibres are always sold
 	for k in a.get("flags", {}):
 		d.set(k, a.flags[k])
 	d.value = a.value
@@ -175,6 +176,8 @@ static func build_gun(id: String) -> void:
 		d.tailOutdoor = d.tailOutdoorSuppressed
 		if en.has("charge"):
 			d.reloadEmpty = _event(en.charge, en.get("volume", 0.0) - 4.0)
+	if g.get("suppressed", false):               # a built-in suppressor: no flash
+		d.nativeSuppressor = true
 	if g.get("silent", false):                   # no flash, never heard (by the game's AI or the zombies)
 		d.nativeSuppressor = true
 		d.set_meta("cs_silent", true)

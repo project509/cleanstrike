@@ -62,8 +62,11 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	var aim_z: float = base.aimPosition.z + g.get("shift", {}).get("aimPosition", Vector3.ZERO).z
 	r.check(tag + "aims through its own sights", is_equal_approx(d.aimPosition.z, aim_z) and d.aimPosition.y < 0.0)
 	var pitch: float = g.get("feel", {}).get("pitch", 1.0)
-	if pitch != 1.0 and base.fireSemi:
-		r.check(tag + "its own voice", d.fireSemi.audioClips[0].mix_rate == int(base.fireSemi.audioClips[0].mix_rate * pitch))
+	var voice_src = base.fireSemi
+	if g.has("voice") and g.voice.has("fireSemi") and g.voice.fireSemi is String:
+		voice_src = load(g.get("voice_from", WP.base_path(g, ".tres"))).get(g.voice.fireSemi)
+	if pitch != 1.0 and voice_src and not g.has("energy"):
+		r.check(tag + "its own voice", d.fireSemi.audioClips[0].mix_rate == int(voice_src.audioClips[0].mix_rate * pitch))
 	r.check(tag + "found in loot, and sold where its base gun is", lt.items.has(d) and d.gunsmith == g.get("data", {}).get("gunsmith", base.gunsmith))
 	if g.magazine is Dictionary:
 		r.check(tag + "its magazine is an item like the game's", WP.items.has(mag.file) and db.get(mag.file) is PackedScene and lt.items.has(mag) and mag.icon != null)

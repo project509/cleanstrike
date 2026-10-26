@@ -16,6 +16,7 @@
 #   hand       move the support hand onto this gun's handguard (not pistols)
 #   shift      added to the base gun's carry poses (lowPosition...)
 #   voice      fire sounds taken from voice_from's (e.g. suppressed ones)
+#   suppressed built-in suppressor: no flash (still heard)
 #   silent     no flash; its shots are never heard or noticed
 #   head_damage  a hit to the head (zombies take 3x; the game's AI dies at 100)
 #   bolt       bolt action fed by a magazine: Reload cycles the bolt
@@ -117,6 +118,23 @@ static func guns() -> Dictionary:
 			"optics": "none",
 			"hand": false,
 		},
+		"ASH12": {
+			"file": "CS_ASH12",
+			"name": "ASh-12 (12.7×55)",
+			"short": "ASh-12",
+			"display": "ASh-12",
+			"base": ["AK-12", "AK-12"],
+			"magazine": {"file": "CS_ASH12_Magazine", "name": "ASh-12 Magazine (12.7×55)", "rounds": 20, "value": 420, "weight": 0.6},
+			"ammo": "CS_Ammo_127x55",
+			"data": {"caliber": "12.7×55", "damage": 75.0, "penetration": 5, "fireRate": 0.092, "weight": 6.2, "value": 14500, "rarity": 2},
+			"voice_from": "res://Items/Weapons/VSS/VSS.tres",
+			"voice": {"fireSemi": "fireSemi", "fireAuto": "fireAuto", "fireSuppressed": "fireSuppressed", "tailOutdoor": "tailOutdoor", "tailIndoor": "tailIndoor", "tailOutdoorSuppressed": "tailOutdoorSuppressed", "tailIndoorSuppressed": "tailIndoorSuppressed"},
+			"feel": {"recoil": 2.0, "kick": 1.6, "recovery": 0.6, "impulse": 0.25, "view_kick": 0.04, "climb": 0.008, "pitch": 0.8, "volume": 4.0},
+			"suppressed": true,
+			"shift": {"lowPosition": Vector3(0, -0.03, -0.13), "highPosition": Vector3(0, -0.03, -0.11), "inspectPosition": Vector3(0, -0.01, -0.08), "aimPosition": Vector3(0, 0, -0.05)},
+			"optics": "rail",
+			"muzzles": false,
+		},
 		"DEAGLE": {
 			"file": "CS_DEAGLE",
 			"name": "Desert Eagle (.50 AE)",
@@ -137,6 +155,12 @@ static func guns() -> Dictionary:
 # New calibres: boxes like the game's, sold by the Gunsmith.
 static func ammo() -> Dictionary:
 	return {
+		"CS_Ammo_127x55": {
+			"name": "12.7×55",
+			"base": "res://Items/Ammo/Ammo_9x39/Ammo_9x39.tres",
+			"art": "Ammo_127x55",
+			"box": 20, "stack": 120, "value": 1100, "weight": 0.9,
+		},
 		"CS_Ammo_PowerCell": {
 			"name": "Plasma Cells",
 			"base": "res://Items/Ammo/Ammo_9x19/Ammo_9x19.tres",

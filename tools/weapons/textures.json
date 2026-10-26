@@ -103,5 +103,18 @@
         "roughness": "Raygun_LP_Raygun_B_Roughness.png"
       }
     }
+  },
+  "ASH12": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/ash12/textures",
+    "materials": {
+      "Material": {
+        "albedo": "Ash1272_DefaultMaterial_BaseColor.png",
+        "normal": "Ash1272_DefaultMaterial_Normal.png",
+        "roughness": "Ash1272_DefaultMaterial_Metallic-Ash1272_DefaultMaterial_Rou.png",
+        "rough_ch": "g",
+        "metallic": "Ash1272_DefaultMaterial_Metallic-Ash1272_DefaultMaterial_Rou.png",
+        "metal_ch": "b"
+      }
+    }
   }
 }
