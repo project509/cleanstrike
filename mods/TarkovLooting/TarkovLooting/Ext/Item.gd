@@ -1,5 +1,5 @@
 # Tarkov Looting: inventory cell look (Tarkov tints, short name top-right,
-# unknown-item silhouette, examine progress bar).
+# unknown-item silhouette, search preview ghost, examine progress bar).
 extends "res://Scripts/Item.gd"
 
 const TL = preload("res://TarkovLooting/TL.gd")
@@ -8,6 +8,8 @@ var tl_mark: Label
 var tl_bar: ColorRect
 var tl_bar_bg: ColorRect
 var tl_styled := false
+var tl_preview := false
+var tl_state := "Static"
 
 
 func UpdateDetails():
@@ -18,8 +20,27 @@ func UpdateDetails():
 
 func State(state):
 	super(state)
-	if TL.active() and state == "Static" and bool(TL.setting("item_colors")) and slotData and slotData.itemData:
+	tl_state = state
+	if TL.active():
+		_tl_apply_fill()
+
+
+func _tl_apply_fill() -> void:
+	if tl_state != "Static" or not slotData or not slotData.itemData:
+		return
+	# Unknown items and search previews give nothing away: plain cell.
+	if TL.is_unknown(self) or tl_preview or not bool(TL.setting("item_colors")):
+		fill.color = TL.DEFAULT_TINT
+	else:
 		fill.color = TL.tint_for(slotData.itemData)
+
+
+# The next item being searched: a faint grey ghost of its shape, nothing else.
+func TL_SetPreview(on: bool) -> void:
+	if tl_preview == on:
+		return
+	tl_preview = on
+	_tl_refresh()
 
 
 func _tl_refresh() -> void:
@@ -42,10 +63,27 @@ func _tl_refresh() -> void:
 		for symbol in symbols.get_children():
 			symbol.hide()
 	if tl_mark:
-		tl_mark.visible = unknown
+		tl_mark.visible = unknown and not tl_preview
 		tl_mark.size = size
+	details.visible = not tl_preview and tl_state != "Free"
 	if sprite:
-		sprite.modulate = Color(0.06, 0.06, 0.06, 0.9) if unknown else Color.WHITE
+		var mat: Material = null
+		if tl_preview:
+			mat = TL.silhouette(TL.SILHOUETTE_PREVIEW)
+		elif unknown:
+			mat = TL.silhouette(TL.SILHOUETTE_UNKNOWN)
+		_tl_set_material(sprite, mat)
+	_tl_apply_fill()
+
+
+# The sprite and its attachment sprites (weapon parts are child sprites).
+func _tl_set_material(node: Node, mat: Material) -> void:
+	if node is CanvasItem:
+		if not node.has_meta("tl_material"):
+			node.set_meta("tl_material", [node.material])   # wrapped: null metas are dropped
+		node.material = mat if mat else node.get_meta("tl_material")[0]
+	for child in node.get_children():
+		_tl_set_material(child, mat)
 
 
 func _tl_ensure_mark() -> void:

@@ -57,6 +57,7 @@ public sealed class ModInfo
     public List<SettingDef> Settings { get; set; } = new();
     public bool HasManifest { get; set; }
     public long SizeBytes { get; set; }
+    public byte[]? Thumbnail { get; set; }     // icon.png / icon.jpg at the mod's root
 }
 
 public sealed class ProfileEntry

@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "tarkov_looting"
-const VERSION := "1.0.0"
+const VERSION := "1.1.0"
 
 # Defaults; each one can be changed in the Cleanstrike app (settings.json).
 const DEFAULTS := {
@@ -13,6 +13,7 @@ const DEFAULTS := {
 	"search_corpses": true,
 	"examine_enabled": true,
 	"examine_speed": 1.0,
+	"examine_middle_mouse": true,
 	"item_colors": true,
 	"reveal_sound": true,
 }
@@ -45,6 +46,28 @@ const DEFAULT_TINT := Color(0.22, 0.22, 0.22, 0.30)
 const LEGENDARY_TINT := Color(0.36, 0.12, 0.48, 0.50)
 const SEARCH_TINT := Color(1, 1, 1, 0.04)
 
+# Unknown items of these types (or subtypes) still work (equip, use, load, attach), as in
+# Tarkov: you can fight with a gun you haven't examined.
+const USABLE_UNKNOWN := ["Weapon", "Magazine", "Knife", "Grenade"]
+
+# Flat silhouettes: unknown items show only their outline (no detail, no
+# colour); the next item being searched shows as a faint grey ghost.
+const SILHOUETTE_SHADER := """
+shader_type canvas_item;
+uniform vec4 tint : source_color = vec4(0.1, 0.1, 0.1, 1.0);
+varying vec4 vcolor;
+void vertex() {
+	vcolor = COLOR;   // fragment COLOR already includes the texture colour
+}
+void fragment() {
+	float a = texture(TEXTURE, UV).a;
+	COLOR = vec4(tint.rgb * vcolor.rgb, a * tint.a * vcolor.a);
+}
+"""
+const SILHOUETTE_UNKNOWN := Color(0.11, 0.11, 0.105, 0.95)
+const SILHOUETTE_PREVIEW := Color(0.55, 0.55, 0.53, 0.30)
+
+static var _materials := {}
 static var _known := {}
 static var _loaded := false
 static var _seeded := false
@@ -167,6 +190,28 @@ static func is_unknown(item) -> bool:
 	if sd == null or sd.itemData == null:
 		return false
 	return not knows(sd.itemData.file)
+
+
+# Unknown and not one of the types that work anyway.
+static func is_restricted(item) -> bool:
+	if not is_unknown(item):
+		return false
+	var sd = item.slotData if item is Control else item
+	var d = sd.itemData
+	# Magazines are type "Attachment", subtype "Magazine".
+	return not (str(d.type).strip_edges() in USABLE_UNKNOWN or str(d.get("subtype")).strip_edges() in USABLE_UNKNOWN)
+
+
+static func silhouette(color: Color) -> ShaderMaterial:
+	var key := color.to_html()
+	if not _materials.has(key):
+		var shader := Shader.new()
+		shader.code = SILHOUETTE_SHADER
+		var m := ShaderMaterial.new()
+		m.shader = shader
+		m.set_shader_parameter("tint", color)
+		_materials[key] = m
+	return _materials[key]
 
 
 static func is_hidden(item) -> bool:

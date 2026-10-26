@@ -22,6 +22,10 @@ func run():
 	while not map_ready("Tutorial"):
 		await wait(0.5)
 	await wait(3.0)
+	if FileAccess.file_exists("user://cleanstrike/shot_loot"):
+		await loot_views()
+		get_tree().quit()
+		return
 	var tr = load("res://Resources/Transition.tscn").instantiate()
 	tr.nextMap = "School"; tr.currentMap = "Village"; tr.nextZone = "Area 05"; tr.time = 1.0
 	get_tree().current_scene.add_child(tr)
@@ -99,6 +103,39 @@ func perf_run(map: String, views: Array) -> void:
 		cam.make_current()
 		await perf_sample("%s view %d" % [map, k])
 		k += 1
+
+# Tarkov Looting: search in progress (grey ghost), unknown silhouettes, examining.
+func loot_views():
+	var ui = get_node("/root/Map/Core/UI")
+	var interface = get_node("/root/Map/Core/UI/Interface")
+	var target = null
+	var stack: Array = [get_tree().current_scene]
+	while stack.size() > 0 and target == null:
+		var n = stack.pop_back()
+		if n is LootContainer and not n.locked and not n.furniture:
+			target = n
+		stack.append_array(n.get_children())
+	if target == null:
+		return
+	target.loot.clear()
+	for path in ["res://Items/Weapons/AKM/AKM.tres", "res://Items/Weapons/AKM/AKM_Magazine.tres"]:
+		target.CreateLoot(load(path))
+	var master = load("res://Loot/LT_Master.tres").items
+	for i in 8:
+		target.CreateLoot(master.pick_random())
+	ui.OpenContainer(target)
+	await wait(2.2)
+	await shot("shot_loot_searching.png")
+	while interface.containerGrid.get_children().any(func(i): return i.get_meta("tl_hidden", false)):
+		await wait(0.5)
+	await wait(0.6)
+	await shot("shot_loot_unknown.png")
+	for i in interface.containerGrid.get_children():
+		if interface.TL_Examine(i):
+			break
+	await wait(0.8)
+	await shot("shot_loot_examining.png")
+
 
 func ground(x: float, z: float) -> float:
 	var space = get_node("/root/Map").get_world_3d().direct_space_state

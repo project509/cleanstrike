@@ -52,6 +52,8 @@ Check("reads settings schema", rtt?.Settings.Count >= 7 && rtt.Settings.Any(s =>
 var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 if (rttWip != null)
     Check("Road to Tarkov labelled in progress", rttWip.Name.Contains("(In Progress)"), rttWip.Name);
+if (rttWip != null)
+    Check("reads mod thumbnail", rttWip.Thumbnail is { Length: > 1000 }, (rttWip.Thumbnail?.Length ?? 0) + " bytes");
 Check("compatible with this game", rtt != null && ModLibrary.CompatibilityProblem(rtt, g, LoaderInstaller.ApiVersion) == null);
 
 var nested = Path.Combine(work, "Nested.zip");

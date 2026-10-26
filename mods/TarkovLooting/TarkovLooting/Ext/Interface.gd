@@ -1,10 +1,12 @@
 # Tarkov Looting: Tarkov-style looting for the inventory screen.
 #  - Containers and bodies must be searched; items reveal one at a time,
 #    top-left to bottom-right, and search progress is kept per container.
-#  - Items you have never examined show as unknown silhouettes. Right-click
-#    -> Examine to identify them; knowledge is kept between sessions.
+#  - The item being searched shows as a faint grey ghost under the spinner.
+#  - Items you have never examined show as flat silhouettes. Middle-click
+#    (or right-click -> Examine) to identify them; knowledge is kept.
 #  - Unknown items can be moved, stacked and dropped, but not used,
-#    equipped or combined until examined.
+#    equipped or combined until examined. Weapons, magazines, knives and
+#    grenades are the exception: they work while unknown.
 extends "res://Scripts/Interface.gd"
 
 const TL = preload("res://TarkovLooting/TL.gd")
@@ -116,6 +118,7 @@ func _tl_begin_container() -> void:
 
 
 func _tl_stop_search() -> void:
+	_tl_unpreview()
 	tl_target = null
 	tl_empty_left = -1.0
 	if tl_spinner:
@@ -156,6 +159,8 @@ func _tl_search_tick(delta: float) -> void:
 				_tl_stop_search()
 			return
 		tl_left = maxf(tl_left, 0.0) + TL.search_time(tl_target.slotData.itemData)
+		tl_target.TL_SetPreview(true)
+		tl_target.modulate.a = 1.0
 
 	_tl_place_spinner(tl_target.global_position, tl_target.size)
 	tl_left -= delta
@@ -167,17 +172,26 @@ func _tl_search_tick(delta: float) -> void:
 
 
 func _tl_place_spinner(pos: Vector2, item_size: Vector2) -> void:
-	var s := minf(cellSize, minf(item_size.x, item_size.y))
-	tl_spinner.size = Vector2(s, s)
+	tl_spinner.size = item_size
 	tl_spinner.global_position = pos
 	tl_spinner.show()
 
 
+# A ghosted item that wasn't revealed (container closed) goes back to hidden.
+func _tl_unpreview() -> void:
+	if tl_target and is_instance_valid(tl_target) and TL.is_hidden(tl_target):
+		tl_target.TL_SetPreview(false)
+		tl_target.modulate.a = 0.0
+
+
 func _tl_reveal(target) -> void:
 	target.set_meta("tl_hidden", false)
+	target.TL_SetPreview(false)
 	target.UpdateDetails()
+	# Brief flash as the ghost turns into the real item (or its silhouette).
+	target.modulate = Color(1.7, 1.7, 1.7, 1.0)
 	var tw := create_tween()
-	tw.tween_property(target, "modulate:a", 1.0, 0.18)
+	tw.tween_property(target, "modulate", Color.WHITE, 0.22)
 	if bool(TL.setting("reveal_sound")):
 		PlayClick()
 
@@ -218,7 +232,7 @@ func Hover():
 	super()
 	if not TL.examining():
 		return
-	if (itemDragged and TL.is_unknown(itemDragged)) or (itemDragged and hoverItem and TL.is_unknown(hoverItem)):
+	if (itemDragged and TL.is_restricted(itemDragged)) or (itemDragged and hoverItem and TL.is_restricted(hoverItem)):
 		canEquip = false
 		canSlotSwap = false
 		canCombine = false
@@ -231,14 +245,14 @@ func Hover():
 
 
 func FastEquip():
-	if hoverItem and TL.is_unknown(hoverItem):
+	if hoverItem and TL.is_restricted(hoverItem):
 		_tl_need_examine()
 		return
 	super()
 
 
 func ContextEquip():
-	if contextItem and TL.is_unknown(contextItem):
+	if contextItem and TL.is_restricted(contextItem):
 		_tl_need_examine()
 		HideContext()
 		Reset()
@@ -247,7 +261,7 @@ func ContextEquip():
 
 
 func Use(targetItem, targetGrid):
-	if targetItem and TL.is_unknown(targetItem):
+	if targetItem and TL.is_restricted(targetItem):
 		_tl_need_examine()
 		return
 	return await super(targetItem, targetGrid)
@@ -255,7 +269,7 @@ func Use(targetItem, targetGrid):
 
 func _tl_need_examine() -> void:
 	PlayError()
-	Loader.Message("Unknown item - examine it first (right-click > Examine)", Color.ORANGE)
+	Loader.Message("Unknown item - examine it first (middle-click)", Color.ORANGE)
 
 
 # Trader stock and crafting results count as known.
@@ -284,14 +298,31 @@ func TL_ContextExamine():
 	var target = contextItem
 	HideContext()
 	Reset()
-	if target == null or not TL.is_unknown(target):
-		return
+	TL_Examine(target)
+
+
+# Start examining an unknown item. Returns false if there was nothing to do.
+func TL_Examine(target) -> bool:
+	if target == null or not is_instance_valid(target) or not TL.is_unknown(target) or TL.is_hidden(target):
+		return false
 	var key: int = target.get_instance_id()
 	if tl_examines.has(key):
-		return
+		return false
 	tl_examines[key] = {"item": target, "t": 0.0, "total": TL.examine_time(target.slotData.itemData)}
 	target.TL_SetProgress(0.0)
 	PlayClick()
+	return true
+
+
+# Middle mouse examines the hovered item, Tarkov's default binding.
+func _input(event):
+	if not visible or not TL.examining() or not bool(TL.setting("examine_middle_mouse")):
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
+		if itemDragged or context.visible:
+			return
+		if TL_Examine(hoverItem):
+			get_viewport().set_input_as_handled()
 
 
 func TL_IsExamining(target) -> bool:

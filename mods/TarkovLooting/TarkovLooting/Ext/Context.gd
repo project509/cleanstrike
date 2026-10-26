@@ -1,5 +1,5 @@
 # Tarkov Looting: adds "Examine" to the right-click menu of unknown items and
-# hides actions that need the item identified first.
+# hides actions that need the item identified first (weapons/mags keep them).
 extends "res://Scripts/Context.gd"
 
 const TL = preload("res://TarkovLooting/TL.gd")
@@ -16,12 +16,13 @@ func Update(slotData: SlotData):
 	if not TL.is_unknown(item):
 		tl_examine.hide()
 		return
-	for b in [useButton, equipButton, unloadButton, sleepButton]:
-		b.hide()
-	for i in 4:
-		var rb = buttons.get_node_or_null("Remove_" + str(i))
-		if rb:
-			rb.hide()
+	if TL.is_restricted(item):
+		for b in [useButton, equipButton, unloadButton, sleepButton]:
+			b.hide()
+		for i in 4:
+			var rb = buttons.get_node_or_null("Remove_" + str(i))
+			if rb:
+				rb.hide()
 	var busy: bool = interface.has_method("TL_IsExamining") and interface.TL_IsExamining(item)
 	tl_examine.text = "Examining..." if busy else "Examine"
 	tl_examine.disabled = busy

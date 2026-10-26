@@ -1,4 +1,5 @@
-# Tarkov Looting: the rotating "searching" mark drawn over the next cell.
+# Tarkov Looting: the rotating "searching" mark drawn over the item being
+# searched (sized to the whole item; the ring stays one cell big).
 extends Control
 
 var angle := 0.0
@@ -17,7 +18,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var c := size / 2.0
-	var r := minf(size.x, size.y) * 0.28
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.35))
+	var r := minf(64.0, minf(size.x, size.y)) * 0.28
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.12))
 	draw_arc(c, r, 0.0, TAU, 32, Color(1, 1, 1, 0.12), 3.0, true)
 	draw_arc(c, r, angle, angle + TAU * 0.3, 16, Color(0.92, 0.86, 0.62, 0.95), 3.0, true)

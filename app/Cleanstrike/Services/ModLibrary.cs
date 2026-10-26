@@ -9,6 +9,7 @@ public static class ModLibrary
 {
     public static readonly string[] Extensions = { ".csmod", ".vmz", ".zip", ".pck" };
     public const string SettingsFile = "cleanstrike.settings.json";
+    public static readonly string[] ThumbnailNames = { "icon.png", "icon.jpg", "thumbnail.png", "thumbnail.jpg" };
 
     public static List<ModInfo> Scan(GameInstall game)
     {
@@ -44,6 +45,13 @@ public static class ModLibrary
         {
             using var r = new StreamReader(manifest.Open());
             ApplyManifest(info, GodotConfig.Parse(r.ReadToEnd()));
+        }
+        var icon = ThumbnailNames.Select(zip.GetEntry).FirstOrDefault(e => e != null && e.Length is > 0 and < 4_000_000);
+        if (icon != null)
+        {
+            using var ms = new MemoryStream();
+            using (var s = icon.Open()) s.CopyTo(ms);
+            info.Thumbnail = ms.ToArray();
         }
         var schema = zip.GetEntry(SettingsFile);
         if (schema != null)

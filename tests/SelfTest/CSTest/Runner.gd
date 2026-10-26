@@ -75,7 +75,17 @@ func run() -> void:
 	check("header searching", "Searching" in interface.containerName.text, interface.containerName.text)
 	check("items use mod script", items[0].has_method(P + "SetProgress"))
 	check("slotData kept through swap", items[0].slotData != null and items[0].slotData.itemData != null)
-	await wait(1.6)
+	if standalone:
+		await wait(0.7)
+		var ghosts: Array = items.filter(func(i): return i.tl_preview)
+		var g = ghosts[0] if ghosts.size() == 1 else null
+		check("one grey preview while searching", g != null and RTT.is_hidden(g) and g.modulate.a > 0.9, "%d previews" % ghosts.size())
+		if g:
+			check("preview is a ghost silhouette", g.sprite.material == RTT.silhouette(RTT.SILHOUETTE_PREVIEW) and not g.details.visible)
+			check("preview cannot be grabbed", interface.GetHoverItem() != g)
+		await wait(0.9)
+	else:
+		await wait(1.6)
 	var revealed: int = items.filter(func(i): return not RTT.is_hidden(i)).size()
 	check("reveals over time", revealed >= 1 and revealed < items.size() or items.size() == 1, "%d revealed after 1.6s" % revealed)
 
@@ -105,6 +115,9 @@ func run() -> void:
 		var mark = unknown.get(pl + "mark")
 		check("unknown mark shown", mark != null and mark.visible)
 		check("abbreviation hidden", unknown.abbreviation.text == "?", unknown.abbreviation.text)
+		if standalone:
+			check("unknown icon obscured", unknown.sprite.material == RTT.silhouette(RTT.SILHOUETTE_UNKNOWN))
+			check("unknown cell untinted", unknown.fill.color == RTT.DEFAULT_TINT, str(unknown.fill.color))
 		interface.tooltip.Update(unknown)
 		check("tooltip unknown", interface.tooltip.title.text == "Unknown item", interface.tooltip.title.text)
 		interface.contextItem = unknown
@@ -113,15 +126,43 @@ func run() -> void:
 		var ex = interface.context.get(pl + "examine")
 		check("examine button", ex != null and ex.visible)
 		check("use hidden for unknown", not interface.context.useButton.visible)
-		interface.call(P + "ContextExamine")
-		check("examining", interface.call(P + "IsExamining", unknown))
+		if standalone:
+			# Middle mouse over the item, as a player would.
+			HideCtx(interface)
+			interface.hoverItem = unknown
+			var mb := InputEventMouseButton.new()
+			mb.button_index = MOUSE_BUTTON_MIDDLE
+			mb.pressed = true
+			interface._input(mb)
+		else:
+			interface.call(P + "ContextExamine")
+		check("examining" + (" (middle-click)" if standalone else ""), interface.call(P + "IsExamining", unknown))
 		var total: float = RTT.examine_time(unknown.slotData.itemData)
 		await wait(total + 0.8)
 		check("examined -> known", not RTT.is_unknown(unknown), "after %.1fs" % total)
 		check("mark cleared", not unknown.get(pl + "mark").visible)
+		if standalone:
+			var m = unknown.sprite.material
+			check("icon revealed", m != RTT.silhouette(RTT.SILHOUETTE_UNKNOWN) and m != RTT.silhouette(RTT.SILHOUETTE_PREVIEW), str(m))
 		interface.tooltip.Update(unknown)
 		check("tooltip shows name", interface.tooltip.title.text == unknown.slotData.itemData.name, interface.tooltip.title.text)
 		check("tint applied", unknown.fill.color == RTT.tint_for(unknown.slotData.itemData), str(unknown.fill.color))
+
+	if standalone:
+		# Weapons and magazines work while unknown; other types don't.
+		var mag := SlotData.new()
+		mag.itemData = load("res://Items/Weapons/AKM/AKM_Magazine.tres")
+		RTT._known.erase(mag.itemData.file)
+		check("unknown magazine is usable", RTT.is_unknown(mag) and not RTT.is_restricted(mag), mag.itemData.subtype)
+		var gun := SlotData.new()
+		gun.itemData = load("res://Items/Weapons/AKM/AKM.tres")
+		RTT._known.erase(gun.itemData.file)
+		check("unknown weapon is usable", RTT.is_unknown(gun) and not RTT.is_restricted(gun), gun.itemData.type)
+		var other = items.filter(func(i): return not (str(i.slotData.itemData.type) in RTT.USABLE_UNKNOWN or str(i.slotData.itemData.subtype) in RTT.USABLE_UNKNOWN))
+		if other.size() > 0:
+			var od: SlotData = other[0].slotData
+			RTT._known.erase(od.itemData.file)
+			check("unknown non-weapon is restricted", RTT.is_restricted(od), od.itemData.type)
 
 	close_ui(ui)
 	await wait(0.3)
@@ -315,3 +356,9 @@ func finish() -> void:
 	f.store_string(JSON.stringify({"failures": failures, "results": results}, "  "))
 	f.close()
 	get_tree().quit(1 if failures else 0)
+
+
+func HideCtx(interface) -> void:
+	if interface.context.visible:
+		interface.HideContext()
+	interface.Reset()

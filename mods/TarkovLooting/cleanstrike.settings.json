@@ -29,7 +29,7 @@
       "type": "bool",
       "default": true,
       "label": "Unknown items need examining",
-      "description": "Items you have never seen show as '?' until you examine them (right-click > Examine)."
+      "description": "Items you have never seen show as '?' until you examine them (middle-click, or right-click > Examine). Weapons and magazines still work while unknown."
     },
     {
       "key": "examine_speed",
@@ -40,6 +40,13 @@
       "step": 0.25,
       "label": "Examine speed",
       "description": "Higher is faster."
+    },
+    {
+      "key": "examine_middle_mouse",
+      "type": "bool",
+      "default": true,
+      "label": "Middle-click to examine",
+      "description": "Middle mouse button on an unknown item starts examining it, like in Tarkov."
     },
     {
       "key": "item_colors",

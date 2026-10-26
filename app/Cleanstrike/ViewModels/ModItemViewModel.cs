@@ -30,6 +30,34 @@ public sealed class ModItemViewModel : ObservableObject
     public ModInfo Mod { get; }
     public string Name => Mod.Name;
     public string Initial => Mod.Name.Length > 0 ? Mod.Name[..1].ToUpperInvariant() : "?";
+    public bool HasThumbnail => Thumbnail != null;
+    private System.Windows.Media.ImageSource? _thumb;
+    private bool _thumbTried;
+    public System.Windows.Media.ImageSource? Thumbnail
+    {
+        get
+        {
+            if (_thumbTried || Mod.Thumbnail == null)
+                return _thumb;
+            _thumbTried = true;
+            try
+            {
+                var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                bmp.BeginInit();
+                bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bmp.DecodePixelWidth = 320;
+                bmp.StreamSource = new MemoryStream(Mod.Thumbnail);
+                bmp.EndInit();
+                bmp.Freeze();
+                _thumb = bmp;
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"Thumbnail for {Mod.Id} unreadable: {ex.Message}");
+            }
+            return _thumb;
+        }
+    }
     public string Version => Mod.Version.Length > 0 ? "v" + Mod.Version : "";
     public string Author => Mod.Author;
     public string Description => Mod.Description.Length > 0 ? Mod.Description : "No description.";

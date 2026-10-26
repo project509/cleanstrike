@@ -6,6 +6,7 @@ A mod is a zip archive (extension `.csmod`, though `.vmz`/`.zip` work too) with 
 MyMod.csmod
   mod.txt
   cleanstrike.settings.json     (optional: settings shown in the app)
+  icon.png / icon.jpg           (optional: square cover art shown in the app, ~512 px)
   MyMod/                         mounts as res://MyMod/...
     Main.gd
     Ext/Interface.gd

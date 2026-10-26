@@ -7,6 +7,7 @@ A mod manager and loader for **Road to Vostok**. One portable `Cleanstrike.exe`:
 - **Drag and drop install.** `.csmod`, `.vmz`, `.zip`, `.pck`. Badly packaged mods (the `mod.txt` one folder down, backslash paths) are repaired on install. Installing a newer version replaces the old one.
 - **Load order and profiles.** Drag mods to reorder, toggle them on and off, and keep several setups.
 - **Per-mod settings**, generated from the mod's `cleanstrike.settings.json`.
+- **Cover art.** A mod's `icon.png`/`icon.jpg` shows in the list and the details pane.
 - **Launch report.** After you play, every mod shows whether it loaded, and if not, why, in plain language.
 - **Safety nets.**
   - Mods made for another game version are held back.
@@ -32,6 +33,7 @@ A mod manager and loader for **Road to Vostok**. One portable `Cleanstrike.exe`:
 
 ```bash
 tools/publish.sh          # dist/Cleanstrike.exe (portable) + dist/TarkovLooting.csmod + dist/RoadToTarkov.csmod
+SHOTS=loot tools/shots.sh # render Tarkov Looting's inventory views to dist/shots/
 tools/test.sh             # end-to-end: app prepares a launch, game boots headless, mod self-test runs
 MODS="TarkovLooting" tools/test.sh   # test one mod on its own
 ```
