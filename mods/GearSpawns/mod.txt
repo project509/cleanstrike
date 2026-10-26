@@ -1,0 +1,19 @@
+[mod]
+name="Gear Spawns"
+id="cs_gear_spawns"
+version="1.0.0"
+author="Cleanstrike"
+description="Weapons come kitted out: enemies, containers and the floor have guns with scopes, suppressors, lasers and loaded magazines, more as the days go on. At night enemies may carry flashlights and night vision."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay", "AI", "Loot"]
+
+[script_extend]
+res://Scripts/AI.gd="res://CSGearSpawns/Ext/AI.gd"
+res://Scripts/Sensor.gd="res://CSGearSpawns/Ext/Sensor.gd"
+res://Scripts/LootContainer.gd="res://CSGearSpawns/Ext/LootContainer.gd"
+res://Scripts/LootSimulation.gd="res://CSGearSpawns/Ext/LootSimulation.gd"

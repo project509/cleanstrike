@@ -1,0 +1,263 @@
+{
+  "settings": [
+    {
+      "key": "bandit_scope",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bandit: scope chance %"
+    },
+    {
+      "key": "bandit_suppressor",
+      "type": "int",
+      "default": 5,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bandit: suppressor chance %"
+    },
+    {
+      "key": "bandit_laser",
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bandit: laser chance %"
+    },
+    {
+      "key": "guard_scope",
+      "type": "int",
+      "default": 20,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Guard: scope chance %"
+    },
+    {
+      "key": "guard_suppressor",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Guard: suppressor chance %"
+    },
+    {
+      "key": "guard_laser",
+      "type": "int",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Guard: laser chance %"
+    },
+    {
+      "key": "military_scope",
+      "type": "int",
+      "default": 40,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Military: scope chance %"
+    },
+    {
+      "key": "military_suppressor",
+      "type": "int",
+      "default": 20,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Military: suppressor chance %"
+    },
+    {
+      "key": "military_laser",
+      "type": "int",
+      "default": 30,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Military: laser chance %"
+    },
+    {
+      "key": "world_scope",
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "World: scope chance %"
+    },
+    {
+      "key": "world_suppressor",
+      "type": "int",
+      "default": 4,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "World: suppressor chance %"
+    },
+    {
+      "key": "world_laser",
+      "type": "int",
+      "default": 6,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "World: laser chance %"
+    },
+    {
+      "key": "world_magazine",
+      "type": "int",
+      "default": 40,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "label": "Found guns: loaded magazine chance %"
+    },
+    {
+      "key": "magazine_fill_min",
+      "type": "int",
+      "default": 5,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "label": "Found magazines: fewest rounds %"
+    },
+    {
+      "key": "magazine_fill_max",
+      "type": "int",
+      "default": 80,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "label": "Found magazines: most rounds %"
+    },
+    {
+      "key": "unlock_scope",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Scopes common from day"
+    },
+    {
+      "key": "unlock_suppressor",
+      "type": "int",
+      "default": 30,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Suppressors common from day"
+    },
+    {
+      "key": "unlock_laser",
+      "type": "int",
+      "default": 5,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Lasers common from day"
+    },
+    {
+      "key": "early_chance",
+      "type": "int",
+      "default": 2,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Before that: chance %"
+    },
+    {
+      "key": "night_gear",
+      "type": "bool",
+      "default": true,
+      "label": "Night gear",
+      "description": "At night enemies may carry a flashlight (which blinks on and off) or night vision; both let them see farther. Night vision wearers drop their PV7."
+    },
+    {
+      "key": "bandit_flashlight",
+      "type": "int",
+      "default": 20,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bandit: flashlight at night %"
+    },
+    {
+      "key": "guard_flashlight",
+      "type": "int",
+      "default": 40,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Guard: flashlight at night %"
+    },
+    {
+      "key": "military_flashlight",
+      "type": "int",
+      "default": 60,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Military: flashlight at night %"
+    },
+    {
+      "key": "bandit_nvg",
+      "type": "int",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bandit: night vision at night %"
+    },
+    {
+      "key": "guard_nvg",
+      "type": "int",
+      "default": 5,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Guard: night vision at night %"
+    },
+    {
+      "key": "military_nvg",
+      "type": "int",
+      "default": 30,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Military: night vision at night %"
+    },
+    {
+      "key": "bandit_sight",
+      "type": "float",
+      "default": 20.0,
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "label": "Bandit: extra night sight (m) with light/NVG"
+    },
+    {
+      "key": "guard_sight",
+      "type": "float",
+      "default": 35.0,
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "label": "Guard: extra night sight (m) with light/NVG"
+    },
+    {
+      "key": "military_sight",
+      "type": "float",
+      "default": 60.0,
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "label": "Military: extra night sight (m) with light/NVG"
+    }
+  ]
+}
