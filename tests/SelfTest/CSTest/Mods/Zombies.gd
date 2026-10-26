@@ -93,7 +93,8 @@ func run(r) -> void:
 		tm += 0.1
 	r.check("Zombies: it walks towards you", z.global_position.distance_to(feet) < d0 - 0.5, "%.1f -> %.1f m" % [d0, z.global_position.distance_to(feet)])
 
-	# The pack hears the call
+	# The pack hears the call (from calm: earlier gunfire in the suite raises the swarm's heat)
+	ZM.heat = 0.0
 	var z2 := _zombie(r, feet + fwd * 8.0 + Vector3(3, 0, 0))
 	var z3 := _zombie(r, feet + fwd * 80.0)
 	await _frames(r, 2)

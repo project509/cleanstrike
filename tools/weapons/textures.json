@@ -58,5 +58,22 @@
         "roughness": "Mini_14_roughness.jpg"
       }
     }
+  },
+  "M82": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/m82/textures",
+    "materials": {
+      "base": {
+        "albedo": "barret_base_BaseColor.png",
+        "normal": "barret_base_Normal.png",
+        "metallic": "barret_base_Metallic.png",
+        "roughness": "barret_base_Roughness.png",
+        "ao": "Ambient_Occlusion_Map_from_Mesh_base.png"
+      },
+      "second": {
+        "albedo": "barret_second_BaseColor.png",
+        "metallic": "barret_second_Metallic.png",
+        "roughness": "barret_second_Roughness.png"
+      }
+    }
   }
 }

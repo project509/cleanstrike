@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.5.0"
+const VERSION := "0.6.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -13,6 +13,7 @@ const ART := "res://CSWeaponsPack/Ammo/"
 const LOOT_MASTER := "res://Loot/LT_Master.tres"
 const G = preload("res://CSWeaponsPack/Guns.gd")
 const FOLD := -1.6            # the game's own fold angle for flip-up sights
+const VIEW_UP := 1.0          # sign of a camera rotation that looks up
 const SOUNDS := ["fireSemi", "fireAuto", "fireSuppressed", "tailOutdoor", "tailIndoor", "tailOutdoorSuppressed", "tailIndoorSuppressed"]
 
 static var built := {}        # file -> PackedScene (pickups, rigs)
@@ -667,6 +668,14 @@ static func on_fire(rig: Node) -> void:
 	var f: Dictionary = g.get("feel", {})
 	if f.has("impulse"):
 		rig.set_deferred("fireImpulse", f.impulse)
+	# the view itself kicks (and eases back), and the aim climbs for good
+	var head: Node3D = rig.get_node_or_null("/root/Map/Core/Controller/Pelvis/Riser/Head")
+	if head and f.has("view_kick"):
+		var imp: Node3D = head.get_node_or_null("Bob/Impulse")
+		if imp and "currentRotation" in imp:
+			imp.currentRotation = Vector3(f.view_kick * VIEW_UP, randf_range(-0.25, 0.25) * f.view_kick, 0.0)
+	if head and f.has("climb"):
+		head.rotation.x = clampf(head.rotation.x + f.climb * VIEW_UP, deg_to_rad(-90), deg_to_rad(90))
 	var flash: float = f.get("flash", 1.0)
 	var muzzle: Node3D = rig.get("muzzle")
 	if muzzle and flash != 1.0:

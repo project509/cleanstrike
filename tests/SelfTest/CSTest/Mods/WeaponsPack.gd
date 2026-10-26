@@ -62,7 +62,7 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	var pitch: float = g.get("feel", {}).get("pitch", 1.0)
 	if pitch != 1.0 and base.fireSemi:
 		r.check(tag + "its own voice", d.fireSemi.audioClips[0].mix_rate == int(base.fireSemi.audioClips[0].mix_rate * pitch))
-	r.check(tag + "found in loot and at the Gunsmith", lt.items.has(d) and d.gunsmith)
+	r.check(tag + "found in loot, and sold where its base gun is", lt.items.has(d) and d.gunsmith == base.gunsmith)
 	if g.magazine is Dictionary:
 		r.check(tag + "its magazine is an item like the game's", WP.items.has(mag.file) and db.get(mag.file) is PackedScene and lt.items.has(mag) and mag.icon != null)
 	var t: Node = d.tetris.instantiate()

@@ -341,7 +341,7 @@ func build(id: String, s: Dictionary) -> void:
 	# landmarks (rig skeleton space)
 	var L := {}
 	if s.has("muzzle"):
-		var mb := box_of(named[s.muzzle])
+		var mb := box_of(_role_list(role_arrs, s.muzzle) if role_arrs.has(s.muzzle) else named[s.muzzle])
 		L.muzzle = Vector3(mb.get_center().x, mb.get_center().y, mb.end.z)
 		L.bore_y = mb.get_center().y
 	if s.has("ejector"):
@@ -374,7 +374,7 @@ func build(id: String, s: Dictionary) -> void:
 	if s.has("sight_line"):              # sights that are not separate parts (source space)
 		L.sight_front = F * (R * s.sight_line)
 	if s.has("rail"):
-		var rl: AABB = box_of(_select(named, s.rail, F))
+		var rl: AABB = box_of(_role_list(role_arrs, s.rail) if role_arrs.has(s.rail) else _select(named, s.rail, F))
 		L.rail_top = rl.end.y
 		L.rail_z = Vector2(rl.position.z, rl.end.z)
 	if s.has("rail_span"):                 # a moulded-in rail: its top over a stretch of the gun (rig z)
@@ -385,6 +385,8 @@ func build(id: String, s: Dictionary) -> void:
 					top = maxf(top, p.y)
 		L.rail_top = top
 		L.rail_z = s.rail_span
+	if s.get("sight", "") == "rail" and L.has("rail_top"):   # no iron sights: along the top of the rail
+		L.sight_front = Vector3(L.muzzle.x, L.rail_top + 0.012, L.rail_z.y)
 	L.box = box_of(all_arrs)
 	L.scale = k
 	if role_arrs.has("Magazine"):
