@@ -1,0 +1,101 @@
+{
+  "settings": [
+    {
+      "key": "seasons",
+      "type": "bool",
+      "default": true,
+      "label": "Seasons turn",
+      "description": "Summer and winter take turns. A new season arrives when you next travel."
+    },
+    {
+      "key": "summer_days",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Summer lasts (days)"
+    },
+    {
+      "key": "winter_days",
+      "type": "int",
+      "default": 5,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Winter lasts (days)"
+    },
+    {
+      "key": "w_neutral",
+      "type": "int",
+      "default": 59,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Clear weather (weight)"
+    },
+    {
+      "key": "w_rain",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Rain (weight)"
+    },
+    {
+      "key": "w_storm",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Storm (weight)"
+    },
+    {
+      "key": "w_overcast",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Overcast (weight)"
+    },
+    {
+      "key": "w_wind",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Wind (weight)"
+    },
+    {
+      "key": "w_aurora",
+      "type": "int",
+      "default": 1,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Aurora (weight)"
+    },
+    {
+      "key": "min_minutes",
+      "type": "float",
+      "default": 5.0,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Weather lasts at least (min)"
+    },
+    {
+      "key": "max_minutes",
+      "type": "float",
+      "default": 20.0,
+      "min": 1,
+      "max": 120,
+      "step": 1,
+      "label": "Weather lasts at most (min)"
+    }
+  ]
+}

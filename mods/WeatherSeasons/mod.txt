@@ -1,0 +1,18 @@
+[mod]
+name="Weather and Seasons"
+id="cs_weather_seasons"
+version="1.0.0"
+author="Cleanstrike"
+description="Seasons turn: summer gives way to winter and back every few days. Set how often each kind of weather comes and how long it lasts."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["World", "Weather"]
+
+[script_extend]
+
+[autoload]
+CSWeatherSeasonsBoot="res://CSWeatherSeasons/Boot.gd"
