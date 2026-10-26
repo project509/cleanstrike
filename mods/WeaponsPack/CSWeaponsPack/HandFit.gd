@@ -23,7 +23,8 @@ const HOLD := 0.16          # wrist to magazine middle while holding one (long m
 # over about the gun's side-to-side axis around the wells; the hand works it
 # from above.
 @export var flip_bone := -1
-@export var flip := Transform3D()         # gun body frame: base well -> this gun's well, turned over
+@export var flip := Transform3D()         # this gun's magazine bone at rest (gun body frame)
+@export var flip_rest := Basis()          # the base magazine bone's rest orientation (gun body frame)
 @export var flip_side := Vector3.ZERO     # the hand swings round this side of the gun
 @export var flip_from := Vector3.ZERO     # the base magazine's seat (gun body frame)
 @export var flip_to := Vector3.ZERO       # this gun's
@@ -48,20 +49,26 @@ func _fit() -> void:
 	var off := g.basis * rest_shift * on_rest
 	var free := 1.0 - on_rest
 	var turn := 0.0
-	var turned := w
 	if flip_bone >= 0 and mag >= 0:
-		# turned over at the gun (lifted off / seated on top), carried as usual
-		# away from it (dropped, taken from the pouch), round the side between
+		# the magazine stays flat: near the gun the base magazine's travel is
+		# mirrored up (off the top instead of out of the grip), its rear tipping
+		# up as it lifts; away from the gun it is carried as usual, round the
+		# gun's side in between. The hand moves with it, keeping its own angle.
 		var v := sk.get_bone_global_pose(mag)
 		var vl := g.affine_inverse() * v
-		var f := _near(vl.origin.distance_to(flip_from), 0.07, 0.22)
-		var local := _between(vl, f)
-		sk.set_bone_pose_position(flip_bone, local.origin)
-		sk.set_bone_pose_rotation(flip_bone, local.basis.get_rotation_quaternion())
+		var disp := vl.origin - flip_from
+		var f := _near(disp.length(), 0.07, 0.22)
+		var mirrored := Vector3(disp.x, -disp.y, disp.z)
+		var delta := (flip_to - flip_from) + (mirrored - disp) * f + flip_side * sin(PI * f)
+		var rest_b := flip.basis                        # seated orientation (bone rest)
+		var carried := (vl.basis * flip_rest.inverse()) * rest_b
+		var tipped := Basis(Vector3.RIGHT, -0.35 * smoothstep(0.0, 0.08, disp.length())) * rest_b
+		var mb := carried.slerp(tipped, f).orthonormalized()
+		sk.set_bone_pose_position(flip_bone, vl.origin + delta)
+		sk.set_bone_pose_rotation(flip_bone, mb.get_rotation_quaternion())
 		turn = _near(w.origin.distance_to(v * mag_point), HOLD, HOLD + 0.08) * free
 		if turn > 0.0:
-			var tw := g * _between(g.affine_inverse() * w, f)
-			turned = Transform3D(w.basis.slerp(tw.basis.orthonormalized(), turn), w.origin.lerp(tw.origin, turn))
+			off += g.basis * delta * turn
 			free *= 1.0 - turn
 	elif mag >= 0 and mag_shift != Vector3.ZERO:
 		var on_mag := _near(w.origin.distance_to(sk.get_bone_global_pose(mag) * mag_point), HOLD, HOLD + 0.08) * free
@@ -69,18 +76,8 @@ func _fit() -> void:
 		free *= 1.0 - on_mag
 	if charge >= 0 and charge_shift != Vector3.ZERO:
 		off += g.basis * charge_shift * _near(w.origin.distance_to(sk.get_bone_global_pose(charge).origin), 0.07, 0.13) * free
-	if turn > 0.0:
-		_reach(sk, w, turned.origin + off, turned.basis)
-	elif off.length_squared() > 0.0000002:
+	if off.length_squared() > 0.0000002:
 		_reach(sk, w, w.origin + off, w.basis)
-
-
-# A pose in the gun body frame moved from the base magazine's seat to this
-# gun's: turned over (f = 1) or just carried across (f = 0).
-func _between(t: Transform3D, f: float) -> Transform3D:
-	var turned := flip * t
-	var moved := Transform3D(t.basis, t.origin + flip_to - flip_from)
-	return Transform3D(moved.basis.slerp(turned.basis.orthonormalized(), f).orthonormalized(), moved.origin.lerp(turned.origin, f) + flip_side * sin(PI * f))
 
 
 static func _near(d: float, full: float, none: float) -> float:

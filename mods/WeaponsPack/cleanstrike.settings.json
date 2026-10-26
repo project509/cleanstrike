@@ -1,5 +1,6 @@
 {
   "settings": [
-    {"key": "in_loot", "type": "bool", "default": true, "label": "Found in loot and at traders", "description": "The pack's guns, magazines and ammo turn up in loot and in the Gunsmith's stock, like the game's own."}
+    {"key": "in_loot", "type": "bool", "default": true, "label": "Found in loot and at traders", "description": "The pack's guns, magazines and ammo turn up in loot and in the Gunsmith's stock, like the game's own."},
+    {"key": "start_kit", "type": "bool", "default": false, "label": "Start new games with the pack's guns", "description": "New games begin with every pack gun, loaded, and a box of each of their ammo (what doesn't fit is at your feet). Off: find or buy them in the game."}
   ]
 }

@@ -4,10 +4,12 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "1.0.0"
+const VERSION := "1.1.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
+	"start_kit": false,            # new games start with the pack's guns and ammo
 }
+const KIT_FLAG := "user://cs_weapons_start_kit.flag"
 const DIR := "res://CSWeaponsPack/Guns/"
 const ART := "res://CSWeaponsPack/Ammo/"
 const LOOT_MASTER := "res://Loot/LT_Master.tres"
@@ -397,7 +399,8 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 	if flip_bone >= 0:
 		hf.mag = mag_bone
 		hf.flip_bone = flip_bone
-		hf.flip = flip
+		hf.flip = brest.affine_inverse() * sk.get_bone_global_rest(flip_bone)
+		hf.flip_rest = (brest.affine_inverse() * sk.get_bone_global_rest(mag_bone)).basis
 		hf.flip_side = to_body * Vector3(0.11, 0.02, 0)           # round the gun's left side
 		hf.flip_from = (brest.affine_inverse() * sk.get_bone_global_rest(mag_bone)).origin
 		hf.flip_to = brest.affine_inverse() * L.mag_box.get_center()
@@ -725,6 +728,38 @@ static func release() -> void:
 	built.clear()
 	items.clear()
 	E.release()
+
+
+# The start kit: every pack gun with a full magazine in it, and a box of each
+# calibre they take. What doesn't fit in the inventory is dropped at your feet.
+static func give_start_kit(ui) -> int:
+	if ui == null:
+		return 0
+	var given := 0
+	var calibres := []
+	for id in G.guns():
+		build_gun(id)
+		var d = items.get(G.guns()[id].file)
+		if d == null:
+			continue
+		var mag = d.compatible[0]
+		var sd := SlotData.new()
+		sd.itemData = d
+		sd.nested.append(mag)
+		sd.amount = mag.maxAmount
+		sd.chamber = true
+		ui.Create(sd, ui.inventoryGrid, true)
+		given += 1
+		if d.ammo and not calibres.has(d.ammo):
+			calibres.append(d.ammo)
+	for a in calibres:
+		var asd := SlotData.new()
+		asd.itemData = a
+		asd.amount = a.defaultAmount
+		ui.Create(asd, ui.inventoryGrid, true)
+		given += 1
+	say("start kit: %d items" % given)
+	return given
 
 
 # After every shot of one of our guns: its own muzzle flash size and how

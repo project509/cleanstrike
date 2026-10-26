@@ -11,6 +11,13 @@ func run(r) -> void:
 	var lt = load("res://Loot/LT_Master.tres")
 	for id in G.guns():
 		await _gun(r, db, lt, id, G.guns()[id])
+	# the start kit (normally only on a new game's first load), into a stand-in
+	# inventory so the test character stays as it was
+	var kit := KitUI.new()
+	var given: int = WP.give_start_kit(kit)
+	var loaded: bool = kit.made.all(func(sd): return sd.itemData.type == "Ammo" or (sd.nested.size() == 1 and sd.amount == sd.nested[0].maxAmount and sd.chamber))
+	r.check("WeaponsPack: start kit: every gun, loaded, and a box of each of their ammo (overflow dropped)", given == G.guns().size() + _calibres() and loaded and kit.dropping, str(given))
+	r.check("WeaponsPack: start kit is off by default", WP.DEFAULTS.start_kit == false)
 	for aid in G.ammo():
 		var a = WP.items.get(aid)
 		if a == null:
@@ -117,3 +124,23 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 		r.check(tag + "weak to the body", d.damage < base.damage)
 	fr.queue_free()
 	await r.get_tree().process_frame
+
+
+func _calibres() -> int:
+	var seen := []
+	for id in G.guns():
+		var d = WP.items.get(G.guns()[id].file)
+		if d and d.ammo and not seen.has(d.ammo):
+			seen.append(d.ammo)
+	return seen.size()
+
+
+class KitUI:
+	var inventoryGrid = null
+	var made := []
+	var dropping := true
+
+	func Create(sd, _grid, use_drop) -> bool:
+		made.append(sd)
+		dropping = dropping and use_drop
+		return true
