@@ -1,0 +1,18 @@
+[mod]
+name="Kill Counter"
+id="cs_kill_counter"
+version="1.0.0"
+author="Cleanstrike"
+description="Counts the enemies you kill, by faction: a short message for each kill and your totals in the inventory's character panel."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["HUD", "Stats"]
+
+[script_extend]
+res://Scripts/AI.gd="res://CSKillCounter/Ext/AI.gd"
+res://Scripts/Loader.gd="res://CSKillCounter/Ext/Loader.gd"
+res://Scripts/Interface.gd="res://CSKillCounter/Ext/Interface.gd"

@@ -1,0 +1,6 @@
+{
+  "settings": [
+    {"key": "messages", "type": "bool", "default": true, "label": "Message for each kill"},
+    {"key": "panel", "type": "bool", "default": true, "label": "Kills in the character panel"}
+  ]
+}
