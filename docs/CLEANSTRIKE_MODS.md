@@ -188,7 +188,7 @@ flashlights blink on 8-20 s / off 3-10 s, off on death.
 21. Better Inventory and Equipment  22. HUD  23. Tactical Watch  24. Custom Fonts
 25. Reticles  26. Weather and Seasons  27. Death and Hit Effects  28. Faction Warfare
 29. AI Overhaul  30. Progression  31. Shelters  32. Visuals  33. Sandbox Mode
-Status: wave 1 (8 mods) done; wave 2: Immortal Cat, Infinite Bedding, Kill Counter, Save Anywhere, Scope Sensitivity, Burst Fire, Better Lean, Weapon Position, Airdrops, Heli Go Boom, Sound Indicators, Item Clarity, Loot Highlight, Cash Money, Clothes to Rags, Multi-Use Items, Injuries Rework done.
+Status: wave 1 (8 mods) done; wave 2: Immortal Cat, Infinite Bedding, Kill Counter, Save Anywhere, Scope Sensitivity, Burst Fire, Better Lean, Weapon Position, Airdrops, Heli Go Boom, Sound Indicators, Item Clarity, Loot Highlight, Cash Money, Clothes to Rags, Multi-Use Items, Injuries Rework, Everything Lootable done.
 New items: Cash Money builds its item in code (ItemData + packed tetris/pickup
 scenes, icons via Image.load_from_file) and registers it in Engine meta
 "cs_items"; its Boot autoload swaps /root/Database to CSCashMoney/Database.gd

@@ -1,0 +1,18 @@
+[mod]
+name="Everything Lootable"
+id="cs_everything_lootable"
+version="1.0.0"
+author="Cleanstrike"
+description="Search more of the world: cash registers, bookshelves, coat racks, cars, vans, trucks and tractors can hold a little loot. No military gear, no shelter keys."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Loot", "World"]
+
+[script_extend]
+
+[autoload]
+CSEverythingLootableBoot="res://CSEverythingLootable/Boot.gd"

@@ -1,0 +1,39 @@
+{
+  "settings": [
+    {
+      "key": "amount",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 2,
+      "step": 0.25,
+      "label": "How often props hold loot (x)"
+    },
+    {
+      "key": "registers",
+      "type": "bool",
+      "default": true,
+      "label": "Cash registers"
+    },
+    {
+      "key": "bookshelves",
+      "type": "bool",
+      "default": true,
+      "label": "Bookshelves"
+    },
+    {
+      "key": "coat_racks",
+      "type": "bool",
+      "default": true,
+      "label": "Coat racks",
+      "description": "Small items, and very rarely a key (never a shelter key)."
+    },
+    {
+      "key": "vehicles",
+      "type": "bool",
+      "default": true,
+      "label": "Cars, vans, trucks and tractors",
+      "description": "Vehicle parts and road trip supplies. Military vehicles stay empty."
+    }
+  ]
+}
