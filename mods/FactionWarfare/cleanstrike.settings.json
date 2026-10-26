@@ -1,0 +1,55 @@
+{
+  "settings": [
+    {
+      "key": "side",
+      "type": "choice",
+      "default": "Neutral",
+      "options": [
+        "Neutral",
+        "Bandit",
+        "Guard",
+        "Military"
+      ],
+      "label": "Your side",
+      "description": "That faction leaves you alone. Neutral: everyone is hostile."
+    },
+    {
+      "key": "bandit_infighting",
+      "type": "bool",
+      "default": true,
+      "label": "Bandits fight each other"
+    },
+    {
+      "key": "guard_infighting",
+      "type": "bool",
+      "default": false,
+      "label": "Guards fight each other"
+    },
+    {
+      "key": "military_infighting",
+      "type": "bool",
+      "default": false,
+      "label": "Military fight each other"
+    },
+    {
+      "key": "rivals",
+      "type": "int",
+      "default": 30,
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "label": "Rival squads (%)",
+      "description": "Share of each zone enemies that come from a rival faction."
+    },
+    {
+      "key": "density",
+      "type": "float",
+      "default": 1.0,
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "label": "More enemies (x)",
+      "description": "How many can be about at once. 1 = the game."
+    }
+  ]
+}

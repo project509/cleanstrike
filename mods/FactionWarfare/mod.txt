@@ -1,0 +1,17 @@
+[mod]
+name="Faction Warfare"
+id="cs_faction_warfare"
+version="1.0.0"
+author="Cleanstrike"
+description="Bandits, Guards and Military fight each other, not just you. Rival squads mix into every zone, bandits turn on each other, and you can side with a faction so it leaves you alone. Optional: more enemies."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["AI", "Combat"]
+
+[script_extend]
+res://Scripts/Sensor.gd="res://CSFactionWarfare/Ext/Sensor.gd"
+res://Scripts/AISpawner.gd="res://CSFactionWarfare/Ext/AISpawner.gd"
