@@ -1,0 +1,17 @@
+[mod]
+name="Loot Highlight"
+id="cs_loot_highlight"
+version="1.0.0"
+author="Cleanstrike"
+description="Press Z to make loot near you glow for a few seconds, coloured by rarity (or keep it on, or hold to show). Off in shelters."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Loot", "QoL"]
+
+[script_extend]
+res://Scripts/Pickup.gd="res://CSLootHighlight/Ext/Pickup.gd"
+res://Scripts/Controller.gd="res://CSLootHighlight/Ext/Controller.gd"
