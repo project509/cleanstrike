@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -403,3 +403,16 @@ func lights_views():
 		i += 1
 	await wait(1.0)
 	await shot("shot_lights.png")
+
+
+# Visuals: the same view through each colour grade.
+func grades_views():
+	var V = load("res://CSVisuals/Mod.gd")
+	var boot = get_node("/root/CSVisualsBoot")
+	await wait(1.0)
+	for p in V.PRESETS:
+		V.overrides = {"preset": p}
+		boot.apply()
+		await wait(0.4)
+		await shot("shot_grade_%s.png" % p.replace(" ", "_"))
+	V.overrides = {}

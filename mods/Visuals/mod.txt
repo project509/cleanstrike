@@ -1,0 +1,18 @@
+[mod]
+name="Visuals"
+id="cs_visuals"
+version="1.0.0"
+author="Cleanstrike"
+description="Colour grading presets for a moodier or crisper Vostok (Tarkov, Zone, Cold, Warm Film, Vivid, Noir), adjustable strength, optional sharpening. F3 flips between graded and original to compare."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Visual", "Graphics"]
+
+[script_extend]
+
+[autoload]
+CSVisualsBoot="res://CSVisuals/Boot.gd"
