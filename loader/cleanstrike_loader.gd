@@ -1,4 +1,4 @@
-# cleanstrike-loader-version: 1.2.0
+# cleanstrike-loader-version: 1.3.0
 # Cleanstrike in-game loader for Road to Vostok (Godot 4.6+).
 # Registered by override.cfg as the first autoload. Everything that has to
 # happen before the game's own scripts load runs in _init().
@@ -14,7 +14,7 @@
 #   user://cleanstrike/cleanstrike.log     plain-text log
 extends Node
 
-const LOADER_VERSION := "1.2.0"
+const LOADER_VERSION := "1.3.0"
 const API_VERSION := 1
 const ARCHIVE_EXTS := ["csmod", "vmz", "zip", "pck"]
 const BOOT_OK_SECONDS := 20.0
@@ -161,6 +161,12 @@ func _load_one(m: Dictionary) -> void:
 				m.reason = "Needs mod '%s' loaded before it." % dep
 				_log("[%s] skipped: %s" % [m.id, m.reason])
 				return
+	var clash := _conflict_with_loaded(m, cfg)
+	if clash != "":
+		m.status = "incompatible"
+		m.reason = clash
+		_log("[%s] skipped: %s" % [m.id, clash])
+		return
 
 	if not ProjectSettings.load_resource_pack(_mountable_path(m), true):
 		m.status = "failed"
@@ -180,6 +186,23 @@ func _load_one(m: Dictionary) -> void:
 	m.status = "loaded"
 	loaded_ids.append(m.id)
 	_log("[%s] loaded (v%s)." % [m.id, m.version])
+
+
+# Mods can't run together when either lists the other under [incompatible]
+# (id = "reason"). The app stops that before launching; this is the safety
+# net (e.g. a hand-edited profile): the first one in the load order wins.
+func _conflict_with_loaded(m: Dictionary, cfg: ConfigFile) -> String:
+	for o in mods:
+		if o == m or o.status != "loaded":
+			continue
+		var ocfg = o.get("manifest")
+		var mine: bool = cfg != null and cfg.has_section_key("incompatible", o.id)
+		var theirs: bool = ocfg != null and ocfg.has_section_key("incompatible", m.id)
+		if not (mine or theirs):
+			continue
+		var reason := str(cfg.get_value("incompatible", o.id)) if mine else str(ocfg.get_value("incompatible", m.id))
+		return "Can't run together with %s%s" % [o.name, (": " + reason) if reason != "" else "."]
+	return ""
 
 
 # Godot only mounts files ending in .zip/.pck, so other archive extensions

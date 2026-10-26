@@ -1,0 +1,8 @@
+[mod]
+name="Clash Test A"
+id="cs_testclash_a"
+version="0.0.1"
+description="Test harness: never ship."
+
+[cleanstrike]
+api=1

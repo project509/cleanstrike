@@ -44,8 +44,15 @@ func run() -> void:
 	# Every mod in this launch must have loaded (a rolled-back mod would
 	# otherwise just skip its tests).
 	for m in cs.mods:
-		if m.get("enabled", true) and str(m.get("id", "")) != "cs_selftest":
+		if m.get("enabled", true) and str(m.get("id", "")) != "cs_selftest" and not str(m.get("id", "")).begins_with("cs_testclash"):
 			check("%s loaded" % m.id, m.get("status", "") == "loaded", str(m.get("reason", m.get("status", ""))))
+	# The loader's safety net: of two mods that can't run together, the
+	# first loads and the second is skipped with the reason.
+	var clash_a = cs.mods.filter(func(m): return m.get("id", "") == "cs_testclash_a")
+	var clash_b = cs.mods.filter(func(m): return m.get("id", "") == "cs_testclash_b")
+	if clash_a.size() == 1 and clash_b.size() == 1:
+		check("loader: first of two clashing mods loads", clash_a[0].status == "loaded")
+		check("loader: the clashing one is skipped, with the reason", clash_b[0].status == "incompatible" and "Test mods that must never run together" in str(clash_b[0].reason), str(clash_b[0].reason))
 	var mod_tests := []
 	for id in MOD_TESTS:
 		if cs.is_loaded(id):

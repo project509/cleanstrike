@@ -52,6 +52,21 @@ public static class SilentInstall
                     e.Enabled = true;
                     changed = true;
                 }
+            if (name == config.ActiveProfile)
+            {
+                // Same as the app: a mod that can't run with one already on stays off.
+                var on = p.Mods.Where(m => m.Enabled).Select(m => installed.FirstOrDefault(i => i.Id == m.Id)).OfType<Cleanstrike.Models.ModInfo>().ToList();
+                foreach (var fix in ModRules.PlanLaunch(on, installed))
+                {
+                    var e = p.Mods.First(m => m.Id == fix.Mod.Id);
+                    if (fresh.Contains(e.Id))
+                    {
+                        e.Enabled = false;
+                        changed = true;
+                        Log.Write($"Silent install: {fix.Mod.Name} left off ({fix.Reason})");
+                    }
+                }
+            }
             if (changed) Store.SaveProfile(p);
         }
         return failures == 0 ? 0 : 1;

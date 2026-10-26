@@ -80,6 +80,35 @@ catch (UserFacingException e) { Check("rejects non-mod", true, e.Message); }
 ModLibrary.Remove(g, r.Mod);
 Check("remove deletes file", !File.Exists(r.Mod.FullPath));
 
+// --- mod rules: clashes and requirements
+static Cleanstrike.Models.ModInfo Mk(string id, string name, Dictionary<string, string>? inc = null, List<string>? req = null) =>
+    new() { Id = id, Name = name, Incompatible = inc ?? new(), Requires = req ?? new() };
+var ruleTabs = Mk("rt_tabs", "Trader Tabs");
+var ruleBetter = Mk("rt_better", "Better Traders", new() { ["rt_tabs"] = "Both replace the trader screen." });
+var ruleLib = Mk("rt_lib", "Helper");
+var ruleUses = Mk("rt_uses", "Uses Helper", req: new() { "rt_lib" });
+var ruleAll = new List<Cleanstrike.Models.ModInfo> { ruleTabs, ruleBetter, ruleLib, ruleUses };
+var none = new List<Cleanstrike.Models.ModInfo>();
+Check("clash read from either side", ModRules.ConflictReason(ruleTabs, ruleBetter) == "Both replace the trader screen." && ModRules.ConflictReason(ruleBetter, ruleTabs) != null);
+var plan = ModRules.PlanEnable(ruleTabs, new List<Cleanstrike.Models.ModInfo> { ruleBetter }, ruleAll);
+Check("turning a mod on offers to turn the clashing one off", plan.TurnOff.Count == 1 && plan.TurnOff[0].Mod.Id == "rt_better" && plan.TurnOn.Count == 0);
+plan = ModRules.PlanEnable(ruleUses, none, ruleAll);
+Check("turning a mod on pulls in what it needs", plan.TurnOn.Count == 1 && plan.TurnOn[0].Id == "rt_lib");
+Check("a missing requirement is reported", ModRules.PlanEnable(Mk("rt_x", "X", req: new() { "nope" }), none, ruleAll).Missing.SequenceEqual(new[] { "nope" }));
+Check("turning a mod off finds what needs it", ModRules.Dependents(ruleLib, new List<Cleanstrike.Models.ModInfo> { ruleLib, ruleUses }).Select(m => m.Id).SequenceEqual(new[] { "rt_uses" }));
+var fixes = ModRules.PlanLaunch(new List<Cleanstrike.Models.ModInfo> { ruleBetter, ruleTabs, ruleUses }, ruleAll);
+Check("before Play: later clashing mod and unmet requirement go", fixes.Select(f => f.Mod.Id).OrderBy(x => x).SequenceEqual(new[] { "rt_tabs", "rt_uses" }), string.Join("; ", fixes.Select(f => f.Mod.Name + " " + f.Reason)));
+Check("list note explains a held-back mod", ModRules.Note(ruleTabs, false, new List<Cleanstrike.Models.ModInfo> { ruleBetter }, ruleAll) == "Can't run with Better Traders (on)");
+Check("list note flags two clashing mods that are both on", ModRules.Note(ruleTabs, true, new List<Cleanstrike.Models.ModInfo> { ruleBetter }, ruleAll) == "Can't run with Better Traders: turn one off");
+Check("clean set has no fixes", ModRules.PlanLaunch(new List<Cleanstrike.Models.ModInfo> { ruleBetter, ruleLib, ruleUses }, ruleAll).Count == 0);
+var clashZip = Path.Combine(work, "Clash.zip");
+File.Delete(clashZip);
+using (var z = ZipFile.Open(clashZip, ZipArchiveMode.Create))
+using (var w = new StreamWriter(z.CreateEntry("mod.txt").Open()))
+    w.Write("[mod]\nname=\"Clash\"\nid=\"rt_clash\"\nversion=\"1.0.0\"\n[incompatible]\nrt_tabs=\"Both replace the trader screen.\"\n");
+var clash = ModLibrary.Read(clashZip);
+Check("manifest [incompatible] read", clash.Incompatible.TryGetValue("rt_tabs", out var why) && why == "Both replace the trader screen.");
+
 // --- settings round trip
 var numeric = withSettings?.Settings.FirstOrDefault(d => d.Type is "float" or "int");
 if (withSettings != null && numeric != null)

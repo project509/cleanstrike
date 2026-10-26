@@ -14,6 +14,8 @@ for m in $MODS; do
 done
 echo "testing with: $MODS"
 python -I "$R/tools/build_mod.py" "$R/tests/SelfTest" --out "$R/dist/test" --install "$T" >/dev/null || exit 1
+# Two test mods that declare they can't run together (the loader must skip the second).
+for c in ClashA ClashB; do python -I "$R/tools/build_mod.py" "$R/tests/ClashMods/$c" --out "$R/dist/test" --install "$T" >/dev/null || exit 1; done
 # Prepare the launch with the app's own code (same as pressing Play), and
 # run the app service checks along the way.
 dotnet build "$R/tests/AppTests" -v q -nologo 2>&1 | grep -E " error " | sed 's/\[C:.*//' | sort -u
@@ -35,5 +37,5 @@ grep -A2 -E "SCRIPT ERROR|Parse Error" "$L" | head -40
 [ -f "$U/selftest.json" ] && python -I -c "import json,sys;d=json.load(open(sys.argv[1]));[print('PASS' if r['ok'] else 'FAIL',r['name'],r['detail']) for r in d['results']];print('failures:',d['failures'])" "$U/selftest.json"
 rm -rf "$U/data"; cp -r "$SNAP/cs/." "$U/" && echo "mod data restored"
 # Leave TestGame playable: drop the self-test harness and test settings.
-rm -f "$T/Cleanstrike/mods/SelfTest.csmod" "$T/Cleanstrike/settings/"*.json
+rm -f "$T/Cleanstrike/mods/SelfTest.csmod" "$T/Cleanstrike/mods/"cs_testclash_*.csmod "$T/Cleanstrike/mods/Clash"*.csmod "$T/Cleanstrike/settings/"*.json
 dotnet "$R/tests/AppTests/bin/Debug/net8.0-windows/AppTests.dll" "$(cygpath -w "$T")" "$(cygpath -w "$R/dist/apptest")" prepare

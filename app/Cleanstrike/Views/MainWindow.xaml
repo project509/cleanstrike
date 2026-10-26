@@ -247,6 +247,10 @@
                                         <Setter TargetName="Thumb" Property="BorderBrush" Value="{StaticResource Gold}" />
                                         <Setter TargetName="Thumb" Property="BorderThickness" Value="1.5" />
                                     </DataTrigger>
+                                    <DataTrigger Binding="{Binding HasRuleNote}" Value="True">
+                                        <Setter TargetName="Sub" Property="Text" Value="{Binding RuleNote}" />
+                                        <Setter TargetName="Sub" Property="Foreground" Value="{StaticResource Accent}" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding StatusKind}" Value="Problem">
                                         <Setter TargetName="Sub" Property="Text" Value="{Binding StatusText}" />
                                         <Setter TargetName="Sub" Property="Foreground" Value="{StaticResource Danger}" />
@@ -298,6 +302,15 @@
                                 </Border>
                                 <TextBlock Text="{Binding Name}" Style="{StaticResource T.Title}" FontSize="20" TextWrapping="Wrap" />
                                 <TextBlock Text="{Binding Byline}" Style="{StaticResource T.Muted}" Margin="0,4,0,0" />
+
+                                <!-- why it's held back (a clash or a missing requirement) -->
+                                <Border Margin="0,16,0,0" Padding="12,9" CornerRadius="9" Background="{StaticResource AccentSoft}"
+                                        Visibility="{Binding HasRuleNote, Converter={StaticResource Vis}}">
+                                    <DockPanel>
+                                        <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource Icons}" FontSize="12" Foreground="{StaticResource Accent}" Margin="0,2,10,0" VerticalAlignment="Top" />
+                                        <TextBlock Text="{Binding RuleNote}" Style="{StaticResource T.Body}" Foreground="{StaticResource Text}" FontSize="12.5" LineHeight="18" TextWrapping="Wrap" />
+                                    </DockPanel>
+                                </Border>
 
                                 <!-- status -->
                                 <Border Margin="0,16,0,0" Padding="12,9" CornerRadius="9" Visibility="{Binding HasStatus, Converter={StaticResource Vis}}">

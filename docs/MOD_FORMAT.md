@@ -45,6 +45,19 @@ MyMod="res://MyMod/Main.gd"
 required=["other_mod_id"]   ; must be enabled and earlier in the load order
 ```
 
+Mods that can't run together list each other (either side is enough) with a
+reason players will see. The app asks which one to keep when you turn one
+on, holds a newly installed one off, and offers to fix things before Play;
+the loader also skips the later one if both somehow end up enabled:
+
+```ini
+[incompatible]
+other_mod_id="Both replace the trader screen."
+```
+
+Requirements work the same way: turning a mod on offers to turn on what it
+needs, and turning one off offers to turn off what depends on it.
+
 To step aside for another mod that does the same job, list the script
 extensions it owns. When that mod is enabled, these are skipped (whatever the
 load order); otherwise they apply as normal:

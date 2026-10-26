@@ -71,14 +71,36 @@ public sealed class ModItemViewModel : ObservableObject
     public ObservableCollection<SettingViewModel> Settings { get; } = new();
     public bool HasSettings => Settings.Count > 0;
 
+    /// <summary>Asked before the switch flips (conflicts, requirements); false keeps it as it was.</summary>
+    public Func<ModItemViewModel, bool, bool>? Gate { get; set; }
+
     public bool IsEnabled
     {
         get => _enabled;
         set
         {
-            if (Set(ref _enabled, value)) _onToggled();
+            if (value == _enabled) return;
+            if (Gate != null && !Gate(this, value))
+            {
+                Raise(nameof(IsEnabled));   // put the switch back
+                return;
+            }
+            Set(ref _enabled, value);
+            _onToggled();
         }
     }
+
+    /// <summary>Flip the switch as part of another change (no prompts).</summary>
+    public void SetEnabledQuietly(bool on) => Set(ref _enabled, on, nameof(IsEnabled));
+
+    private string? _ruleNote;
+    /// <summary>Why this mod is held back right now (a clash or a missing requirement).</summary>
+    public string? RuleNote
+    {
+        get => _ruleNote;
+        set { if (Set(ref _ruleNote, value)) Raise(nameof(HasRuleNote)); }
+    }
+    public bool HasRuleNote => !string.IsNullOrEmpty(RuleNote);
 
     public string StatusText { get => _statusText; private set => Set(ref _statusText, value); }
     public ModStatusKind StatusKind { get => _statusKind; private set => Set(ref _statusKind, value); }

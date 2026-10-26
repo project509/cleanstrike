@@ -58,7 +58,8 @@ public sealed class ModInfo
     public bool HasManifest { get; set; }
     public long SizeBytes { get; set; }
     public byte[]? Thumbnail { get; set; }
-    public bool Premium { get; set; }          // [cleanstrike] premium=true: Cleanstrike's flagship mods     // icon.png / icon.jpg at the mod's root
+    public bool Premium { get; set; }
+    public Dictionary<string, string> Incompatible { get; set; } = new();   // [incompatible] other_id="reason"          // [cleanstrike] premium=true: Cleanstrike's flagship mods     // icon.png / icon.jpg at the mod's root
 }
 
 public sealed class ProfileEntry

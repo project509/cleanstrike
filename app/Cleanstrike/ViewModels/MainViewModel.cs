@@ -273,11 +273,12 @@ public sealed class MainViewModel : ObservableObject
         {
             var mod = mods.FirstOrDefault(m => string.Equals(m.Id, entry.Id, StringComparison.OrdinalIgnoreCase));
             if (mod == null) continue;
-            var vm = new ModItemViewModel(mod, Game, entry.Enabled, OnModToggled);
+            var vm = new ModItemViewModel(mod, Game, entry.Enabled, OnModToggled) { Gate = GateToggle };
             vm.ApplyReport(report?.Mods.FirstOrDefault(r => r.Id == mod.Id));
             Mods.Add(vm);
         }
         Selected = Mods.FirstOrDefault(m => m.Mod.Id == selectId) ?? Mods.FirstOrDefault();
+        RefreshRuleNotes();
         Raise(nameof(HasMods));
         Raise(nameof(Summary));
         Raise(nameof(LoaderStatus));
@@ -286,7 +287,101 @@ public sealed class MainViewModel : ObservableObject
     private void OnModToggled()
     {
         SaveProfile();
+        RefreshRuleNotes();
         Raise(nameof(Summary));
+    }
+
+    // ------------------------------------------------------------ mod rules
+
+    private ModItemViewModel? VmFor(ModInfo m) => Mods.FirstOrDefault(v => v.Mod.Id == m.Id);
+
+    private static string Join(IEnumerable<string> names)
+    {
+        var list = names.ToList();
+        return list.Count switch
+        {
+            0 => "",
+            1 => list[0],
+            _ => string.Join(", ", list.Take(list.Count - 1)) + " and " + list[^1],
+        };
+    }
+
+    /// <summary>
+    /// Before a mod's switch flips: if it can't run with mods that are on,
+    /// or needs mods that are off, ask what to do in plain words.
+    /// </summary>
+    private bool GateToggle(ModItemViewModel item, bool on)
+    {
+        var owner = Application.Current?.MainWindow;
+        var enabled = Mods.Where(m => m.IsEnabled && m != item).Select(m => m.Mod).ToList();
+        var installed = Mods.Select(m => m.Mod).ToList();
+        if (on)
+        {
+            var plan = ModRules.PlanEnable(item.Mod, enabled, installed);
+            if (plan.IsSimple) return true;
+            if (plan.Missing.Count > 0)
+            {
+                Dialog.Show(owner, $"{item.Name} needs another mod",
+                    $"{item.Name} needs {Join(plan.Missing)}, which isn't installed. Add it to Cleanstrike first, then turn {item.Name} on.", "OK");
+                return false;
+            }
+            var pulled = plan.TurnOn.Select(m => m.Name).ToList();
+            Dialog.Result r;
+            if (plan.TurnOff.Count > 0)
+            {
+                var off = plan.TurnOff.Select(c => c.Mod.Name).ToList();
+                var title = off.Count == 1 ? $"{item.Name} can't run with {off[0]}" : $"{item.Name} can't run with some of your mods";
+                var why = string.Join("\n", plan.TurnOff.Select(c => off.Count == 1 ? c.Reason : $"{c.Mod.Name}: {c.Reason}"));
+                var also = pulled.Count > 0 ? $" It also needs {Join(pulled)}, which will be turned on." : "";
+                r = Dialog.Show(owner, title, $"{why}\n\nTurn on {item.Name} and turn off {Join(off)}?{also}",
+                    $"Use {item.Name}", off.Count == 1 ? $"Keep {off[0]}" : "Cancel");
+            }
+            else
+            {
+                r = Dialog.Show(owner, $"{item.Name} needs {Join(pulled)}",
+                    $"{item.Name} only works with {Join(pulled)} turned on as well.",
+                    pulled.Count == 1 ? "Turn both on" : "Turn them all on", "Cancel");
+            }
+            if (!r.Ok) return false;
+            foreach (var c in plan.TurnOff) VmFor(c.Mod)?.SetEnabledQuietly(false);
+            foreach (var m in plan.TurnOn) VmFor(m)?.SetEnabledQuietly(true);
+            if (plan.TurnOff.Count > 0) Toast($"Turned off {Join(plan.TurnOff.Select(c => c.Mod.Name))}", "info");
+            return true;
+        }
+        var deps = ModRules.Dependents(item.Mod, enabled);
+        if (deps.Count == 0) return true;
+        var names = deps.Select(d => d.Name).ToList();
+        var res = Dialog.Show(owner, $"Turn off {item.Name}?",
+            $"{Join(names)} {(deps.Count == 1 ? "needs" : "need")} {item.Name}, so {(deps.Count == 1 ? "it" : "they")} will be turned off too.",
+            deps.Count == 1 ? "Turn off both" : "Turn them all off", "Cancel");
+        if (!res.Ok) return false;
+        foreach (var d in deps) VmFor(d)?.SetEnabledQuietly(false);
+        return true;
+    }
+
+    private void RefreshRuleNotes()
+    {
+        var enabled = Mods.Where(m => m.IsEnabled).Select(m => m.Mod).ToList();
+        var installed = Mods.Select(m => m.Mod).ToList();
+        foreach (var vm in Mods)
+            vm.RuleNote = ModRules.Note(vm.Mod, vm.IsEnabled, enabled.Where(e => e.Id != vm.Mod.Id).ToList(), installed);
+    }
+
+    /// <summary>
+    /// Mods turned on together that can't run together (e.g. right after
+    /// installing one): the later one is switched off, with a note why.
+    /// Returns what was switched off.
+    /// </summary>
+    private List<ModRules.LaunchFix> SettleConflicts()
+    {
+        var fixes = ModRules.PlanLaunch(Mods.Where(m => m.IsEnabled).Select(m => m.Mod).ToList(), Mods.Select(m => m.Mod).ToList());
+        foreach (var f in fixes) VmFor(f.Mod)?.SetEnabledQuietly(false);
+        if (fixes.Count > 0)
+        {
+            SaveProfile();
+            RefreshRuleNotes();
+        }
+        return fixes;
     }
 
     private void SaveProfile()
@@ -353,6 +448,15 @@ public sealed class MainViewModel : ObservableObject
                     : first.Replaced != null ? $"Reinstalled {first.Mod.Name}" : $"Installed {first.Mod.Name}";
             if (done.Any(d => d.Repaired)) msg += " (fixed its packaging)";
             Toast(msg, "success");
+
+            // A new mod that can't run with one that's already on stays off,
+            // with the reason on its row.
+            var held = SettleConflicts();
+            if (held.Count > 0)
+                Dialog.Show(Application.Current.MainWindow,
+                    held.Count == 1 ? $"{held[0].Mod.Name} is installed but off" : "Some new mods are installed but off",
+                    string.Join("\n", held.Select(f => $"{f.Mod.Name} {f.Reason}.")) +
+                    "\n\nTurn it on in the list whenever you want to switch; Cleanstrike will ask which one to keep.", "OK");
         }
         if (errors.Count > 0)
             Dialog.Show(Application.Current.MainWindow, errors.Count == 1 ? "Couldn't install that mod" : "Some mods couldn't be installed",
@@ -437,6 +541,18 @@ public sealed class MainViewModel : ObservableObject
         if (Launcher.IsRunning(Game)) { Toast("Road to Vostok is already running", "info"); return; }
         try
         {
+            if (!vanilla)
+            {
+                var fixes = ModRules.PlanLaunch(Mods.Where(m => m.IsEnabled).Select(m => m.Mod).ToList(), Mods.Select(m => m.Mod).ToList());
+                if (fixes.Count > 0)
+                {
+                    var list = string.Join("\n", fixes.Select(f => $"•  {f.Mod.Name} {f.Reason}"));
+                    var r = Dialog.Show(Application.Current.MainWindow, "Some mods can't run together",
+                        $"{list}\n\nCleanstrike can turn {(fixes.Count == 1 ? "that mod" : "those mods")} off and start the game.", "Fix and play", "Cancel");
+                    if (!r.Ok) return;
+                    SettleConflicts();
+                }
+            }
             SaveProfile();
             var order = Mods.Select(m => (m.Mod, m.IsEnabled)).ToList();
             var steam = _config.LaunchViaSteam && Game.IsSteam;

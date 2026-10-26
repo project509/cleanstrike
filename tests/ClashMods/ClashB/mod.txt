@@ -1,0 +1,11 @@
+[mod]
+name="Clash Test B"
+id="cs_testclash_b"
+version="0.0.1"
+description="Test harness: never ship."
+
+[cleanstrike]
+api=1
+
+[incompatible]
+cs_testclash_a="Test mods that must never run together."
