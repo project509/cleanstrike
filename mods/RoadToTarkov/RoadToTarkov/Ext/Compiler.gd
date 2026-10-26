@@ -37,6 +37,11 @@ func _rtt_spawn_customs() -> void:
 		Loader.LoadCharacter()
 		Simulation.simulate = true
 
+	var preview = get_tree().current_scene.find_child("Spawn_Preview", true, false) if gameData.tutorial else null
+	if preview:
+		controller.global_transform = Transform3D(Basis.looking_at(-preview.global_transform.basis.z, Vector3.UP), preview.global_position)
+		_rtt_spawn_done()
+		return
 	var target := "Transition_" + str(gameData.previousMap)
 	for t in get_tree().get_nodes_in_group("Transition"):
 		var owner_node = t.owner
@@ -46,6 +51,10 @@ func _rtt_spawn_customs() -> void:
 			controller.global_position = spawn_point.global_position
 			break
 
+	_rtt_spawn_done()
+
+
+func _rtt_spawn_done() -> void:
 	gameData.isTransitioning = false
 	gameData.isSleeping = false
 	gameData.isOccupied = false

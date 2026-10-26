@@ -35,6 +35,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	await customs_views()
+	await spawn_views()
 	if OS.get_cmdline_user_args().has("--perf") or FileAccess.file_exists("user://cleanstrike/perf_mode"):
 		await perf_run("Customs", [[330, 150, 640, 560, 0, 330], [250, 1.7, 343, 420, 3, 362], [505, 1.7, 418, 505, 6, 470], [702, 2.5, 372, 795, 4, 351], [300, 1.7, 420, 340, 3, 380]])
 		Loader.LoadScene("Village")
@@ -167,3 +168,30 @@ func customs_views():
 		await wait(2.5)
 		cam.make_current()
 		await shot("shot_customs_%s.png" % v[0])
+
+
+# First-person views from the preview start and every exit's spawn point.
+func spawn_views():
+	var cam := Camera3D.new()
+	cam.far = 3000.0
+	cam.fov = 75.0
+	get_node("/root/Map").add_child(cam)
+	var targets: Array = []
+	var sp = get_tree().current_scene.find_child("Spawn_Preview", true, false)
+	if sp: targets.append(["preview_start", sp.global_position, -sp.global_transform.basis.z])
+	for t in get_tree().get_nodes_in_group("Transition"):
+		var o = t.owner
+		if o and o.get("spawn"):
+			var s3: Node3D = o.spawn
+			targets.append(["spawn_" + String(o.name).replace("Transition_", ""), s3.global_position, s3.global_transform.basis.z])
+	for tg in targets:
+		var pos: Vector3 = tg[1]
+		var dir: Vector3 = tg[2]
+		dir.y = 0.0
+		cam.global_position = Vector3(pos.x, ground(pos.x, pos.z) + 1.7, pos.z)
+		cam.look_at(cam.global_position + dir.normalized() * 10.0 + Vector3(0, -0.5, 0), Vector3.UP)
+		cam.make_current()
+		print("[shot] %s at layout (%.0f, %.0f)" % [tg[0], pos.x + 540.0, pos.z + 340.0])
+		await wait(2.0)
+		cam.make_current()
+		await shot("shot_%s.png" % tg[0])

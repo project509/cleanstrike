@@ -869,24 +869,50 @@ func build_exits() -> void:
 	var centre := Vector2(540, 340)
 	var used := {}
 	for e in L.exits:
-		var p := v2(e.pos)
-		var inward := (centre - p).normalized()
-		p += inward * 4.0
+		# Snap to the true playable boundary (extracts sit on the edge in
+		# Tarkov), face inward along the boundary normal, flag 1 m inside.
+		var raw := v2(e.pos)
+		var edge := _closest_boundary(raw)
+		var on_edge: Vector2 = edge[0]
+		var tangent: Vector2 = edge[1]
+		var inward := tangent.orthogonal()
+		if not inside_playable(on_edge + inward * 3.0):
+			inward = -inward
+		var p := on_edge + inward * 1.0
+		stats["exit_snap_max_m"] = maxf(float(stats.get("exit_snap_max_m", 0.0)), raw.distance_to(on_edge))
 		var to: String = e.to
 		var n := "Transition_" + to
 		if not e.has("spawn_for") or used.has(n):
 			n = "Transition_%s_%s" % [to, String(e.name).replace(" ", "").replace("-", "")]
 		used[n] = true
 		var tr := instance(SCN_TRANSITION)
-		tr.transform = Transform3D(Basis(Vector3.UP, atan2(inward.x, inward.y)), W(p.x, p.y))
+		# Face into the map: halfway between the edge normal and the map centre,
+		# so arrivals look at Customs, not along the tape or into a fence.
+		var face := (inward + (centre - p).normalized()).normalized()
+		tr.transform = Transform3D(Basis(Vector3.UP, atan2(face.x, face.y)), W(p.x, p.y))
 		tr.set("nextMap", to)
 		tr.set("nextZone", "Area 05")
 		tr.set("currentMap", "Customs")
 		tr.set("time", 2.0 if to == "Outpost" else 1.0)
 		add(g, tr, n)
-		tr.set("spawn", tr.get_node("Spawn"))
+		# Arrive well inside the map, never on the tape.
+		var spawn_node: Node3D = tr.get_node("Spawn")
+		var depth := 12.0
+		while depth < 30.0 and (not inside_playable(p + face * depth) or boundary_distance(p + face * depth) < 10.0 or blocked(p + face * depth)):
+			depth += 1.0
+		spawn_node.position = Vector3(0, 0, depth)
+		var sp2 := p + face * depth
+		spawn_node.position.y = ground(sp2.x, sp2.y) - ground(p.x, p.y)
+		tr.set("spawn", spawn_node)
 		tr.set_meta("rtt_exit_name", String(e.name))
 	stats["exits"] = L.exits.size()
+	if L.has("preview_spawn"):
+		var ps := v2(L.preview_spawn.pos)
+		var look := v2(L.preview_spawn.look)
+		var marker := Node3D.new()
+		var d := Vector3(look.x - ps.x, 0.0, look.y - ps.y).normalized()
+		marker.transform = Transform3D(Basis.looking_at(d, Vector3.UP), W(ps.x, ps.y, 0.1))
+		add(content, marker, "Spawn_Preview")
 
 
 func build_border() -> void:
@@ -2601,3 +2627,31 @@ func build_hall_ruin(holder: Node, b: Dictionary) -> void:
 	add(area, acs, "CollisionShape3D")
 	footprints.append(Rect2(x0, z0, w, d).grow(3.0))
 	_dress_interior(holder, x0, z0, x1, z1, floor_y, "concrete")
+
+
+
+func boundary_distance(p: Vector2) -> float:
+	var b := _boundary()
+	var best := INF
+	for i in b.size():
+		var a := b[i]
+		var c := b[(i + 1) % b.size()]
+		best = minf(best, p.distance_to(Geometry2D.get_closest_point_to_segment(p, a, c)))
+	return best
+
+
+
+# Closest point on the playable boundary to p, and the boundary direction there.
+func _closest_boundary(p: Vector2) -> Array:
+	var b := _boundary()
+	var best := INF
+	var out := [p, Vector2.RIGHT]
+	for i in b.size():
+		var a := b[i]
+		var c := b[(i + 1) % b.size()]
+		var q := Geometry2D.get_closest_point_to_segment(p, a, c)
+		var d := p.distance_to(q)
+		if d < best and a.distance_to(c) > 0.01:
+			best = d
+			out = [q, (c - a).normalized()]
+	return out

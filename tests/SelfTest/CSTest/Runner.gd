@@ -277,6 +277,9 @@ func customs_tests(ui, interface) -> void:
 	Loader.LoadScene("CustomsPreview")
 	check("preview loads Customs", await wait_for_map("Customs", 120.0), map_name())
 	check("preview is save-free (tutorial mode)", gd.tutorial == true)
+	var sp = get_tree().current_scene.find_child("Spawn_Preview", true, false)
+	var pc: Vector3 = get_node("/root/Map/Core/Controller").global_position
+	check("preview starts on the main road", sp != null and Vector2(pc.x, pc.z).distance_to(Vector2(sp.global_position.x, sp.global_position.z)) < 2.0, str(pc))
 	var exit_node = null
 	for t in get_tree().get_nodes_in_group("Transition"):
 		if t.owner.name == "Transition_Village": exit_node = t.owner
