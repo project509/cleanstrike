@@ -1,0 +1,34 @@
+Zombie voices: "Zombie Sound Effects (free)" by Sidney Turner
+https://youtu.be/wg8u3AQj1Ac - supplied by the Cleanstrike owner as free to use.
+Split at the silences into 28 clips (mono, 24 kHz, 12 ms fades) and sorted
+by kind from their spectrograms. To move a clip, rename it to another kind
+and update VOICES in CSZombies/Mod.gd.
+
+moan_1.wav <- clip 6 of the pack
+moan_2.wav <- clip 9 of the pack
+moan_3.wav <- clip 16 of the pack
+moan_4.wav <- clip 18 of the pack
+moan_5.wav <- clip 26 of the pack
+moan_6.wav <- clip 3 of the pack
+moan_7.wav <- clip 7 of the pack
+moan_8.wav <- clip 12 of the pack
+moan_9.wav <- clip 22 of the pack
+moan_10.wav <- clip 28 of the pack
+scream_1.wav <- clip 2 of the pack
+scream_2.wav <- clip 14 of the pack
+scream_3.wav <- clip 20 of the pack
+scream_4.wav <- clip 21 of the pack
+scream_5.wav <- clip 11 of the pack
+scream_6.wav <- clip 23 of the pack
+attack_1.wav <- clip 8 of the pack
+attack_2.wav <- clip 13 of the pack
+attack_3.wav <- clip 4 of the pack
+attack_4.wav <- clip 1 of the pack
+attack_5.wav <- clip 17 of the pack
+attack_6.wav <- clip 19 of the pack
+hit_1.wav <- clip 5 of the pack
+hit_2.wav <- clip 25 of the pack
+hit_3.wav <- clip 15 of the pack
+death_1.wav <- clip 10 of the pack
+death_2.wav <- clip 24 of the pack
+death_3.wav <- clip 27 of the pack

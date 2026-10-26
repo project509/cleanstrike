@@ -86,7 +86,7 @@ static func say(text: String) -> void:
 		print("[%s] %s" % [MOD_ID, text])
 
 
-const VOICES := {"moan": 8, "scream": 3, "attack": 4, "hit": 3, "death": 3}
+const VOICES := {"moan": 10, "scream": 6, "attack": 6, "hit": 3, "death": 3}
 const MAX_VOICES := 6                    # a horde stays readable
 
 static var _sounds := {}

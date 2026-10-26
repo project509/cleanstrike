@@ -1,7 +1,9 @@
 """Generate CleanStrike Zombies' voices (original, procedurally synthesised).
 
 Usage: python tools/make_zombie_sounds.py
-Writes mods/Zombies/CSZombies/Sounds/*.wav (22.05 kHz mono):
+Writes dist/zombie_synth_voices/*.wav (22.05 kHz mono). The mod ships the
+owner-supplied pack instead (see CSZombies/Sounds/SOURCE.txt); these are the
+fallback, original voices, same names:
   moan_1..8     low, rattling moans while wandering or closing in
   scream_1..3   the call that brings the pack
   attack_1..4   short effort grunts with a blow
@@ -17,7 +19,7 @@ import numpy as np
 
 SR = 22050
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                   "mods", "Zombies", "CSZombies", "Sounds")
+                   "dist", "zombie_synth_voices")
 rng = np.random.default_rng(1031)
 
 VOWELS = {  # formant (Hz, bandwidth)
