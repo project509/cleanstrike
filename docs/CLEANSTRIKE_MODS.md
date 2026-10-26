@@ -179,7 +179,18 @@ Night Vision Spawner (mod/56388): at night AI may carry flashlights (bandit
 sight boost 20 / 35 / 60; NVG wearers drop a PV7 with random battery;
 flashlights blink on 8-20 s / off 3-10 s, off on death.
 
-## Queued after the lineup's first wave
+## Wave 2 (build in this order; research each original's public page first)
+1. Immortal Cat  2. Infinite Bedding  3. Kill Counter  4. Save Anywhere
+5. Scope Sensitivity  6. Burst Fire  7. Better Lean  8. Weapon Position
+9. Hideout Lights  10. Airdrops (red smoke)  11. Heli Go Boom  12. Sound Indicators
+13. Item Clarity  14. Loot Highlight  15. Cash Money  16. Clothes to Rags
+17. Multi-Use Items  18. Injuries Rework  19. Everything Lootable  20. Better Map
+21. Better Inventory and Equipment  22. HUD  23. Tactical Watch  24. Custom Fonts
+25. Reticles  26. Weather and Seasons  27. Death and Hit Effects  28. Faction Warfare
+29. AI Overhaul  30. Progression  31. Shelters  32. Visuals  33. Sandbox Mode
+Status: wave 1 (8 mods) done.
+
+## Queued after the lineup
 - CleanStrike Zombies (premium): replaces all enemies with sound-aware zombie packs
   (model + Mixamo animations in ideaboard/), dismemberment, crawlers, door breaking
   (10 hits), loot chance, aggro loss after 3 min unseen.
