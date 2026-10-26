@@ -984,27 +984,27 @@
   },
   {
    "name": "DormsWest",
-   "kind": "dorm_2storey",
+   "kind": "dorm",
    "rect": [
-    459,
-    439,
-    480,
-    467
+    463,
+    433,
+    476,
+    473
    ],
-   "height": 8,
+   "height": 7.2,
    "roof": "flat",
    "floors": 2
   },
   {
    "name": "DormsEast",
-   "kind": "dorm_3storey",
+   "kind": "dorm",
    "rect": [
-    511,
-    450,
-    534,
-    483
+    515.5,
+    443.5,
+    529.5,
+    489.5
    ],
-   "height": 11,
+   "height": 10.4,
    "roof": "flat",
    "floors": 3
   },
@@ -1073,38 +1073,7 @@
    "roof": "flat"
   }
  ],
- "fences": [
-  {
-   "name": "red_yard",
-   "closed": true,
-   "points": [
-    [
-     856,
-     220
-    ],
-    [
-     940,
-     220
-    ],
-    [
-     940,
-     337
-    ],
-    [
-     856,
-     337
-    ]
-   ],
-   "height": 2.5,
-   "gates": [
-    [
-     900,
-     337,
-     10
-    ]
-   ]
-  }
- ],
+ "fences": [],
  "tanks": [
   {
    "center": [
@@ -1948,6 +1917,44 @@
     ]
    ],
    "kind": "po2"
+  },
+  {
+   "name": "red_yard",
+   "points": [
+    [
+     856,
+     220
+    ],
+    [
+     940,
+     220
+    ],
+    [
+     940,
+     337
+    ],
+    [
+     856,
+     337
+    ],
+    [
+     856,
+     220
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     900,
+     337,
+     10
+    ],
+    [
+     856,
+     300,
+     8
+    ]
+   ]
   }
  ],
  "pipelines": [

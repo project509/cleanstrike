@@ -44,11 +44,20 @@ func ground(x: float, z: float) -> float:
 	var hits := 0
 	var hit = space.intersect_ray(q)
 	# Skip trees and roofs: keep casting until the terrain is hit.
-	while hit and not String(hit.collider.get_path()).contains("Terrain/Elements") and hits < 8:
+	var last = hit
+	while hit and not String(hit.collider.get_path()).contains("Terrain/Elements") and hits < 60:
+		last = hit
 		q.from = hit.position + Vector3(0, -0.05, 0)
 		hit = space.intersect_ray(q)
 		hits += 1
-	return hit.position.y if hit else 0.0
+	if not hit:
+		hit = last
+	if not hit:
+		return 0.0
+	# Inside buildings stand on the floor, not the terrain under it.
+	var q2 = PhysicsRayQueryParameters3D.create(Vector3(x, hit.position.y + 2.5, z), Vector3(x, hit.position.y - 1.0, z))
+	var h2 = space.intersect_ray(q2)
+	return h2.position.y if h2 else hit.position.y
 
 func customs_views():
 	Simulation.time = 1200.0
@@ -69,6 +78,13 @@ func customs_views():
 		["red_warehouse", 868, 1.7, 352, 905, 6, 262],
 		["dorms", 505, 1.7, 418, 505, 6, 470],
 		["bridge", 702, 2.5, 372, 795, 4, 351],
+		["wh5_close", 212, 1.7, 345, 228, 5, 315],
+		["garages", 1000, 1.7, 304, 990, 2, 270],
+		["forest_edge", 300, 1.7, 420, 340, 3, 380],
+		["dorms_outside", 497, 1.7, 470, 523, 6, 462],
+		["dorm_corridor", 522.5, 1.65, 450.0, 522.5, 1.5, 485.0],
+		["dorm_room", 521.0, 1.6, 462.9, 516.2, 1.1, 461.2],
+		["dorm_stairs", 524.0, 1.65, 447.8, 517.5, 2.5, 446.5],
 	]
 	for v in views:
 		var ex = float(v[1]) - 540.0
@@ -77,6 +93,7 @@ func customs_views():
 		var tz = float(v[6]) - 340.0
 		var eye = Vector3(ex, ground(ex, ez) + float(v[2]), ez)
 		var target = Vector3(tx, ground(tx, tz) + float(v[5]), tz)
+		print("[shot] %s eye=%s target=%s" % [v[0], eye, target])
 		cam.global_position = eye
 		cam.look_at(target, Vector3.UP)
 		cam.make_current()

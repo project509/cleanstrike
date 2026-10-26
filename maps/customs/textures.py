@@ -26,6 +26,10 @@ SWATCHES = {
     "roof_tar":     ("Assets/Shack_Brick/Files/TX_Shack_Brick_Roof", (0.03, 0.02, 0.97, 0.48), (6.0, 3.0)),
     "metal_red":    ("Assets/Container_Shipping/Files/TX_Container_Shipping", (0.03, 0.03, 0.68, 0.43), (4.0, 2.6)),
     "slab":         ("Assets/Slab_Concrete/Files/TX_Slab_Concrete", (0.03, 0.03, 0.97, 0.97), (3.0, 3.0)),
+    "plaster":      ("Assets/Office_Airfield/Files/TX_Office_Airfield_Interior", (0.03, 0.02, 0.97, 0.20), (4.0, 1.6)),
+    "paint_green":  ("Assets/Khrushchevka/Files/TX_Khrushchevka_Staircase", (0.03, 0.44, 0.97, 0.56), (4.0, 1.5)),
+    "parquet":      ("Assets/Khrushchevka/Files/TX_Khrushchevka_Rooms", (0.35, 0.35, 0.62, 0.62), (2.0, 2.0)),
+    "tiles":        ("Assets/Office_Airfield/Files/TX_Office_Airfield_Interior", (0.04, 0.48, 0.46, 0.92), (2.4, 2.4)),
 }
 SIZE = 1024
 
