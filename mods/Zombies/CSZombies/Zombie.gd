@@ -220,12 +220,15 @@ func _pick_wander() -> void:
 	agent.target_position = target
 
 
+# How fast it moves: its current clip's own speed times the clip rate
+# (feet stay planted). Hunting zombies hurry a little; wanderers drift.
+func _rate() -> float:
+	var r := 1.0 if state == S.WANDER else 1.3
+	return r * float(ZM.setting("speed"))
+
+
 func _speed() -> float:
-	if crawler:
-		return 0.45
-	if state == S.WANDER:
-		return 0.6
-	return 2.4 if _enraged() else 1.05
+	return float(ZM.CLIP_SPEED.get(_move_anim(), 0.4)) * _rate()
 
 
 func _move(delta: float) -> void:
@@ -244,6 +247,7 @@ func _move(delta: float) -> void:
 	_ground()
 	rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), delta * 4.0)
 	_play(_move_anim(), spd)
+	anim.speed_scale = _rate()
 
 
 func _ground() -> void:
@@ -412,9 +416,9 @@ func _idle_anim() -> String:
 
 func _move_anim() -> String:
 	if crawler:
-		return "crawl_run" if state == S.CHASE else "crawl"
+		return "crawl"                                 # crawlers are always slow
 	if state == S.WANDER:
-		return ["walk", "walk_3", "stumble"][get_instance_id() % 3]
+		return ["walk", "walk_3", "walk_2"][get_instance_id() % 3]
 	return ("run" if get_instance_id() % 2 == 0 else "run_2") if _enraged() else ["walk", "walk_2", "walk_3"][get_instance_id() % 3]
 
 

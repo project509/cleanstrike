@@ -21,6 +21,16 @@
       "description": "60: a blow takes 15-30 health before armour."
     },
     {
+      "key": "speed",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 2,
+      "step": 0.1,
+      "label": "Speed (x)",
+      "description": "Movement and animation together, so feet stay planted."
+    },
+    {
       "key": "rage_chance",
       "type": "float",
       "default": 0.12,

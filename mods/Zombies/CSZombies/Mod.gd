@@ -9,6 +9,7 @@ const VERSION := "0.1.0"
 const DEFAULTS := {
 	"health": 1.0,            # zombie health (x); 250 at 1
 	"damage": 60.0,           # a blow takes 15-30 health before armour
+	"speed": 1.0,             # how fast they move (and animate) (x)
 	"rage_chance": 0.12,      # shot at, a zombie may charge you for a few seconds
 	"horde": 2.0,             # how many more than the game's enemies
 	"start_share": 0.5,       # share of the alive cap already out when you arrive
@@ -24,8 +25,10 @@ const MODEL := "res://CSZombies/Model/Zombie.scn"
 const ZOMBIE := preload("res://CSZombies/Zombie.gd")
 const ZHITBOX := preload("res://CSZombies/ZHitbox.gd")
 
-# Natural speed of each moving clip (m/s), to match feet to ground.
-const CLIP_SPEED := {"walk": 1.0, "walk_2": 1.1, "walk_3": 1.0, "stumble": 0.8, "run": 3.0, "run_2": 3.0, "crawl": 0.4, "crawl_run": 1.0}
+# Natural speed of each moving clip (m/s): how fast the planted foot sweeps back
+# (measured from the clips). Zombies move at exactly this times the clip rate,
+# so feet never skate.
+const CLIP_SPEED := {"walk": 0.27, "walk_2": 0.46, "walk_3": 0.27, "stumble": 0.08, "run": 1.65, "run_2": 1.63, "crawl": 0.36, "crawl_run": 1.6}
 
 # part: [bone, to bone, radius, meshes it carries, parts that go with it, health]
 const PARTS := {
