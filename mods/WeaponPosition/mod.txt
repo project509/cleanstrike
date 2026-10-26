@@ -1,0 +1,16 @@
+[mod]
+name="Weapon Position"
+id="cs_weapon_position"
+version="1.0.0"
+author="Cleanstrike"
+description="Move your weapon on screen: further to the side, lower or closer, for a clearer view. Aiming down sights is untouched."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay", "QoL"]
+
+[script_extend]
+res://Scripts/Handling.gd="res://CSWeaponPosition/Ext/Handling.gd"
