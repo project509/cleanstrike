@@ -42,6 +42,16 @@ MyMod="res://MyMod/Main.gd"
 required=["other_mod_id"]   ; must be enabled and earlier in the load order
 ```
 
+To step aside for another mod that does the same job, list the script
+extensions it owns. When that mod is enabled, these are skipped (whatever the
+load order); otherwise they apply as normal:
+
+```ini
+[cleanstrike]
+defer_to="tarkov_looting"
+defer_targets=["res://Scripts/Item.gd", "res://Scripts/Tooltip.gd"]
+```
+
 All string values must be quoted.
 
 ## Script extensions

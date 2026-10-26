@@ -1,0 +1,22 @@
+[mod]
+name="Tarkov Looting"
+id="tarkov_looting"
+version="1.0.0"
+author="Cleanstrike"
+description="Tarkov-style looting for Road to Vostok: search containers and bodies item by item, examine unknown items to identify them, and Tarkov-style inventory cells."
+priority=10
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["UI", "Looting"]
+
+; Order matters: Item first, Interface last (it preloads the item scene).
+[script_extend]
+res://Scripts/Item.gd="res://TarkovLooting/Ext/Item.gd"
+res://Scripts/LootContainer.gd="res://TarkovLooting/Ext/LootContainer.gd"
+res://Scripts/Pickup.gd="res://TarkovLooting/Ext/Pickup.gd"
+res://Scripts/Tooltip.gd="res://TarkovLooting/Ext/Tooltip.gd"
+res://Scripts/Context.gd="res://TarkovLooting/Ext/Context.gd"
+res://Scripts/Interface.gd="res://TarkovLooting/Ext/Interface.gd"

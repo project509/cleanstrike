@@ -9,7 +9,7 @@ var rtt_examine: Button
 
 func Update(slotData: SlotData):
 	super(slotData)
-	if not RTT.active():
+	if not RTT.looting():
 		return
 	_rtt_ensure_button()
 	var item = interface.contextItem

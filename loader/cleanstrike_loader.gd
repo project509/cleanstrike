@@ -1,4 +1,4 @@
-# cleanstrike-loader-version: 1.0.0
+# cleanstrike-loader-version: 1.1.0
 # Cleanstrike in-game loader for Road to Vostok (Godot 4.6+).
 # Registered by override.cfg as the first autoload. Everything that has to
 # happen before the game's own scripts load runs in _init().
@@ -14,7 +14,7 @@
 #   user://cleanstrike/cleanstrike.log     plain-text log
 extends Node
 
-const LOADER_VERSION := "1.0.0"
+const LOADER_VERSION := "1.1.0"
 const API_VERSION := 1
 const ARCHIVE_EXTS := ["csmod", "vmz", "zip", "pck"]
 const BOOT_OK_SECONDS := 20.0
@@ -237,7 +237,11 @@ func _apply_extends(m: Dictionary, cfg: ConfigFile) -> String:
 	if section == "":
 		return ""
 	var applied: Array = []   # [kind, target_path, script]
+	var deferred := _deferred_targets(m, cfg)
 	for target in cfg.get_section_keys(section):
+		if target in deferred:
+			_log("[%s] leaves %s to %s." % [m.id, target, cfg.get_value("cleanstrike", "defer_to", "")])
+			continue
 		var ext_path := str(cfg.get_value(section, target))
 		var fail := ""
 		if not ResourceLoader.exists(target):
@@ -275,6 +279,19 @@ func _apply_extends(m: Dictionary, cfg: ConfigFile) -> String:
 		if not tree.node_added.is_connected(_on_node_added):
 			tree.node_added.connect(_on_node_added)
 	return ""
+
+
+# A mod can step aside for another one: [cleanstrike] defer_to="other_id"
+# and defer_targets=[...] skip those extensions when the other mod is
+# enabled in this launch, whatever the load order.
+func _deferred_targets(m: Dictionary, cfg: ConfigFile) -> Array:
+	var other := str(cfg.get_value("cleanstrike", "defer_to", ""))
+	if other == "":
+		return []
+	for o in mods:
+		if o.id == other and o.enabled and o.status in ["pending", "loaded"]:
+			return cfg.get_value("cleanstrike", "defer_targets", [])
+	return []
 
 
 func _on_node_added(node: Node) -> void:

@@ -26,14 +26,23 @@ func run() -> void:
 	while get_tree().current_scene == null or get_node_or_null("/root/Map/Core/UI/Interface") == null:
 		await wait(0.5)
 	await wait(4.0)
-	var RTT = load("res://RoadToTarkov/RTT.gd")
 	var cs = Engine.get_meta("Cleanstrike")
-	check("mod loaded", cs.is_loaded("road_to_tarkov"))
-	check("RTT active", RTT.active())
-	check("main menu has Customs preview", menu_preview_button)
+	# Looting comes from Tarkov Looting when it is loaded, else Road to Tarkov.
+	var standalone: bool = cs.is_loaded("tarkov_looting")
+	var RTT = load("res://TarkovLooting/TL.gd") if standalone else load("res://RoadToTarkov/RTT.gd")
+	var P := "TL_" if standalone else "RTT_"
+	var pl := "tl_" if standalone else "rtt_"
+	print("[CSTest] looting provided by ", "tarkov_looting" if standalone else "road_to_tarkov")
+	check("looting mod loaded", cs.is_loaded("tarkov_looting" if standalone else "road_to_tarkov"))
+	check("looting active", RTT.active())
+	if standalone and cs.is_loaded("road_to_tarkov"):
+		var R = load("res://RoadToTarkov/RTT.gd")
+		check("Road to Tarkov steps aside for Tarkov Looting", R.active() and not R.looting())
+	if cs.is_loaded("road_to_tarkov"):
+		check("main menu has Customs preview", menu_preview_button)
 	var ui = get_node("/root/Map/Core/UI")
 	var interface = get_node("/root/Map/Core/UI/Interface")
-	check("interface extended", interface.has_method("RTT_ContextExamine"))
+	check("interface extended", interface.has_method(P + "ContextExamine"))
 
 	check("type check: Node3D is not LootContainer", not (Node3D.new() is LootContainer))
 	check("type check: Panel is not Item", not (Panel.new() is Item))
@@ -64,7 +73,7 @@ func run() -> void:
 	var hidden: Array = items.filter(func(i): return RTT.is_hidden(i))
 	check("all hidden at start", hidden.size() == items.size(), "%d hidden" % hidden.size())
 	check("header searching", "Searching" in interface.containerName.text, interface.containerName.text)
-	check("items use mod script", items[0].has_method("RTT_SetProgress"))
+	check("items use mod script", items[0].has_method(P + "SetProgress"))
 	check("slotData kept through swap", items[0].slotData != null and items[0].slotData.itemData != null)
 	await wait(1.6)
 	var revealed: int = items.filter(func(i): return not RTT.is_hidden(i)).size()
@@ -84,7 +93,7 @@ func run() -> void:
 		await wait(0.5); t += 0.5
 	check("search completes", not items.any(func(i): return RTT.is_hidden(i)), "%.1fs" % t)
 	await wait(0.6)
-	check("container marked searched", bool(target.get_meta("rtt_searched", false)))
+	check("container marked searched", bool(target.get_meta(pl + "searched", false)))
 	check("header restored", not ("Searching" in interface.containerName.text), interface.containerName.text)
 
 	# Unknown items
@@ -93,22 +102,23 @@ func run() -> void:
 		if RTT.is_unknown(i): unknown = i; break
 	check("found unknown item", unknown != null)
 	if unknown:
-		check("unknown mark shown", unknown.rtt_mark != null and unknown.rtt_mark.visible)
+		var mark = unknown.get(pl + "mark")
+		check("unknown mark shown", mark != null and mark.visible)
 		check("abbreviation hidden", unknown.abbreviation.text == "?", unknown.abbreviation.text)
 		interface.tooltip.Update(unknown)
 		check("tooltip unknown", interface.tooltip.title.text == "Unknown item", interface.tooltip.title.text)
 		interface.contextItem = unknown
 		interface.contextGrid = interface.containerGrid
 		interface.context.Update(unknown.slotData)
-		var ex = interface.context.rtt_examine
+		var ex = interface.context.get(pl + "examine")
 		check("examine button", ex != null and ex.visible)
 		check("use hidden for unknown", not interface.context.useButton.visible)
-		interface.RTT_ContextExamine()
-		check("examining", interface.RTT_IsExamining(unknown))
+		interface.call(P + "ContextExamine")
+		check("examining", interface.call(P + "IsExamining", unknown))
 		var total: float = RTT.examine_time(unknown.slotData.itemData)
 		await wait(total + 0.8)
 		check("examined -> known", not RTT.is_unknown(unknown), "after %.1fs" % total)
-		check("mark cleared", not unknown.rtt_mark.visible)
+		check("mark cleared", not unknown.get(pl + "mark").visible)
 		interface.tooltip.Update(unknown)
 		check("tooltip shows name", interface.tooltip.title.text == unknown.slotData.itemData.name, interface.tooltip.title.text)
 		check("tint applied", unknown.fill.color == RTT.tint_for(unknown.slotData.itemData), str(unknown.fill.color))
@@ -122,7 +132,8 @@ func run() -> void:
 	close_ui(ui)
 	target.UpdateTooltip()
 	check("tooltip says Open after search", target.gameData.tooltip.ends_with("[Open]"), target.gameData.tooltip)
-	await customs_tests(ui, interface)
+	if cs.is_loaded("road_to_tarkov"):
+		await customs_tests(ui, interface)
 	finish()
 
 func map_name() -> String:

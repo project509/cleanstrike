@@ -20,7 +20,9 @@ A mod manager and loader for **Road to Vostok**. One portable `Cleanstrike.exe`:
 |---|---|
 | `app/Cleanstrike` | The Windows app (WPF, .NET 8) |
 | `loader/cleanstrike_loader.gd` | The in-game loader (bundled into the app) |
-| `mods/RoadToTarkov` | First Cleanstrike mod: Tarkov-style looting |
+| `mods/TarkovLooting` | **Tarkov Looting**: searching, unknown items/examining, Tarkov cell tints (standalone) |
+| `mods/RoadToTarkov` | **Road to Tarkov (In Progress, paused)**: Customs map and travel; defers looting to Tarkov Looting when both are on |
+| `maps/customs` | Customs map sources and generator (layout traced from re3mr) |
 | `tests/SelfTest` | Headless in-game test harness (never ship) |
 | `tests/AppTests` | App service tests that drive a real game folder |
 | `tools/` | `build_mod.py`, `test.sh`, `publish.sh`, `make_icon.py` |
@@ -29,8 +31,9 @@ A mod manager and loader for **Road to Vostok**. One portable `Cleanstrike.exe`:
 ## Building
 
 ```bash
-tools/publish.sh          # dist/Cleanstrike.exe (portable, self-contained) + dist/RoadToTarkov.csmod
+tools/publish.sh          # dist/Cleanstrike.exe (portable) + dist/TarkovLooting.csmod + dist/RoadToTarkov.csmod
 tools/test.sh             # end-to-end: app prepares a launch, game boots headless, mod self-test runs
+MODS="TarkovLooting" tools/test.sh   # test one mod on its own
 ```
 
 `test.sh` expects a copy of the game in `../TestGame` (`RTV.exe` + `RTV.pck`), or set `TESTGAME`.

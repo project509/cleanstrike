@@ -26,10 +26,11 @@ var rtt_dots := 0.0
 
 func Open():
 	super()
-	if not RTT.active():
+	if RTT.active():
+		_rtt_setup_map()
+	if not RTT.looting():
 		return
 	_rtt_setup()
-	_rtt_setup_map()
 	if not RTT.is_seeded():
 		_rtt_seed_knowledge()
 	if container:
@@ -53,7 +54,7 @@ func FillContainerGrid():
 # hidden flag across by tagging the SlotData copies the game stores.
 func StorageContainerGrid():
 	super()
-	if not RTT.active() or container == null:
+	if not RTT.looting() or container == null:
 		return
 	var children: Array = containerGrid.get_children()
 	for i in min(children.size(), container.storage.size()):
@@ -74,7 +75,7 @@ func Create(slotData, targetGrid, useDrop):
 
 
 func _rtt_tag_new(slotData, targetGrid, before: int) -> void:
-	if not rtt_filling or targetGrid != containerGrid or not RTT.active():
+	if not rtt_filling or targetGrid != containerGrid or not RTT.looting():
 		return
 	if targetGrid.get_child_count() <= before:
 		return
@@ -206,7 +207,7 @@ func GetHoverItem():
 
 # Don't silently merge a stack into an item the player can't see.
 func AutoStack(slotData, targetGrid):
-	if RTT.active() and targetGrid == containerGrid and slotData and slotData.itemData:
+	if RTT.looting() and targetGrid == containerGrid and slotData and slotData.itemData:
 		for child in containerGrid.get_children():
 			if RTT.is_hidden(child) and child.slotData.itemData.file == slotData.itemData.file:
 				return false
@@ -262,7 +263,7 @@ func _rtt_need_examine() -> void:
 # Trader stock and crafting results count as known.
 func FillSupplyGrid():
 	super()
-	if RTT.active():
+	if RTT.looting():
 		var files := []
 		for child in supplyGrid.get_children():
 			if child is Item:
@@ -271,7 +272,7 @@ func FillSupplyGrid():
 
 
 func Complete(data: Resource):
-	if RTT.active() and data and "output" in data:
+	if RTT.looting() and data and "output" in data:
 		var files := []
 		for out in data.output:
 			if out:
@@ -413,7 +414,7 @@ func _rtt_relabel(node: Node, text: String) -> void:
 
 func _physics_process(delta):
 	super(delta)
-	if not visible or not RTT.active():
+	if not visible or not RTT.looting():
 		return
 	if container:
 		_rtt_search_tick(delta)

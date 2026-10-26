@@ -1,16 +1,19 @@
 [mod]
-name="Road to Tarkov"
+name="Road to Tarkov (In Progress)"
 id="road_to_tarkov"
 version="0.3.0"
 author="Cleanstrike"
-description="Tarkov-style looting (search containers and bodies item by item, examine unknown items, Tarkov-style cells) and travel to Customs from every School exit. Customs map art by re3mr.com (CC BY-NC-SA 4.0)."
+description="WORK IN PROGRESS. Tarkov overhaul for Road to Vostok: travel to Customs from every School exit (Customs map art by re3mr.com, CC BY-NC-SA 4.0). Looting changes now live in the standalone Tarkov Looting mod; when it is enabled, this mod leaves looting to it."
 priority=0
 
 [cleanstrike]
 api=1
 game_min="0.2.2.0"
 godot_min="4.6.0"
-tags=["UI", "Looting", "Maps", "Overhaul"]
+tags=["In Progress", "Maps", "Overhaul"]
+; If Tarkov Looting is enabled, skip these extensions (it owns them).
+defer_to="tarkov_looting"
+defer_targets=["res://Scripts/Item.gd", "res://Scripts/LootContainer.gd", "res://Scripts/Pickup.gd", "res://Scripts/Tooltip.gd", "res://Scripts/Context.gd"]
 
 ; Order matters: Item first, Interface last (it preloads the item scene).
 [script_extend]

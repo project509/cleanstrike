@@ -73,8 +73,17 @@ static func setting(key: String):
 	return v if typeof(v) == typeof(fallback) or (typeof(fallback) == TYPE_FLOAT and typeof(v) == TYPE_INT) else fallback
 
 
+# Looting features step aside when the standalone Tarkov Looting mod is
+# loaded (it carries the same features and owns them from now on).
+static func looting() -> bool:
+	if not active():
+		return false
+	var c := cs()
+	return c == null or not c.is_loaded("tarkov_looting")
+
+
 static func searching() -> bool:
-	return active() and bool(setting("search_enabled"))
+	return looting() and bool(setting("search_enabled"))
 
 
 static func customs_enabled() -> bool:
@@ -82,7 +91,7 @@ static func customs_enabled() -> bool:
 
 
 static func examining() -> bool:
-	return active() and bool(setting("examine_enabled"))
+	return looting() and bool(setting("examine_enabled"))
 
 
 static func say(text: String) -> void:

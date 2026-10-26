@@ -12,13 +12,13 @@ var rtt_styled := false
 
 func UpdateDetails():
 	super()
-	if RTT.active():
+	if RTT.looting():
 		_rtt_refresh()
 
 
 func State(state):
 	super(state)
-	if RTT.active() and state == "Static" and bool(RTT.setting("item_colors")) and slotData and slotData.itemData:
+	if RTT.looting() and state == "Static" and bool(RTT.setting("item_colors")) and slotData and slotData.itemData:
 		fill.color = RTT.tint_for(slotData.itemData)
 
 

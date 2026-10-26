@@ -1,5 +1,9 @@
 # Road to Tarkov: overhaul roadmap
 
+> **Status: paused (In Progress).** Work has moved to the standalone Tarkov
+> Looting mod (`mods/TarkovLooting`). Road to Tarkov defers its looting to it
+> when both are enabled.
+
 Goal: turn Road to Vostok into a faithful Escape from Tarkov experience.
 That covers Tarkov's maps, UI, looting, raids, hideout, traders, quests and
 progression, all built natively on Vostok so it looks and plays like a game
@@ -24,7 +28,7 @@ that was always meant to be this way.
 
 | # | Area | State |
 |---|---|---|
-| 1 | Container & body searching, unknown items, examine, Tarkov cell tints | **Done** (v0.1) |
+| 1 | Container & body searching, unknown items, examine, Tarkov cell tints | **Done**, now the standalone **Tarkov Looting** mod (v1.0) |
 | 2 | School / Customs destination picker, Customs routing, map tool | **Done** (v0.2) |
 | 3 | Customs: full-scale map build | **In progress**: terrain, river, layout, Vostok buildings, generated warehouses, pipelines, fences, vehicles, forest, exits |
 | 4 | Tarkov UI overhaul | Planned |

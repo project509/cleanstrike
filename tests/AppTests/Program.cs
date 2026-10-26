@@ -45,9 +45,13 @@ Check("keeps key order", string.Join(",", cfg.Entries("script_extend").Select(e 
 
 // --- install: clean archive, nested-folder archive, junk
 var installed = ModLibrary.Scan(g);
-var rtt = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
-Check("scan finds Road to Tarkov", rtt != null);
+// Whichever looting mod is installed (Tarkov Looting preferred).
+var rtt = installed.FirstOrDefault(m => m.Id == "tarkov_looting") ?? installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
+Check("scan finds a looting mod", rtt != null, rtt?.Id ?? "");
 Check("reads settings schema", rtt?.Settings.Count >= 7 && rtt.Settings.Any(s => s.Key == "search_speed"), rtt?.Settings.Count.ToString() ?? "");
+var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
+if (rttWip != null)
+    Check("Road to Tarkov labelled in progress", rttWip.Name.Contains("(In Progress)"), rttWip.Name);
 Check("compatible with this game", rtt != null && ModLibrary.CompatibilityProblem(rtt, g, LoaderInstaller.ApiVersion) == null);
 
 var nested = Path.Combine(work, "Nested.zip");
