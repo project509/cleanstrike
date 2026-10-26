@@ -16,6 +16,7 @@ const BASE_PICKUP := "res://Items/Weapons/KAR-21/KAR-21_308.tscn"
 const ICON := "res://CSWeaponsPack/Model/Icon_SCAR.png"
 const SCAR_PARTS := "res://CSWeaponsPack/Model/SCAR_Parts.scn"
 const SCAR_FILE := "CS_SCAR"
+const LOOT_MASTER := "res://Loot/LT_Master.tres"
 
 # Which rig bone each SCAR part rides on (everything else: the body).
 const SCAR_BONES := {
@@ -231,6 +232,17 @@ static func register() -> void:
 	reg[SCAR_FILE] = scar_pickup_scene()
 	reg[SCAR_FILE + "_Rig"] = build_scar_rig()
 	Engine.set_meta("cs_items", reg)
+	# Found like any other gun: in military loot and at the Gunsmith (the game's
+	# master loot list, filtered by the item's flags, which match the KAR-21's).
+	var lt = load(LOOT_MASTER)
+	if lt and not lt.items.has(scar_item()):
+		lt.items.append(scar_item())
+
+
+static func unregister() -> void:
+	var lt = load(LOOT_MASTER)
+	if lt and scar_data:
+		lt.items.erase(scar_data)
 
 
 # The SCAR's folding iron sights fold away while an optic is mounted (or when

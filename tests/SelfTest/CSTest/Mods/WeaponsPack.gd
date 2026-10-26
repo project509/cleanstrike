@@ -33,6 +33,8 @@ func run(r) -> void:
 	var d = WP.scar_item()
 	r.check("WeaponsPack: SCAR item: its own name and icon, the KAR-21 (.308)'s ammo and magazines", d.file == "CS_SCAR" and d.name == "FN SCAR-17" and d.icon != null and d.caliber == ".308" and d.compatible == load(WP.BASE_DATA).compatible)
 	var db = r.get_node("/root/Database")
+	var lt = load("res://Loot/LT_Master.tres")
+	r.check("WeaponsPack: SCAR is in the game's loot list: military loot and the Gunsmith", lt.items.has(d) and d.military and d.gunsmith)
 	r.check("WeaponsPack: the game's Database finds the SCAR and its rig", db.get("CS_SCAR") is PackedScene and db.get("CS_SCAR_Rig") is PackedScene)
 	var pk = db.get("CS_SCAR").instantiate()
 	r.get_tree().current_scene.add_child(pk)

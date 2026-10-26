@@ -24,4 +24,5 @@ func _physics_process(_delta: float) -> void:
 func _exit_tree() -> void:
 	if Engine.has_meta("cs_items"):
 		Engine.remove_meta("cs_items")
+	WP.unregister()
 	WP.release()
