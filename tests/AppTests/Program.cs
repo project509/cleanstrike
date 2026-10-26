@@ -45,10 +45,13 @@ Check("keeps key order", string.Join(",", cfg.Entries("script_extend").Select(e 
 
 // --- install: clean archive, nested-folder archive, junk
 var installed = ModLibrary.Scan(g);
-// Whichever looting mod is installed (Tarkov Looting preferred).
+// Checks use whichever Cleanstrike mods are being tested: any mod with a
+// settings schema, plus mod-specific checks when those mods are present.
+var withSettings = installed.FirstOrDefault(m => m.Settings.Count > 0);
+Check("scan finds Cleanstrike mods", installed.Any(m => m.HasManifest), string.Join(",", installed.Select(m => m.Id)));
+Check("reads settings schema", withSettings != null && withSettings.Settings.All(s => s.Key.Length > 0 && s.Label.Length > 0), withSettings?.Id ?? "none");
+Check("compatible with this game", installed.Where(m => m.HasManifest).All(m => ModLibrary.CompatibilityProblem(m, g, LoaderInstaller.ApiVersion) == null));
 var rtt = installed.FirstOrDefault(m => m.Id == "tarkov_looting") ?? installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
-Check("scan finds a looting mod", rtt != null, rtt?.Id ?? "");
-Check("reads settings schema", rtt?.Settings.Count >= 7 && rtt.Settings.Any(s => s.Key == "search_speed"), rtt?.Settings.Count.ToString() ?? "");
 var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 if (rttWip != null)
     Check("Road to Tarkov labelled in progress", rttWip.Name.Contains("(In Progress)"), rttWip.Name);
@@ -56,7 +59,6 @@ if (rtt != null)
     Check("reads premium flag", rtt.Premium, rtt.Id);
 if (rttWip != null)
     Check("reads mod thumbnail", rttWip.Thumbnail is { Length: > 1000 }, (rttWip.Thumbnail?.Length ?? 0) + " bytes");
-Check("compatible with this game", rtt != null && ModLibrary.CompatibilityProblem(rtt, g, LoaderInstaller.ApiVersion) == null);
 
 var nested = Path.Combine(work, "Nested.zip");
 File.Delete(nested);
@@ -79,12 +81,16 @@ ModLibrary.Remove(g, r.Mod);
 Check("remove deletes file", !File.Exists(r.Mod.FullPath));
 
 // --- settings round trip
-if (rtt != null)
+var numeric = withSettings?.Settings.FirstOrDefault(d => d.Type is "float" or "int");
+if (withSettings != null && numeric != null)
 {
-    var values = ModLibrary.LoadSettings(g, rtt);
-    values["search_speed"] = 4.0;
-    ModLibrary.SaveSettings(g, rtt, values);
-    Check("settings saved", ModLibrary.LoadSettings(g, rtt)["search_speed"] is 4.0);
+    var values = ModLibrary.LoadSettings(g, withSettings);
+    values[numeric.Key] = numeric.Max;
+    ModLibrary.SaveSettings(g, withSettings, values);
+    var back = ModLibrary.LoadSettings(g, withSettings)[numeric.Key];
+    Check("settings saved", back != null && Convert.ToDouble(back) == numeric.Max, $"{withSettings.Id}.{numeric.Key}={back}");
+    // Don't let this leak into the in-game test: back to defaults.
+    File.Delete(Path.Combine(g.Folder, "Cleanstrike", "settings", withSettings.Id + ".json"));
 }
 
 // --- prepare launch exactly like the Play button

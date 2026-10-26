@@ -83,9 +83,12 @@ static func setting(key: String):
 	if c == null:
 		return fallback
 	var v = c.get_setting(MOD_ID, key, fallback)
-	if typeof(v) == typeof(fallback) or (typeof(fallback) == TYPE_FLOAT and typeof(v) == TYPE_INT):
-		return v
-	return fallback
+	# Settings files store every number as a float: convert to the default's type.
+	if typeof(fallback) == TYPE_INT and typeof(v) == TYPE_FLOAT:
+		return int(round(v))
+	if typeof(fallback) == TYPE_FLOAT and typeof(v) == TYPE_INT:
+		return float(v)
+	return v if typeof(v) == typeof(fallback) else fallback
 
 
 static func say(text: String) -> void:

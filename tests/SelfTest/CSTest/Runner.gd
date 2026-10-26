@@ -7,6 +7,7 @@ extends Node
 #   func run(r)        checks that leave the game where it was
 #   func run_last(r)   optional, may die/travel; must end back in the Tutorial
 const MOD_TESTS := {
+	"cs_better_traders": "res://CSTest/Mods/BetterTraders.gd",
 	"cs_fixes_overhaul": "res://CSTest/Mods/FixesOverhaul.gd",
 	"cs_no_permadeath": "res://CSTest/Mods/NoPermadeath.gd",
 }
@@ -37,6 +38,11 @@ func run() -> void:
 		await wait(0.5)
 	await wait(4.0)
 	var cs = Engine.get_meta("Cleanstrike")
+	# Every mod in this launch must have loaded (a rolled-back mod would
+	# otherwise just skip its tests).
+	for m in cs.mods:
+		if m.get("enabled", true) and str(m.get("id", "")) != "cs_selftest":
+			check("%s loaded" % m.id, m.get("status", "") == "loaded", str(m.get("reason", m.get("status", ""))))
 	var mod_tests := []
 	for id in MOD_TESTS:
 		if cs.is_loaded(id):
@@ -47,6 +53,9 @@ func run() -> void:
 		if t.has_method("run_last"):
 			await t.run_last(self)
 	if cs.is_loaded("tarkov_looting") or cs.is_loaded("road_to_tarkov"):
+		# A fresh Tutorial, so nothing a mod test did (items, flags) carries over.
+		if not mod_tests.is_empty():
+			check("fresh Tutorial for the looting checks", await reload_tutorial())
 		await looting_tests(cs)
 	finish()
 
@@ -226,7 +235,9 @@ func looting_tests(cs) -> void:
 # Back to a fresh Tutorial (after a test that died or travelled).
 func reload_tutorial() -> bool:
 	Loader.LoadScene("Tutorial")
-	return await wait_for_map("Tutorial", 60.0)
+	var ok: bool = await wait_for_map("Tutorial", 60.0)
+	await wait(4.0)   # same settling time as the first load (the Tutorial's own start-up)
+	return ok
 
 func map_name() -> String:
 	var m = get_node_or_null("/root/Map")

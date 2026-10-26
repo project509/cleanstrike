@@ -1,0 +1,107 @@
+{
+  "settings": [
+    {
+      "key": "tabs",
+      "type": "bool",
+      "default": true,
+      "label": "Goods and Furniture tabs",
+      "description": "Traders stock goods and furniture separately, each on its own tab, so furniture never crowds out the goods."
+    },
+    {
+      "key": "goods_count",
+      "type": "int",
+      "default": 40,
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "label": "Goods per restock",
+      "description": "How many goods a trader puts out each restock (the game uses 40)."
+    },
+    {
+      "key": "furniture_count",
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "label": "Furniture per restock"
+    },
+    {
+      "key": "stock",
+      "type": "bool",
+      "default": true,
+      "label": "Stock tab",
+      "description": "Items a trader only sells to people they trust: 3 more for each reputation level, getting better as you go."
+    },
+    {
+      "key": "stock_per_level",
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "label": "Stock items per reputation level"
+    },
+    {
+      "key": "keys",
+      "type": "bool",
+      "default": true,
+      "label": "Sell trader keys",
+      "description": "Once you're Reliable, the Generalist sells the Cellar Key, the Doctor the Gymnasium Key and the Gunsmith the Tunnel Key."
+    },
+    {
+      "key": "key_price",
+      "type": "int",
+      "default": 3000,
+      "min": 250,
+      "max": 10000,
+      "step": 250,
+      "label": "Key price"
+    },
+    {
+      "key": "reputation",
+      "type": "bool",
+      "default": true,
+      "label": "Trader reputation",
+      "description": "Each trader has a reputation from Unknown to Partner. Tasks, dailies and trading raise it. Off: stock follows completed tasks only."
+    },
+    {
+      "key": "dailies",
+      "type": "bool",
+      "default": true,
+      "label": "Daily tasks",
+      "description": "1 to 6 small jobs per trader each day, more as your reputation grows."
+    },
+    {
+      "key": "kill_contracts",
+      "type": "bool",
+      "default": true,
+      "label": "Kill contracts",
+      "description": "Once you're an Acquaintance, one daily can be a contract to kill Bandits, Guards or Military."
+    },
+    {
+      "key": "repairs",
+      "type": "bool",
+      "default": true,
+      "label": "Repairs",
+      "description": "The Gunsmith repairs weapons and the Doctor armor and helmets. Toggle Repair in the deal panel and click damaged items."
+    },
+    {
+      "key": "refresh_key",
+      "type": "string",
+      "default": "F1",
+      "label": "Restock hotkey",
+      "description": "Press while trading to restock the trader now. A key name like F1 or R."
+    },
+    {
+      "key": "refresh_cooldown",
+      "type": "int",
+      "default": 0,
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "label": "Restock hotkey cooldown (minutes)",
+      "description": "0 means no cooldown."
+    }
+  ]
+}

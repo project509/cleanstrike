@@ -1,0 +1,20 @@
+[mod]
+name="Better Traders"
+id="cs_better_traders"
+version="1.0.0"
+author="Cleanstrike"
+description="Trader tabs for goods, furniture and reputation stock, trader reputation with daily tasks and kill contracts, repairs at the Gunsmith and Doctor, and a hotkey to refresh stock."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Traders", "QoL"]
+
+[script_extend]
+; Order: the Trader (class) first, Interface last.
+res://Scripts/Trader.gd="res://CSBetterTraders/Ext/Trader.gd"
+res://Scripts/AI.gd="res://CSBetterTraders/Ext/AI.gd"
+res://Scripts/Loader.gd="res://CSBetterTraders/Ext/Loader.gd"
+res://Scripts/Interface.gd="res://CSBetterTraders/Ext/Interface.gd"

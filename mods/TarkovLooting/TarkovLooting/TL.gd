@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "tarkov_looting"
-const VERSION := "1.2.0"
+const VERSION := "1.2.1"
 
 # Defaults; each one can be changed in the Cleanstrike app (settings.json).
 const DEFAULTS := {
@@ -107,7 +107,12 @@ static func setting(key: String):
 	if c == null:
 		return fallback
 	var v = c.get_setting(MOD_ID, key, fallback)
-	return v if typeof(v) == typeof(fallback) or (typeof(fallback) == TYPE_FLOAT and typeof(v) == TYPE_INT) else fallback
+	# Settings files store every number as a float: convert to the default's type.
+	if typeof(fallback) == TYPE_INT and typeof(v) == TYPE_FLOAT:
+		return int(round(v))
+	if typeof(fallback) == TYPE_FLOAT and typeof(v) == TYPE_INT:
+		return float(v)
+	return v if typeof(v) == typeof(fallback) else fallback
 
 
 static func searching() -> bool:

@@ -17,8 +17,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 | # | Cleanstrike mod | id | Status |
 |---|---|---|---|
 | 1 | No Permadeath | cs_no_permadeath | Done (1.0.0) |
-| 2 | Better Traders | | Next |
-| 3 | Loot Settings, Better Enemy Loot | | Planned |
+| 2 | Better Traders | cs_better_traders | Done (1.0.0) |
+| 3 | Loot Settings, Better Enemy Loot | | Next |
 | 4 | Event Hints | | Planned |
 | 5 | Focus Zoom, Hold Breath | | Planned |
 | 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Skeleton |
@@ -69,6 +69,12 @@ Trader Improvements (tetrahydroc, mod/55972), Trader Refresh Hotkey
 - Settings: stock tab on/off; grid rows per tab; refresh key; cooldown.
 Vanilla: Trader.gd supply = 40 random items from the trader's bucket every
 `traderData.resupply` minutes; Interface.FillSupplyGrid / Resupply.
+Built (1.0.0): reputation 0-5 (thresholds 0/10/25/45/70/100; 10 per task,
+dailies 2-6.5, 1 per 1000 traded; resets on FormatSave); Stock = 3 per level
+from 6 value bands of the trader's range, + key at Reliable (3000, the
+game's own keys so removal can't break saves); dailies = 1 + level, the
+last a kill contract from Acquaintance; repairs priced at missing% x value
+x 0.5 x (1 + tax/200), paid like a deal; restock hotkey F1 + cooldown.
 
 ## 3. Loot Settings + Better Enemy Loot
 Loot Settings sources: Loot Modifier (False_Hope, mod/56036, Build 2), Mega

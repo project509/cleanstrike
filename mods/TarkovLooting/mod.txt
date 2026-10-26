@@ -1,7 +1,7 @@
 [mod]
 name="Tarkov Looting"
 id="tarkov_looting"
-version="1.2.0"
+version="1.2.1"
 author="Cleanstrike"
 description="Tarkov-style looting for Road to Vostok: search containers and bodies item by item, examine unknown items (middle-click) to identify them, and Tarkov-style inventory cells."
 priority=10

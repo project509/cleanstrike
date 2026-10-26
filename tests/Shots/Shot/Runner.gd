@@ -22,10 +22,12 @@ func run():
 	while not map_ready("Tutorial"):
 		await wait(0.5)
 	await wait(3.0)
-	if FileAccess.file_exists("user://cleanstrike/shot_loot"):
-		await loot_views()
-		get_tree().quit()
-		return
+	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
+	for mode in ["loot", "trader"]:
+		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
+			await call(mode + "_views")
+			get_tree().quit()
+			return
 	var tr = load("res://Resources/Transition.tscn").instantiate()
 	tr.nextMap = "School"; tr.currentMap = "Village"; tr.nextZone = "Area 05"; tr.time = 1.0
 	get_tree().current_scene.add_child(tr)
@@ -103,6 +105,31 @@ func perf_run(map: String, views: Array) -> void:
 		cam.make_current()
 		await perf_sample("%s view %d" % [map, k])
 		k += 1
+
+# Trader screen (Tutorial's trader), each tab Better Traders adds.
+func trader_views():
+	var ui = get_node("/root/Map/Core/UI")
+	var interface = get_node("/root/Map/Core/UI/Interface")
+	var trader = null
+	for n in get_tree().current_scene.find_children("*", "", true, false):
+		if n is Trader:
+			trader = n
+			break
+	if trader == null:
+		print("[CSShot] no trader in this map")
+		return
+	trader.Activate()
+	ui.OpenTrader(trader)
+	await wait(1.5)
+	await shot("shot_trader_supply.png")
+	for b in ["Furniture", "Stock", "Dailies", "Tasks"]:
+		var btn = interface.get_node_or_null("Trader/Panel/Buttons/" + b)
+		if btn:
+			btn.pressed.emit()
+			btn.button_pressed = true
+			await wait(0.8)
+			await shot("shot_trader_%s.png" % b.to_lower())
+
 
 # Tarkov Looting: search in progress (grey ghost), unknown silhouettes, examining.
 func loot_views():

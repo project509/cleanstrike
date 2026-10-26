@@ -338,6 +338,11 @@ func FillSupplyGrid():
 			if child is Item:
 				files.append(child.slotData.itemData.file)
 		TL.learn_many(files)
+		# What a trader sells is on show: redraw the cells, which were made
+		# before the items were known.
+		for child in supplyGrid.get_children():
+			if child is Item:
+				child.UpdateDetails()
 
 
 func Complete(data: Resource):
