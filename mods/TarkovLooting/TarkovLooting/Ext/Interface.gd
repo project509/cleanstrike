@@ -22,6 +22,8 @@ var tl_empty_left := -1.0     # short "searching" pass for empty containers
 var tl_filling := false
 var tl_examines := {}         # instance id -> {item, t, total}
 var tl_dots := 0.0
+var tl_rummage: AudioStreamPlayer   # looping search sound
+var tl_queue_label: Label           # examine queue, top right of the screen
 
 
 # ---------------------------------------------------------------- open/close
@@ -39,7 +41,8 @@ func Open():
 
 
 func Close():
-	_tl_cancel_examines()
+	# Examining carries on with the inventory closed (items from the
+	# container you just left drop out of the queue as they're freed).
 	_tl_stop_search()
 	super()
 
@@ -85,6 +88,10 @@ func _tl_tag_new(slotData, targetGrid, before: int) -> void:
 	var hidden := false
 	if TL.should_search(container):
 		hidden = bool(slotData.get_meta("tl_hidden", true)) if container.storaged else not bool(container.get_meta("tl_searched", false))
+		# A body's weapon and worn gear are in plain sight; only what's in
+		# its pockets and bags needs searching.
+		if hidden and bool(container.get("corpse")) and bool(TL.setting("worn_gear_visible")) and TL.is_worn_gear(item.slotData.itemData):
+			hidden = false
 	else:
 		TL.learn(item.slotData.itemData.file)   # own storage: you know what's in it
 	item.set_meta("tl_hidden", hidden)
@@ -119,6 +126,7 @@ func _tl_begin_container() -> void:
 
 func _tl_stop_search() -> void:
 	_tl_unpreview()
+	_tl_set_rummage(false)
 	tl_target = null
 	tl_empty_left = -1.0
 	if tl_spinner:
@@ -143,6 +151,7 @@ func _tl_search_tick(delta: float) -> void:
 
 	if tl_empty_left >= 0.0:
 		tl_empty_left -= delta
+		_tl_set_rummage(true)
 		_tl_place_spinner(containerGrid.global_position, Vector2(cellSize, cellSize))
 		if tl_empty_left < 0.0:
 			_tl_finish_container()
@@ -163,6 +172,13 @@ func _tl_search_tick(delta: float) -> void:
 		tl_target.modulate.a = 1.0
 
 	_tl_place_spinner(tl_target.global_position, tl_target.size)
+	# Holding an item pauses the search, as in Tarkov.
+	var paused: bool = itemDragged != null and bool(TL.setting("pause_while_dragging"))
+	tl_spinner.modulate.a = 0.45 if paused else 1.0
+	_tl_set_rummage(not paused)
+	if paused:
+		_tl_update_header(true)
+		return
 	tl_left -= delta
 	_tl_update_header()
 	if tl_left <= 0.0:
@@ -193,7 +209,7 @@ func _tl_reveal(target) -> void:
 	var tw := create_tween()
 	tw.tween_property(target, "modulate", Color.WHITE, 0.22)
 	if bool(TL.setting("reveal_sound")):
-		PlayClick()
+		_tl_play("found", -6.0)
 
 
 func _tl_finish_container() -> void:
@@ -202,11 +218,52 @@ func _tl_finish_container() -> void:
 	_tl_stop_search()
 
 
-func _tl_update_header() -> void:
+func _tl_update_header(paused := false) -> void:
 	if not is_instance_valid(containerName):
+		return
+	if paused:
+		containerName.text = "%s  -  Searching (paused)" % container.containerName
 		return
 	var dots := ".".repeat(int(tl_dots * 3.0) % 4)
 	containerName.text = "%s  -  Searching%s" % [container.containerName, dots]
+
+
+# ---------------------------------------------------------------- sounds
+
+func _tl_play(name: String, db: float) -> void:
+	var s := TL.sound(name)
+	if s == null:
+		PlayClick()
+		return
+	var p := AudioStreamPlayer.new()
+	p.stream = s
+	p.bus = &"SFX"
+	p.volume_db = db
+	p.finished.connect(p.queue_free)
+	add_child(p)
+	p.play()
+
+
+func _tl_set_rummage(on: bool) -> void:
+	on = on and bool(TL.setting("search_sounds"))
+	if not on:
+		if tl_rummage and tl_rummage.playing:
+			tl_rummage.stop()
+		return
+	if tl_rummage == null:
+		var s = TL.sound("rummage")
+		if s == null:
+			return
+		s.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		s.loop_end = int(s.get_length() * s.mix_rate)
+		tl_rummage = AudioStreamPlayer.new()
+		tl_rummage.name = "TL_Rummage"
+		tl_rummage.stream = s
+		tl_rummage.bus = &"SFX"
+		tl_rummage.volume_db = -12.0
+		add_child(tl_rummage)
+	if not tl_rummage.playing:
+		tl_rummage.play()
 
 
 # Never let the player interact with what they haven't found yet.
@@ -329,27 +386,67 @@ func TL_IsExamining(target) -> bool:
 	return target != null and tl_examines.has(target.get_instance_id())
 
 
+# 0..1 for the item being examined, 0 for queued ones, -1 if not queued.
+func TL_ExamineProgress(target) -> float:
+	if not TL_IsExamining(target):
+		return -1.0
+	var e: Dictionary = tl_examines[target.get_instance_id()]
+	return e.t / e.total
+
+
+# Items are examined one at a time, in the order you asked (Tarkov's queue).
+# It keeps running with the inventory closed.
 func _tl_examine_tick(delta: float) -> void:
+	for k in tl_examines.keys():
+		var gone = tl_examines[k].item
+		if not is_instance_valid(gone) or gone.is_queued_for_deletion() or not gone.is_inside_tree():
+			tl_examines.erase(k)
+	_tl_update_queue_label()
 	if tl_examines.is_empty():
 		return
-	for key in tl_examines.keys():
-		var e: Dictionary = tl_examines[key]
-		var it = e.item
-		if not is_instance_valid(it) or it.is_queued_for_deletion():
-			tl_examines.erase(key)
-			continue
-		if it == itemDragged:
-			continue   # paused while held
-		e.t += delta
-		it.TL_SetProgress(e.t / e.total)
-		if e.t >= e.total:
-			tl_examines.erase(key)
-			it.TL_SetProgress(-1.0)
-			var data = it.slotData.itemData
-			if TL.learn(data.file):
-				Loader.Message("Examined: " + data.name, Color.GREEN)
-			PlayAttach()
-			_tl_refresh_items()
+	var first_key = tl_examines.keys()[0]
+	var e: Dictionary = tl_examines[first_key]
+	var it = e.item
+	if it == itemDragged:
+		return   # paused while held
+	e.t += delta
+	it.TL_SetProgress(e.t / e.total)
+	if e.t >= e.total:
+		tl_examines.erase(first_key)
+		it.TL_SetProgress(-1.0)
+		var data = it.slotData.itemData
+		if TL.learn(data.file):
+			Loader.Message("Examined: " + data.name, Color.GREEN)
+		PlayAttach()
+		_tl_refresh_items()
+		_tl_update_queue_label()
+
+
+func _tl_update_queue_label() -> void:
+	if tl_examines.is_empty():
+		if tl_queue_label:
+			tl_queue_label.hide()
+		return
+	if tl_queue_label == null or not is_instance_valid(tl_queue_label):
+		tl_queue_label = Label.new()
+		tl_queue_label.name = "TL_ExamineQueue"
+		tl_queue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tl_queue_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		tl_queue_label.add_theme_font_size_override("font_size", 15)
+		tl_queue_label.add_theme_color_override("font_color", Color(0.92, 0.86, 0.62))
+		tl_queue_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		tl_queue_label.add_theme_constant_override("outline_size", 5)
+		tl_queue_label.z_index = 20
+		get_parent().add_child(tl_queue_label)
+	var first: Dictionary = tl_examines.values()[0]
+	var text := "Examining  %d%%" % int(first.t / first.total * 100.0)
+	if tl_examines.size() > 1:
+		text += "   (+%d queued)" % (tl_examines.size() - 1)
+	tl_queue_label.text = text
+	var vp := get_viewport().get_visible_rect().size
+	tl_queue_label.size = Vector2(360, 24)
+	tl_queue_label.global_position = Vector2(vp.x - 380, 16)
+	tl_queue_label.show()
 
 
 func _tl_cancel_examines() -> void:
@@ -396,8 +493,8 @@ func _tl_seed_knowledge() -> void:
 
 func _physics_process(delta):
 	super(delta)
-	if not visible or not TL.active():
+	if not TL.active():
 		return
-	if container:
-		_tl_search_tick(delta)
 	_tl_examine_tick(delta)
+	if visible and container:
+		_tl_search_tick(delta)

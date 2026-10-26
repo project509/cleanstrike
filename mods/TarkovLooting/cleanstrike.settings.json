@@ -25,6 +25,41 @@
       "description": "Bodies need searching just like containers."
     },
     {
+      "key": "search_sounds",
+      "type": "bool",
+      "default": true,
+      "label": "Search sounds",
+      "description": "Rummaging sound while searching."
+    },
+    {
+      "key": "pause_while_dragging",
+      "type": "bool",
+      "default": true,
+      "label": "Holding an item pauses the search",
+      "description": "Like Tarkov: the search waits while you drag something."
+    },
+    {
+      "key": "character_affects_search",
+      "type": "bool",
+      "default": true,
+      "label": "Condition affects search speed",
+      "description": "Overweight, fractures, bleeding, frostbite and insanity slow searching down."
+    },
+    {
+      "key": "worn_gear_visible",
+      "type": "bool",
+      "default": true,
+      "label": "Bodies show their gear",
+      "description": "Weapons and worn gear on bodies are visible straight away; pockets and bags still need searching."
+    },
+    {
+      "key": "value_borders",
+      "type": "bool",
+      "default": true,
+      "label": "Value borders",
+      "description": "Coloured frame on valuable items (value per cell): gold, purple, blue."
+    },
+    {
       "key": "examine_enabled",
       "type": "bool",
       "default": true,

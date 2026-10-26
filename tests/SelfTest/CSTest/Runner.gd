@@ -76,13 +76,18 @@ func run() -> void:
 	check("items use mod script", items[0].has_method(P + "SetProgress"))
 	check("slotData kept through swap", items[0].slotData != null and items[0].slotData.itemData != null)
 	if standalone:
-		await wait(0.7)
-		var ghosts: Array = items.filter(func(i): return i.tl_preview)
+		var ghosts: Array = []
+		for k in 20:   # poll: between a reveal and the next pick there are frames with no ghost
+			await wait(0.05)
+			ghosts = items.filter(func(i): return i.tl_preview)
+			if ghosts.size() == 1 and k >= 10: break
 		var g = ghosts[0] if ghosts.size() == 1 else null
 		check("one grey preview while searching", g != null and RTT.is_hidden(g) and g.modulate.a > 0.9, "%d previews" % ghosts.size())
 		if g:
 			check("preview is a ghost silhouette", g.sprite.material == RTT.silhouette(RTT.SILHOUETTE_PREVIEW) and not g.details.visible)
 			check("preview cannot be grabbed", interface.GetHoverItem() != g)
+		check("search sounds load", RTT.sound("rummage") != null and RTT.sound("found") != null)
+		check("rummage plays while searching", interface.tl_rummage != null and interface.tl_rummage.playing)
 		await wait(0.9)
 	else:
 		await wait(1.6)
@@ -120,6 +125,8 @@ func run() -> void:
 			check("unknown cell untinted", unknown.fill.color == RTT.DEFAULT_TINT, str(unknown.fill.color))
 		interface.tooltip.Update(unknown)
 		check("tooltip unknown", interface.tooltip.title.text == "Unknown item", interface.tooltip.title.text)
+		if standalone:
+			check("tooltip says not examined", "Not examined" in interface.tooltip.type.text, interface.tooltip.type.text)
 		interface.contextItem = unknown
 		interface.contextGrid = interface.containerGrid
 		interface.context.Update(unknown.slotData)
@@ -137,6 +144,10 @@ func run() -> void:
 		else:
 			interface.call(P + "ContextExamine")
 		check("examining" + (" (middle-click)" if standalone else ""), interface.call(P + "IsExamining", unknown))
+		if standalone:
+			await wait(0.3)
+			check("examine queue shown", interface.tl_queue_label != null and interface.tl_queue_label.visible and "Examining" in interface.tl_queue_label.text, interface.tl_queue_label.text if interface.tl_queue_label else "")
+			check("examine progresses", interface.TL_ExamineProgress(unknown) > 0.0)
 		var total: float = RTT.examine_time(unknown.slotData.itemData)
 		await wait(total + 0.8)
 		check("examined -> known", not RTT.is_unknown(unknown), "after %.1fs" % total)
@@ -153,6 +164,17 @@ func run() -> void:
 		var mag := SlotData.new()
 		mag.itemData = load("res://Items/Weapons/AKM/AKM_Magazine.tres")
 		RTT._known.erase(mag.itemData.file)
+		check("rummage stops when search ends", not interface.tl_rummage.playing)
+		var gd = load("res://Resources/GameData.tres")
+		var f0: float = RTT.character_factor()
+		gd.fracture = true
+		check("fracture slows searching", RTT.character_factor() > f0 * 1.3, "%.2f" % RTT.character_factor())
+		gd.fracture = false
+		check("bodies show worn gear", RTT.is_worn_gear(load("res://Items/Weapons/AKM/AKM.tres")) and not RTT.is_worn_gear(load("res://Items/Weapons/AKM/AKM_Magazine.tres")))
+		var bordered := 0
+		for it in load("res://Loot/LT_Master.tres").items:
+			if RTT.value_color(it).a > 0.0: bordered += 1
+		check("value borders on some loot", bordered > 0, "%d bordered" % bordered)
 		check("unknown magazine is usable", RTT.is_unknown(mag) and not RTT.is_restricted(mag), mag.itemData.subtype)
 		var gun := SlotData.new()
 		gun.itemData = load("res://Items/Weapons/AKM/AKM.tres")

@@ -9,6 +9,7 @@ var tl_bar: ColorRect
 var tl_bar_bg: ColorRect
 var tl_styled := false
 var tl_preview := false
+var tl_border: Panel
 var tl_state := "Static"
 
 
@@ -74,6 +75,29 @@ func _tl_refresh() -> void:
 			mat = TL.silhouette(TL.SILHOUETTE_UNKNOWN)
 		_tl_set_material(sprite, mat)
 	_tl_apply_fill()
+	_tl_update_border(not unknown and not tl_preview)
+
+
+# Thin coloured frame for valuable items (value per cell), like Tarkov's
+# loot-value overlays. Never shown for unknown items or ghosts.
+func _tl_update_border(allowed: bool) -> void:
+	var c: Color = TL.value_color(slotData.itemData) if allowed and slotData and slotData.itemData else Color.TRANSPARENT
+	if c.a == 0.0:
+		if tl_border:
+			tl_border.hide()
+		return
+	if tl_border == null:
+		tl_border = Panel.new()
+		tl_border.name = "TL_Border"
+		tl_border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tl_border.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(tl_border)
+	var sb := StyleBoxFlat.new()
+	sb.draw_center = false
+	sb.set_border_width_all(2)
+	sb.border_color = Color(c, 0.85)
+	tl_border.add_theme_stylebox_override("panel", sb)
+	tl_border.show()
 
 
 # The sprite and its attachment sprites (weapon parts are child sprites).

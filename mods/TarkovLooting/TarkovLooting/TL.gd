@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "tarkov_looting"
-const VERSION := "1.1.0"
+const VERSION := "1.2.0"
 
 # Defaults; each one can be changed in the Cleanstrike app (settings.json).
 const DEFAULTS := {
@@ -14,6 +14,11 @@ const DEFAULTS := {
 	"examine_enabled": true,
 	"examine_speed": 1.0,
 	"examine_middle_mouse": true,
+	"search_sounds": true,
+	"pause_while_dragging": true,
+	"character_affects_search": true,
+	"worn_gear_visible": true,
+	"value_borders": true,
 	"item_colors": true,
 	"reveal_sound": true,
 }
@@ -68,6 +73,16 @@ const SILHOUETTE_UNKNOWN := Color(0.11, 0.11, 0.105, 0.95)
 const SILHOUETTE_PREVIEW := Color(0.55, 0.55, 0.53, 0.30)
 
 static var _materials := {}
+static var _sounds := {}
+
+
+# Our own sounds (generated, see tools/make_loot_sounds.py). Raw WAVs in the
+# mod archive aren't imported resources, so build the stream from the bytes.
+static func sound(name: String) -> AudioStream:
+	if not _sounds.has(name):
+		var bytes := FileAccess.get_file_as_bytes("res://TarkovLooting/Sounds/%s.wav" % name)
+		_sounds[name] = AudioStreamWAV.load_from_buffer(bytes) if bytes.size() > 44 else null
+	return _sounds[name]
 static var _known := {}
 static var _loaded := false
 static var _seeded := false
@@ -232,7 +247,58 @@ static func search_time(data) -> float:
 		t += 0.35
 	elif r == 2:
 		t += 0.8
-	return t / maxf(0.1, float(setting("search_speed")))
+	return t * character_factor() / maxf(0.1, float(setting("search_speed")))
+
+
+# Searching is slower when the character is in a bad way.
+static func character_factor() -> float:
+	if not bool(setting("character_affects_search")):
+		return 1.0
+	var gd = load("res://Resources/GameData.tres")
+	var f := 1.0
+	if gd.overweight: f *= 1.3
+	if gd.fracture: f *= 1.4
+	if gd.bleeding: f *= 1.15
+	if gd.frostbite: f *= 1.25   # numb fingers
+	if gd.insanity: f *= 1.15
+	return f
+
+
+# What a body is visibly wearing or carrying needs no searching.
+const WORN_TYPES := ["Weapon", "Armor", "Helmet", "Rig", "Backpack", "Clothing", "Belt Pouch"]
+
+static func is_worn_gear(data) -> bool:
+	return data != null and str(data.type).strip_edges() in WORN_TYPES
+
+
+# ---------------------------------------------------------------- value tiers
+
+# Value per cell, compared with the game's whole loot table: top 5% gold,
+# top 20% purple, top 40% blue. Anything below gets no border.
+const VALUE_COLORS := [Color(0.95, 0.75, 0.25), Color(0.68, 0.42, 0.95), Color(0.35, 0.62, 0.95)]
+static var _value_cuts := []
+
+static func value_color(data) -> Color:
+	if data == null or not bool(setting("value_borders")):
+		return Color.TRANSPARENT
+	if _value_cuts.is_empty():
+		var vals := []
+		for it in load("res://Loot/LT_Master.tres").items:
+			vals.append(_per_cell(it))
+		vals.sort()
+		if vals.is_empty():
+			return Color.TRANSPARENT
+		for q in [0.95, 0.8, 0.6]:
+			_value_cuts.append(vals[int((vals.size() - 1) * q)])
+	var v := _per_cell(data)
+	for i in 3:
+		if v >= _value_cuts[i] and v > 0.0:
+			return VALUE_COLORS[i]
+	return Color.TRANSPARENT
+
+
+static func _per_cell(data) -> float:
+	return float(data.value) / maxf(1.0, data.size.x * data.size.y)
 
 
 static func examine_time(data) -> float:

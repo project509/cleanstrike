@@ -12,9 +12,14 @@ func Update(item: Item):
 	title.show()
 	title.text = "Unknown item"
 	type.show()
-	type.text = "Right-click > Examine"
+	type.text = "Not examined  ·  middle-click to examine"
+	if not bool(TL.setting("examine_middle_mouse")):
+		type.text = "Not examined  ·  right-click > Examine"
 	rarity.hide()
-	if item.interface and item.interface.has_method("TL_IsExamining") and item.interface.TL_IsExamining(item):
-		type.text = "Examining..."
+	var ui = item.interface
+	if ui and ui.has_method("TL_ExamineProgress"):
+		var p: float = ui.TL_ExamineProgress(item)
+		if p >= 0.0:
+			type.text = "Examining...  %d%%" % int(p * 100.0)
 	panel.size = Vector2(256, 0)
 	interface.tooltipOffset = panel.size.y / 2.0
