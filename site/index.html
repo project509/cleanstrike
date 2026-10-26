@@ -3,279 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cleanstrike — Mod Manager for Road to Vostok</title>
-<meta name="description" content="Cleanstrike: the one-click mod loader and manager for Road to Vostok. Drop mods in, press Play. Home of Tarkov Looting and Road to Tarkov.">
-<meta property="og:title" content="Cleanstrike — Mod Manager for Road to Vostok">
-<meta property="og:description" content="Drop mods in. Press Play. Tarkov-style looting for Road to Vostok.">
+<title>Cleanstrike</title>
+<meta name="description" content="Mod manager for Road to Vostok. Drop mods in, press Play.">
+<meta property="og:title" content="Cleanstrike">
+<meta property="og:description" content="Mod manager for Road to Vostok.">
 <meta property="og:image" content="img/rtt.jpg">
 <link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0b0c; --bg2:#111315; --panel:#15181b; --line:#262a2e;
-  --text:#e9e6df; --muted:#9a9c98; --faint:#5f625f;
-  --amber:#f2b544; --amber-d:#c98f22; --olive:#5d6b3a; --red:#b3402e;
-}
+:root{--bg:#0b0b0b;--text:#e6e3dc;--muted:#8d8b86;--line:#222;--amber:#f2b544}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-.stencil{font-family:"Black Ops One",Impact,sans-serif;letter-spacing:.04em;font-weight:400}
-.mono{font-family:"JetBrains Mono",monospace}
+body{background:var(--bg);color:var(--text);font:16px/1.65 "IBM Plex Sans",system-ui,sans-serif}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+.stencil{font-family:"Black Ops One",Impact,sans-serif;font-weight:400;letter-spacing:.02em}
 
-/* grain + scanlines */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.06;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+header{padding:28px 0}
+header .wrap{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:500}
+.brand img{width:30px;height:30px}
+header nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:22px}
+header nav a:hover{color:var(--text)}
 
-/* nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:40;backdrop-filter:blur(10px);background:rgba(10,11,12,.72);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
-.brand img{width:34px;height:34px;filter:drop-shadow(0 0 8px rgba(242,181,68,.35))}
-nav ul{display:flex;gap:28px;list-style:none;font-size:14px;color:var(--muted)}
-nav ul a:hover{color:var(--text)}
-.btn{display:inline-flex;align-items:center;gap:10px;border-radius:10px;font-weight:600;transition:.2s;cursor:pointer;border:0}
-.btn-sm{padding:9px 16px;font-size:14px;background:var(--amber);color:#16120a}
-.btn-sm:hover{background:#ffc75c}
+.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;padding-bottom:64px;
+  background:linear-gradient(180deg,rgba(11,11,11,.2),var(--bg) 92%),url(img/rtt.jpg) center 28%/cover}
+h1{font-size:clamp(44px,8vw,92px);line-height:.95}
+.hero p{max-width:480px;color:#c9c6bf;margin:16px 0 28px;font-size:18px}
+.dl{display:inline-block;background:var(--amber);color:#111;text-decoration:none;font-weight:500;padding:14px 26px}
+.dl:hover{background:#ffc75c}
+.under{margin-top:14px;font-size:14px;color:var(--muted)}
+.under b{color:var(--text);font-weight:500}
 
-/* hero */
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:url(img/rtt.jpg) center 30%/cover;filter:saturate(.7) brightness(.45);transform:scale(1.08)}
-.hero::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(ellipse at 70% 40%,transparent 0,rgba(10,11,12,.55) 55%,var(--bg) 100%),
-  linear-gradient(180deg,rgba(10,11,12,.3) 0,rgba(10,11,12,.1) 40%,var(--bg) 100%)}
-.hero .wrap{position:relative;z-index:2;width:100%}
-.hero-logo{width:clamp(96px,12vw,150px);margin-bottom:22px;filter:drop-shadow(0 0 30px rgba(242,181,68,.35))}
-.tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(242,181,68,.35);background:rgba(242,181,68,.08);color:var(--amber);border-radius:999px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
-.tag i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.8s infinite}
-@keyframes pulse{50%{opacity:.35}}
-h1{font-size:clamp(52px,9vw,124px);line-height:.92;margin:22px 0 18px;text-shadow:0 6px 40px rgba(0,0,0,.6)}
-h1 span{color:var(--amber)}
-.lede{font-size:clamp(17px,2vw,21px);color:#cfccc4;max-width:620px}
-.cta{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:38px}
-.btn-dl{position:relative;padding:18px 28px;font-size:18px;background:var(--amber);color:#16120a;box-shadow:0 10px 40px rgba(242,181,68,.25),inset 0 -3px 0 var(--amber-d)}
-.btn-dl:hover{transform:translateY(-2px);box-shadow:0 16px 50px rgba(242,181,68,.38),inset 0 -3px 0 var(--amber-d)}
-.btn-dl small{display:block;font-size:12px;font-weight:500;opacity:.7}
-.btn-ghost{padding:17px 24px;border:1px solid var(--line);background:rgba(21,24,27,.7);color:var(--text)}
-.btn-ghost:hover{border-color:#3a4045}
-.counter{display:flex;align-items:center;gap:14px;margin-top:34px;padding:14px 18px;border:1px solid var(--line);background:rgba(17,19,21,.75);border-radius:12px;width:max-content;max-width:100%}
-.counter b{font-family:"Black Ops One";font-size:30px;color:var(--amber);font-weight:400;min-width:3ch;font-variant-numeric:tabular-nums}
-.counter span{font-size:13px;color:var(--muted);line-height:1.3}
-.meta{margin-top:16px;font-size:13px;color:var(--faint)}
+section{padding:88px 0;border-top:1px solid var(--line)}
+h2{font-size:32px;margin-bottom:28px}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.cols h3{font-size:16px;font-weight:500;margin-bottom:6px}
+.cols p,.mod p{color:var(--muted);font-size:15px}
+.shot{margin-top:56px;border:1px solid var(--line)}
+.mod{display:grid;grid-template-columns:140px 1fr;gap:24px;padding:24px 0;border-top:1px solid var(--line)}
+.mod:first-of-type{border-top:0;padding-top:0}
+.mod img{width:140px;height:140px;object-fit:cover}
+.mod h3{font-size:20px;font-weight:500}
+.mod .state{font-size:13px;color:var(--amber);margin-bottom:6px}
 
-/* tape divider */
-.tape{height:34px;background:repeating-linear-gradient(-45deg,var(--amber) 0 22px,#111 22px 44px);opacity:.9;transform:rotate(-1.2deg) scale(1.05);box-shadow:0 8px 30px rgba(0,0,0,.6);display:flex;align-items:center;overflow:hidden}
-.tape p{white-space:nowrap;font-family:"Black Ops One";color:#111;font-size:15px;letter-spacing:.3em;animation:scroll 40s linear infinite;background:var(--amber);padding:0 18px}
-@keyframes scroll{to{transform:translateX(-50%)}}
+footer{padding:40px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
 
-section{padding:110px 0}
-.kicker{color:var(--amber);font-size:13px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px}
-h2{font-size:clamp(34px,5vw,56px);line-height:1.02;margin-bottom:18px}
-.sub{color:var(--muted);max-width:640px;font-size:18px}
-
-/* features */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:56px}
-.card{position:relative;padding:28px;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--bg2));border-radius:14px;overflow:hidden;transition:.25s}
-.card:hover{border-color:rgba(242,181,68,.4);transform:translateY(-3px)}
-.card::before{content:"";position:absolute;top:0;left:0;width:42px;height:3px;background:var(--amber)}
-.card .ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:rgba(242,181,68,.1);color:var(--amber);margin-bottom:18px}
-.card h3{font-size:18px;margin-bottom:8px}
-.card p{color:var(--muted);font-size:15px}
-
-/* showcase */
-.show{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
-.frame{border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);background:#000;position:relative}
-.frame .bar{display:flex;gap:6px;padding:10px 12px;background:#0e1012;border-bottom:1px solid var(--line)}
-.frame .bar i{width:10px;height:10px;border-radius:50%;background:#2a2e32}
-ol.steps{list-style:none;counter-reset:s;margin-top:30px}
-ol.steps li{counter-increment:s;display:flex;gap:18px;padding:16px 0;border-bottom:1px dashed var(--line)}
-ol.steps li::before{content:"0" counter(s);font-family:"Black Ops One";color:var(--amber);font-size:22px;min-width:38px}
-ol.steps b{display:block}
-ol.steps span{color:var(--muted);font-size:15px}
-
-/* mods */
-.mods{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:56px}
-.mod{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column}
-.mod .art{height:260px;background-size:cover;background-position:center;position:relative}
-.mod .art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,var(--panel))}
-.mod .body{padding:26px}
-.mod h3{font-size:26px;margin-bottom:6px}
-.pill{display:inline-block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:12px}
-.pill.ok{background:rgba(93,107,58,.35);color:#b9cf86}
-.pill.wip{background:rgba(179,64,46,.25);color:#f0947f}
-.mod ul{margin:14px 0 0 18px;color:var(--muted);font-size:15px}
-.mod li{margin:4px 0}
-
-/* final cta */
-.final{position:relative;text-align:center;border:1px solid var(--line);border-radius:22px;padding:80px 24px;overflow:hidden;background:
-  radial-gradient(ellipse at 50% 0,rgba(242,181,68,.16),transparent 60%),var(--bg2)}
-.final h2{margin-bottom:12px}
-.final .cta{justify-content:center}
-
-footer{padding:50px 0;border-top:1px solid var(--line);color:var(--faint);font-size:13px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
-footer a:hover{color:var(--text)}
-
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s}
-.reveal.in{opacity:1;transform:none}
-
-@media (max-width:860px){
-  nav ul{display:none}
-  .show,.mods{grid-template-columns:1fr}
-  section{padding:80px 0}
-  .wrap{padding:0 16px}
+@media (max-width:760px){
+  .cols{grid-template-columns:1fr}
+  .mod{grid-template-columns:88px 1fr;gap:16px}
+  .mod img{width:88px;height:88px}
+  header nav a:not(.dl-link){display:none}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
 </head>
 <body>
 
-<nav><div class="wrap">
-  <a class="brand" href="#"><img src="img/logo.png" alt="">Cleanstrike</a>
-  <ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#mods">Mods</a></li><li><a href="https://github.com/project509/cleanstrike">GitHub</a></li></ul>
-  <a class="btn btn-sm dl-link" href="#">Download</a>
-</div></nav>
+<header><div class="wrap">
+  <a class="brand" href="/"><img src="img/logo.png" alt="">Cleanstrike</a>
+  <nav><a href="#mods">Mods</a><a href="https://github.com/project509/cleanstrike">GitHub</a><a class="dl-link" href="#">Download</a></nav>
+</div></header>
 
-<header class="hero">
-  <div class="hero-bg"></div>
-  <div class="wrap">
-    <img class="hero-logo" src="img/logo.png" alt="Cleanstrike logo">
-    <div class="tag"><i></i> Road to Vostok mod manager</div>
-    <h1 class="stencil">Mod Vostok.<br><span>Raid like Tarkov.</span></h1>
-    <p class="lede">Cleanstrike is the one-click mod loader and manager for Road to Vostok. Drop mods in, press Play. No file juggling, no broken installs, no fear for your saves.</p>
-    <div class="cta">
-      <a class="btn btn-dl dl-link" href="#">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
-        <span>Download Cleanstrike<small>Windows 10/11 · portable .exe · free</small></span>
-      </a>
-      <a class="btn btn-ghost" href="#mods">See the mods →</a>
+<div class="hero"><div class="wrap">
+  <h1 class="stencil">Cleanstrike</h1>
+  <p>A mod manager for Road to Vostok. Drop mods in, press Play.</p>
+  <a class="dl dl-link" href="#">Download for Windows</a>
+  <p class="under"><b id="count">–</b> downloads · <span id="ver">latest release</span></p>
+</div></div>
+
+<section><div class="wrap">
+  <div class="cols">
+    <div><h3>Finds your game</h3><p>Looks through every Steam library on its own. Or point it at the folder yourself.</p></div>
+    <div><h3>Install by dragging</h3><p>.csmod, .vmz, .zip and .pck. Badly packed mods are repaired on install.</p></div>
+    <div><h3>Keeps the game working</h3><p>Mods for other game versions are held back, broken ones are rolled back, and a crashing setup boots clean next time.</p></div>
+    <div><h3>Load order and profiles</h3><p>Reorder, switch mods on and off, keep different setups.</p></div>
+    <div><h3>Settings in one place</h3><p>Each mod's options in the app, not in files.</p></div>
+    <div><h3>Undo in one click</h3><p>Removing Cleanstrike puts the game back as it was.</p></div>
+  </div>
+  <img class="shot" src="img/app.jpg" alt="The Cleanstrike app" loading="lazy">
+</div></section>
+
+<section id="mods"><div class="wrap">
+  <h2 class="stencil">Included mods</h2>
+  <div class="mod">
+    <img src="img/loot.jpg" alt="" loading="lazy">
+    <div>
+      <p class="state">Available</p>
+      <h3>Tarkov Looting</h3>
+      <p>Search containers and bodies one item at a time. Items you haven't seen are silhouettes until you examine them. Weapons and magazines still work before you do.</p>
     </div>
-    <div class="counter"><b id="count">—</b><span>raiders have<br>downloaded Cleanstrike</span></div>
-    <p class="meta mono" id="ver">Latest release · GitHub</p>
   </div>
-</header>
-
-<div class="tape"><p>CLEANSTRIKE ✦ ROAD TO VOSTOK ✦ TARKOV LOOTING ✦ SEARCH ✦ EXAMINE ✦ EXTRACT ✦ CLEANSTRIKE ✦ ROAD TO VOSTOK ✦ TARKOV LOOTING ✦ SEARCH ✦ EXAMINE ✦ EXTRACT ✦ CLEANSTRIKE ✦ ROAD TO VOSTOK ✦ TARKOV LOOTING ✦ SEARCH ✦ EXAMINE ✦ EXTRACT ✦ CLEANSTRIKE ✦ ROAD TO VOSTOK ✦ TARKOV LOOTING ✦ SEARCH ✦ EXAMINE ✦ EXTRACT ✦</p></div>
-
-<section id="features"><div class="wrap">
-  <p class="kicker reveal">Built for the zone</p>
-  <h2 class="stencil reveal">Gear up in seconds.</h2>
-  <p class="sub reveal">One portable app. Run it from anywhere and it finds your game on its own.</p>
-  <div class="grid">
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div><h3>Finds your game</h3><p>Scans Steam and every library folder automatically. Or point it at the game yourself.</p></div>
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg></div><h3>Drag, drop, play</h3><p>.csmod, .vmz, .zip, .pck. Badly packaged mods are repaired on install.</p></div>
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3>Load order & profiles</h3><p>Drag to reorder, toggle mods on and off, and keep separate loadouts.</p></div>
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg></div><h3>Safety nets</h3><p>Incompatible mods are held back, broken ones roll back alone, and two crashed boots start the game clean.</p></div>
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div><h3>Per-mod settings</h3><p>Every mod's options in one clean panel. No config files to hunt down.</p></div>
-    <div class="card reveal"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><h3>Launch report</h3><p>After every raid, see which mods loaded, and if one didn't, why, in plain language.</p></div>
-  </div>
-</div></section>
-
-<section id="how" style="padding-top:20px"><div class="wrap show">
-  <div class="frame reveal"><div class="bar"><i></i><i></i><i></i></div><img src="img/app.jpg" alt="The Cleanstrike app" loading="lazy"></div>
-  <div>
-    <p class="kicker reveal">Deploy</p>
-    <h2 class="stencil reveal">Three steps to the raid.</h2>
-    <ol class="steps">
-      <li class="reveal"><div><b>Download Cleanstrike</b><span>A single portable .exe. Nothing to install.</span></div></li>
-      <li class="reveal"><div><b>Drop your mods in</b><span>Drag files onto the window or click Add mod.</span></div></li>
-      <li class="reveal"><div><b>Press Play</b><span>Cleanstrike wires itself into the game and launches it. Remove it any time with one click.</span></div></li>
-    </ol>
-  </div>
-</div></section>
-
-<section id="mods" style="padding-top:20px"><div class="wrap">
-  <p class="kicker reveal">From the Cleanstrike workshop</p>
-  <h2 class="stencil reveal">Tarkov, brought to Vostok.</h2>
-  <p class="sub reveal">Our own mods, built to feel native to the game.</p>
-  <div class="mods">
-    <article class="mod reveal">
-      <div class="art" style="background-image:url(img/loot.jpg);background-size:contain;background-repeat:no-repeat;background-color:#0b0c0d"></div>
-      <div class="body">
-        <span class="pill ok">Available</span>
-        <h3 class="stencil">Tarkov Looting</h3>
-        <p style="color:var(--muted)">Every container is a gamble. Search it item by item and find out what you've got.</p>
-        <ul>
-          <li>Containers and bodies searched one item at a time</li>
-          <li>Unknown items are silhouettes until you examine them (middle-click)</li>
-          <li>Weapons and mags work before you examine them</li>
-          <li>Tarkov-style colour-coded cells</li>
-        </ul>
-      </div>
-    </article>
-    <article class="mod reveal">
-      <div class="art" style="background-image:url(img/rtt.jpg);background-position:center 35%"></div>
-      <div class="body">
-        <span class="pill wip">In progress</span>
-        <h3 class="stencil">Road to Tarkov</h3>
-        <p style="color:var(--muted)">A full Tarkov overhaul for Road to Vostok, starting with a full-scale Customs.</p>
-        <ul>
-          <li>Travel to Customs from every School exit</li>
-          <li>Tarkov's playable bounds and extracts</li>
-          <li>Customs map art by re3mr.com (CC BY-NC-SA 4.0)</li>
-        </ul>
-      </div>
-    </article>
-  </div>
-</div></section>
-
-<section style="padding-top:20px"><div class="wrap">
-  <div class="final reveal">
-    <img src="img/logo.png" alt="" style="width:88px;margin:0 auto 18px;filter:drop-shadow(0 0 24px rgba(242,181,68,.4))">
-    <p class="kicker">Ready to drop in?</p>
-    <h2 class="stencil">Get Cleanstrike.</h2>
-    <p class="sub" style="margin:0 auto">Free, portable, and safe for your saves.</p>
-    <div class="cta"><a class="btn btn-dl dl-link" href="#"><span>Download for Windows<small id="ver2">Latest release</small></span></a></div>
+  <div class="mod">
+    <img src="img/rtt.jpg" alt="" loading="lazy">
+    <div>
+      <p class="state">In progress</p>
+      <h3>Road to Tarkov</h3>
+      <p>A Tarkov overhaul, starting with Customs. Map art by re3mr.com (CC BY-NC-SA 4.0).</p>
+    </div>
   </div>
 </div></section>
 
 <footer><div class="wrap">
-  <span>© <span id="yr"></span> Cleanstrike · Fan-made, not affiliated with Road to Vostok or Battlestate Games.</span>
-  <span><a href="https://github.com/project509/cleanstrike">GitHub</a> · <a href="https://github.com/project509/cleanstrike/releases">Releases</a></span>
+  <span>Fan-made. Not affiliated with Road to Vostok or Battlestate Games.</span>
+  <span><a href="https://github.com/project509/cleanstrike/releases">Releases</a></span>
 </div></footer>
 
 <script>
 const REPO = "project509/cleanstrike";
-const DL = `https://github.com/${REPO}/releases/latest/download/Cleanstrike.exe`;
-document.querySelectorAll(".dl-link").forEach(a => a.href = DL);
-document.getElementById("yr").textContent = new Date().getFullYear();
-
-const countEl = document.getElementById("count");
-function show(n){
-  const fmt = new Intl.NumberFormat();
-  const start = performance.now(), dur = 1400;
-  (function tick(t){
-    const p = Math.min(1,(t-start)/dur), e = 1-Math.pow(1-p,3);
-    countEl.textContent = fmt.format(Math.round(n*e));
-    if (p < 1) requestAnimationFrame(tick);
-  })(start);
-}
-// Downloads are counted by GitHub per release asset. /api/downloads (a
-// Cloudflare Pages Function) caches the total; fall back to GitHub directly.
-async function loadCount(){
-  try {
-    const r = await fetch("/api/downloads");
-    if (r.ok) { const d = await r.json(); if (typeof d.downloads === "number") return show(d.downloads); }
-  } catch {}
-  try {
-    const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`);
-    const rel = await r.json();
-    show(rel.reduce((s,x)=>s+(x.assets||[]).reduce((t,a)=>t+a.download_count,0),0));
-  } catch { countEl.textContent = "—"; }
-}
-loadCount();
-fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then(r=>r.ok?r.json():null).then(d=>{
-  if(!d) return;
-  const t = `${d.tag_name} · released ${new Date(d.published_at).toLocaleDateString()}`;
-  document.getElementById("ver").textContent = "Latest: " + t;
-  document.getElementById("ver2").textContent = d.tag_name + " · Windows 10/11";
-}).catch(()=>{});
-
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold:.12});
-document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+document.querySelectorAll(".dl-link").forEach(a => a.href = `https://github.com/${REPO}/releases/latest/download/Cleanstrike.exe`);
+const sum = rel => rel.reduce((s, x) => s + (x.assets || []).reduce((t, a) => t + a.download_count, 0), 0);
+const show = n => document.getElementById("count").textContent = n.toLocaleString();
+fetch("/api/downloads").then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => show(d.downloads))
+  .catch(() => fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`).then(r => r.json()).then(r => show(sum(r))).catch(() => {}));
+fetch(`https://api.github.com/repos/${REPO}/releases/latest`).then(r => r.ok ? r.json() : null)
+  .then(d => { if (d) document.getElementById("ver").textContent = d.tag_name; }).catch(() => {});
 </script>
 </body>
 </html>
