@@ -1,0 +1,16 @@
+[mod]
+name="Burst Fire"
+id="cs_burst_fire"
+version="1.0.0"
+author="Cleanstrike"
+description="Automatic weapons get a burst mode: semi, auto, then burst (3 rounds by default) when you switch fire modes."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay"]
+
+[script_extend]
+res://Scripts/WeaponRig.gd="res://CSBurstFire/Ext/WeaponRig.gd"
