@@ -22,8 +22,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 | 4 | Event Hints | cs_event_hints | Done (1.0.0) |
 | 5 | Focus Zoom, Hold Breath | cs_focus_zoom, cs_hold_breath | Done (1.0.0) |
 | 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Done (1.0.0) |
-| 7 | Medical Durability | | Next |
-| 8 | Gear Spawns | | Planned |
+| 7 | Medical Durability | cs_medical_durability | Done (1.0.0) |
+| 8 | Gear Spawns | | Next |
 | | Tarkov Looting (premium) | tarkov_looting | Done (1.2.0) |
 | | Road to Tarkov (premium) | road_to_tarkov | Paused |
 

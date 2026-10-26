@@ -1,0 +1,191 @@
+{
+  "settings": [
+    {
+      "key": "found_partly_used",
+      "type": "bool",
+      "default": true,
+      "label": "Found supplies are partly used",
+      "description": "Supplies from containers, bodies and the floor have some uses left; traders sell them full."
+    },
+    {
+      "key": "uses_Bandage_Improvised",
+      "type": "int",
+      "default": 2,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Bandage Improvised: uses"
+    },
+    {
+      "key": "uses_Bandage",
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Bandage: uses"
+    },
+    {
+      "key": "uses_Splint_Improvised",
+      "type": "int",
+      "default": 2,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Splint Improvised: uses"
+    },
+    {
+      "key": "uses_Splint",
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Splint: uses"
+    },
+    {
+      "key": "uses_Tourniquet_Improvised",
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Tourniquet Improvised: uses"
+    },
+    {
+      "key": "uses_Tourniquet",
+      "type": "int",
+      "default": 5,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Tourniquet: uses"
+    },
+    {
+      "key": "uses_Painkillers",
+      "type": "int",
+      "default": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Painkillers: uses"
+    },
+    {
+      "key": "uses_Antibiotics",
+      "type": "int",
+      "default": 4,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Antibiotics: uses"
+    },
+    {
+      "key": "uses_Antiseptic",
+      "type": "int",
+      "default": 5,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Antiseptic: uses"
+    },
+    {
+      "key": "uses_IFAK",
+      "type": "int",
+      "default": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "IFAK: uses"
+    },
+    {
+      "key": "uses_AFAK",
+      "type": "int",
+      "default": 7,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "AFAK: uses"
+    },
+    {
+      "key": "uses_Cold_Medicine",
+      "type": "int",
+      "default": 4,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Cold Medicine: uses"
+    },
+    {
+      "key": "uses_Lotion",
+      "type": "int",
+      "default": 4,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Lotion: uses"
+    },
+    {
+      "key": "uses_Balm",
+      "type": "int",
+      "default": 4,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Balm: uses"
+    },
+    {
+      "key": "uses_Melatonin",
+      "type": "int",
+      "default": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Melatonin: uses"
+    },
+    {
+      "key": "uses_Wipes",
+      "type": "int",
+      "default": 8,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Wipes: uses"
+    },
+    {
+      "key": "uses_Tissues",
+      "type": "int",
+      "default": 8,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Tissues: uses"
+    },
+    {
+      "key": "uses_Deodorant",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Deodorant: uses"
+    },
+    {
+      "key": "uses_Saline",
+      "type": "int",
+      "default": 2,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Saline: uses"
+    },
+    {
+      "key": "uses_Medkit",
+      "type": "int",
+      "default": 8,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Medkit: uses"
+    }
+  ]
+}

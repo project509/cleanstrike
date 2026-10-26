@@ -1,0 +1,19 @@
+[mod]
+name="Medical Durability"
+id="cs_medical_durability"
+version="1.0.0"
+author="Cleanstrike"
+description="Medical supplies have several uses: a bandage does three, a medkit eight. Found supplies are partly used; traders sell them full. Uses left show on the item."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Survival", "Medical"]
+
+[script_extend]
+res://Scripts/Item.gd="res://CSMedicalDurability/Ext/Item.gd"
+res://Scripts/LootContainer.gd="res://CSMedicalDurability/Ext/LootContainer.gd"
+res://Scripts/LootSimulation.gd="res://CSMedicalDurability/Ext/LootSimulation.gd"
+res://Scripts/Interface.gd="res://CSMedicalDurability/Ext/Interface.gd"
