@@ -8,7 +8,7 @@
 <meta property="og:title" content="Cleanstrike — Mod Manager for Road to Vostok">
 <meta property="og:description" content="Drop mods in. Press Play. Tarkov-style looting for Road to Vostok.">
 <meta property="og:image" content="img/rtt.jpg">
-<link rel="icon" href="img/logo.png">
+<link rel="icon" href="img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -34,7 +34,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;op
 nav{position:fixed;top:0;left:0;right:0;z-index:40;backdrop-filter:blur(10px);background:rgba(10,11,12,.72);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
-.brand img{width:30px;height:30px;border-radius:7px}
+.brand img{width:34px;height:34px;filter:drop-shadow(0 0 8px rgba(242,181,68,.35))}
 nav ul{display:flex;gap:28px;list-style:none;font-size:14px;color:var(--muted)}
 nav ul a:hover{color:var(--text)}
 .btn{display:inline-flex;align-items:center;gap:10px;border-radius:10px;font-weight:600;transition:.2s;cursor:pointer;border:0}
@@ -48,6 +48,7 @@ nav ul a:hover{color:var(--text)}
   radial-gradient(ellipse at 70% 40%,transparent 0,rgba(10,11,12,.55) 55%,var(--bg) 100%),
   linear-gradient(180deg,rgba(10,11,12,.3) 0,rgba(10,11,12,.1) 40%,var(--bg) 100%)}
 .hero .wrap{position:relative;z-index:2;width:100%}
+.hero-logo{width:clamp(96px,12vw,150px);margin-bottom:22px;filter:drop-shadow(0 0 30px rgba(242,181,68,.35))}
 .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(242,181,68,.35);background:rgba(242,181,68,.08);color:var(--amber);border-radius:999px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .tag i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.8s infinite}
 @keyframes pulse{50%{opacity:.35}}
@@ -141,6 +142,7 @@ footer a:hover{color:var(--text)}
 <header class="hero">
   <div class="hero-bg"></div>
   <div class="wrap">
+    <img class="hero-logo" src="img/logo.png" alt="Cleanstrike logo">
     <div class="tag"><i></i> Road to Vostok mod manager</div>
     <h1 class="stencil">Mod Vostok.<br><span>Raid like Tarkov.</span></h1>
     <p class="lede">Cleanstrike is the one-click mod loader and manager for Road to Vostok. Drop mods in, press Play. No file juggling, no broken installs, no fear for your saves.</p>
@@ -222,6 +224,7 @@ footer a:hover{color:var(--text)}
 
 <section style="padding-top:20px"><div class="wrap">
   <div class="final reveal">
+    <img src="img/logo.png" alt="" style="width:88px;margin:0 auto 18px;filter:drop-shadow(0 0 24px rgba(242,181,68,.4))">
     <p class="kicker">Ready to drop in?</p>
     <h2 class="stencil">Get Cleanstrike.</h2>
     <p class="sub" style="margin:0 auto">Free, portable, and safe for your saves.</p>

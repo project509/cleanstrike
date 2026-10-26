@@ -26,11 +26,7 @@
 
         <!-- Brand mark: dark tile with an amber strike -->
         <DataTemplate x:Key="Mark">
-            <Grid Width="26" Height="26">
-                <Border CornerRadius="7" Background="#16181C" BorderBrush="#30353C" BorderThickness="1" />
-                <Path Fill="{StaticResource Accent}" Data="M 7.6,20.8 L 11.9,20.8 L 18.4,5.2 L 14.1,5.2 Z" />
-                <Path Fill="#6EF2B544" Data="M 4.6,18 L 5.9,18 L 12.4,8 L 11.1,8 Z" />
-            </Grid>
+            <Image Width="30" Height="30" Source="/Assets/cleanstrike.png" RenderOptions.BitmapScalingMode="HighQuality" />
         </DataTemplate>
     </Window.Resources>
 
