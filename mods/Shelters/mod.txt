@@ -1,0 +1,16 @@
+[mod]
+name="Shelters"
+id="cs_shelters"
+version="1.0.0"
+author="Cleanstrike"
+description="Shelters are a real refuge: hunger, thirst and stress slow down inside, you slowly heal when you are not hurt, and your cat gets hungry more slowly."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Shelter", "Survival"]
+
+[script_extend]
+res://Scripts/Character.gd="res://CSShelters/Ext/Character.gd"

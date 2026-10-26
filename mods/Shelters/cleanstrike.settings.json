@@ -1,0 +1,44 @@
+{
+  "settings": [
+    {
+      "key": "needs_rate",
+      "type": "float",
+      "default": 0.25,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Hunger and thirst inside (x)",
+      "description": "0 = paused, 1 = as outside."
+    },
+    {
+      "key": "mental_rate",
+      "type": "float",
+      "default": 0.0,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Stress inside (x)",
+      "description": "0 = shelters are calming."
+    },
+    {
+      "key": "cat_rate",
+      "type": "float",
+      "default": 0.5,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Cat hunger inside (x)",
+      "description": "When the cat is with you."
+    },
+    {
+      "key": "heal_per_minute",
+      "type": "float",
+      "default": 6.0,
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "label": "Healing (HP per minute)",
+      "description": "While unhurt, fed and watered. 0 = off."
+    }
+  ]
+}
