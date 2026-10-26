@@ -31,6 +31,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\loader\cleanstrike_loader.gd" LogicalName="cleanstrike_loader.gd" />
+    <!-- Cleanstrike's own mods ship inside the app (built by tools/publish.sh). -->
+    <EmbeddedResource Include="../../dist/bundled/*.csmod" LogicalName="bundled/%(Filename)%(Extension)" />
     <Resource Include="Assets\cleanstrike.ico" />
     <Resource Include="Assets\cleanstrike.png" />
   </ItemGroup>

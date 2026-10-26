@@ -261,6 +261,7 @@ public sealed class MainViewModel : ObservableObject
     {
         if (Game == null) return;
         selectId ??= Selected?.Mod.Id;
+        ModLibrary.InstallBundled(Game);
         var mods = ModLibrary.Scan(Game);
         _profile = Store.LoadProfile(ActiveProfile);
         // Mods that appear in the folder are on in the profile you're using.

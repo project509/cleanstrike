@@ -11,6 +11,40 @@ public static class ModLibrary
     public const string SettingsFile = "cleanstrike.settings.json";
     public static readonly string[] ThumbnailNames = { "icon.png", "icon.jpg", "thumbnail.png", "thumbnail.jpg" };
 
+    // Installs the mods bundled in the app. Each bundled version is installed
+    // once: if the player removes a mod, it stays removed until a newer
+    // version ships with Cleanstrike.
+    public static void InstallBundled(GameInstall game)
+    {
+        var asm = System.Reflection.Assembly.GetExecutingAssembly();
+        var seenPath = Path.Combine(Log.AppDataDir, "bundled.txt");
+        var seen = File.Exists(seenPath) ? File.ReadAllLines(seenPath).ToHashSet() : new HashSet<string>();
+        bool changed = false;
+        foreach (var name in asm.GetManifestResourceNames().Where(n => n.StartsWith("bundled/")))
+        {
+            var tmp = Path.Combine(Path.GetTempPath(), "cleanstrike-bundled-" + Path.GetFileName(name));
+            try
+            {
+                using (var src = asm.GetManifestResourceStream(name)!)
+                using (var dst = File.Create(tmp)) src.CopyTo(dst);
+                var info = Read(tmp);
+                var key = info.Id + "@" + info.Version;
+                if (seen.Contains(key)) continue;
+                var installed = Scan(game);
+                var current = installed.FirstOrDefault(m => m.Id == info.Id);
+                if (current == null || CompareVersions(current.Version, info.Version) < 0)
+                {
+                    Install(game, tmp, installed);
+                    Log.Write($"Installed bundled {key}");
+                }
+                seen.Add(key); changed = true;
+            }
+            catch (Exception ex) { Log.Write($"Bundled {name} failed: {ex.Message}"); }
+            finally { try { File.Delete(tmp); } catch { } }
+        }
+        if (changed) File.WriteAllLines(seenPath, seen);
+    }
+
     public static List<ModInfo> Scan(GameInstall game)
     {
         var list = new List<ModInfo>();
