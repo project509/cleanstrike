@@ -18,13 +18,7 @@ func _input(event):
 	if k >= 0.999 or k <= 0.0:
 		super(event)
 		return
-	var look: float = gameData.lookSensitivity
-	var aim: float = gameData.aimSensitivity
-	var scope: float = gameData.scopeSensitivity
-	gameData.lookSensitivity = look * k
-	gameData.aimSensitivity = aim * k
-	gameData.scopeSensitivity = scope * k
-	super(event)
-	gameData.lookSensitivity = look
-	gameData.aimSensitivity = aim
-	gameData.scopeSensitivity = scope
+	# Scale the movement itself (the game clamps sensitivity at 0.1).
+	var scaled: InputEventMouseMotion = event.duplicate()
+	scaled.relative = event.relative * k
+	super(scaled)

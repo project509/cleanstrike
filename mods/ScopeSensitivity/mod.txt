@@ -1,0 +1,16 @@
+[mod]
+name="Scope Sensitivity"
+id="cs_scope_sensitivity"
+version="1.0.0"
+author="Cleanstrike"
+description="Mouse speed through a scope matches its magnification, so a 12x scope doesn't swing like a red dot. Your own scope sensitivity setting still applies on top."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay", "QoL"]
+
+[script_extend]
+res://Scripts/Controller.gd="res://CSScopeSensitivity/Ext/Controller.gd"
