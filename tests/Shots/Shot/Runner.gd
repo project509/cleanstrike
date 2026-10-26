@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -509,3 +509,39 @@ func zmap_views():
 		cam.look_at(near.global_position + Vector3.UP * 1.2, Vector3.UP)
 	await wait(0.3)
 	await shot("shot_zmap.png")
+
+
+# CleanStrike Zombies: frame times with a big horde hunting you on Village.
+func zperf_views():
+	var ZM = load("res://CSZombies/Mod.gd")
+	var gd = load("res://Resources/GameData.tres")
+	ZM.overrides = {"horde": 4.0, "start_share": 1.0}
+	Loader.LoadScene("Village")
+	while not map_ready("Village"):
+		await wait(0.5)
+	await wait(10.0)
+	var base := await _frame_stats(5.0)
+	var zs: Array = ZM.living.filter(func(z): return is_instance_valid(z) and z.active)
+	for z in zs:                                      # bring them all in, hunting
+		z.global_position = gd.playerPosition + Vector3(randf_range(-25, 25), 0, randf_range(-25, 25))
+		z.Hear(gd.playerPosition, false)
+	await wait(2.0)
+	var hunt := await _frame_stats(8.0)
+	print("[ZPERF] zombies %d | before: avg %.1f ms, worst %.1f ms | hunting: avg %.1f ms, worst %.1f ms" % [zs.size(), base[0], base[1], hunt[0], hunt[1]])
+	ZM.overrides = {}
+
+
+func _frame_stats(seconds: float) -> Array:
+	var times := []
+	var t0 := Time.get_ticks_usec()
+	var last := t0
+	while Time.get_ticks_usec() - t0 < seconds * 1e6:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		times.append((now - last) / 1000.0)
+		last = now
+	times.sort()
+	var avg := 0.0
+	for x in times:
+		avg += x
+	return [avg / maxf(1, times.size()), times[int(times.size() * 0.99)]]

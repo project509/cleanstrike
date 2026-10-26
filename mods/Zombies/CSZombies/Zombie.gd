@@ -50,6 +50,8 @@ var think := 0.0
 var current_anim := ""
 var path_next := Vector3.ZERO
 var voice: AudioStreamPlayer3D
+var path_to := Vector3.INF      # where the current path leads
+var path_age := 0.0
 var moan_in := 0.0
 var screamed := -1000.0
 
@@ -208,7 +210,7 @@ func _set_state(s: int) -> void:
 		S.ATTACK:
 			attack_ready = 0.0
 	if s in [S.WANDER, S.INVESTIGATE, S.CHASE]:
-		agent.target_position = target
+		path_to = Vector3.INF          # repath on the next move
 
 
 func _pick_wander() -> void:
@@ -217,7 +219,7 @@ func _pick_wander() -> void:
 		target = pts.pick_random().global_position
 	else:
 		target = global_position + Vector3(randf_range(-15, 15), 0, randf_range(-15, 15))
-	agent.target_position = target
+	path_to = Vector3.INF          # repath on the next move
 
 
 # How fast it moves: its current clip's own speed times the clip rate
@@ -232,8 +234,7 @@ func _speed() -> float:
 
 
 func _move(delta: float) -> void:
-	if state != S.WANDER:
-		agent.target_position = target
+	_repath(delta)
 	var next: Vector3 = agent.get_next_path_position() if not agent.is_navigation_finished() else target
 	if next.distance_to(global_position) < 0.05 or agent.get_current_navigation_path().is_empty():
 		next = target                                       # no navmesh here: head straight for it
@@ -248,6 +249,17 @@ func _move(delta: float) -> void:
 	rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), delta * 4.0)
 	_play(_move_anim(), spd)
 	anim.speed_scale = _rate()
+
+
+# A new path only when the goal has really moved, or now and then: path
+# searches across a whole map are the expensive part.
+func _repath(delta: float) -> void:
+	path_age += delta
+	if path_to == Vector3.INF or path_to.distance_to(target) > 1.5 or path_age > 2.0:
+		if path_age > 0.5 or path_to == Vector3.INF or path_to.distance_to(target) > 6.0:
+			agent.target_position = target
+			path_to = target
+			path_age = 0.0
 
 
 func _ground() -> void:
