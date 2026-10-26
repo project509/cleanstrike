@@ -1,0 +1,21 @@
+{
+  "settings": [
+    {
+      "key": "font",
+      "type": "choice",
+      "default": "Play",
+      "options": [
+        "Play",
+        "Rubik",
+        "Inter",
+        "Exo 2",
+        "Jost",
+        "Geologica",
+        "Literata",
+        "Lora (game)"
+      ],
+      "label": "Font",
+      "description": "Takes effect next launch."
+    }
+  ]
+}

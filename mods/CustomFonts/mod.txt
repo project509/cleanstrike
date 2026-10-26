@@ -1,0 +1,18 @@
+[mod]
+name="Custom Fonts"
+id="cs_custom_fonts"
+version="1.0.0"
+author="Cleanstrike"
+description="Pick the game's font: Play, Rubik, Inter, Exo 2, Jost, Geologica, Literata or the original Lora. Applies to the whole interface and to other Cleanstrike mods."
+priority=-50
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["UI", "Visual"]
+
+[script_extend]
+
+[autoload]
+CSCustomFontsBoot="res://CSCustomFonts/Boot.gd"

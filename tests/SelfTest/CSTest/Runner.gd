@@ -7,6 +7,7 @@ extends Node
 #   func run(r)        checks that leave the game where it was
 #   func run_last(r)   optional, may die/travel; must end back in the Tutorial
 const MOD_TESTS := {
+	"cs_custom_fonts": "res://CSTest/Mods/CustomFonts.gd",
 	"cs_tactical_watch": "res://CSTest/Mods/TacticalWatch.gd",
 	"cs_hud": "res://CSTest/Mods/HUD.gd",
 	"cs_better_inventory": "res://CSTest/Mods/BetterInventory.gd",
@@ -82,7 +83,12 @@ func run() -> void:
 	var mod_tests := []
 	for id in MOD_TESTS:
 		if cs.is_loaded(id):
-			mod_tests.append(load(MOD_TESTS[id]).new())
+			# A test that fails to compile must fail the run, not vanish.
+			var script = load(MOD_TESTS[id])
+			var ok: bool = script != null and script.can_instantiate()
+			check("test script compiles: " + MOD_TESTS[id].get_file(), ok)
+			if ok:
+				mod_tests.append(script.new())
 	for t in mod_tests:
 		await t.run(self)
 	for t in mod_tests:

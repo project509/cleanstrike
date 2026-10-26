@@ -19,7 +19,8 @@ func run(r) -> void:
 	TW.shown = false
 	panel._unhandled_input(e)
 	r.check("TacticalWatch: Y shows the panel", TW.visible_now())
-	await r.wait(0.1)
+	for i in 3:   # whole frames: the suite runs the game faster than real time
+		await r.get_tree().process_frame
 	var text := ""
 	for l in panel.lines:
 		text += str(l[0]) + " | "
