@@ -21,8 +21,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 | 3 | Loot Settings, Better Enemy Loot | cs_loot_settings, cs_better_enemy_loot | Done (1.0.0) |
 | 4 | Event Hints | cs_event_hints | Done (1.0.0) |
 | 5 | Focus Zoom, Hold Breath | cs_focus_zoom, cs_hold_breath | Done (1.0.0) |
-| 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Next |
-| 7 | Medical Durability | | Planned |
+| 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Done (1.0.0) |
+| 7 | Medical Durability | | Next |
 | 8 | Gear Spawns | | Planned |
 | | Tarkov Looting (premium) | tarkov_looting | Done (1.2.0) |
 | | Road to Tarkov (premium) | road_to_tarkov | Paused |
@@ -178,3 +178,10 @@ Night Vision Spawner (mod/56388): at night AI may carry flashlights (bandit
 20 / guard 40 / military 60%), NVG (0 / 5 / 30%), lasers (30 / 50 / 70%);
 sight boost 20 / 35 / 60; NVG wearers drop a PV7 with random battery;
 flashlights blink on 8-20 s / off 3-10 s, off on death.
+
+## Queued after the lineup's first wave
+- CleanStrike Zombies (premium): replaces all enemies with sound-aware zombie packs
+  (model + Mixamo animations in ideaboard/), dismemberment, crawlers, door breaking
+  (10 hits), loot chance, aggro loss after 3 min unseen.
+- CleanStrike Weapons Pack (premium): v1 = FN SCAR (asset in ideaboard/), fully
+  compatible with vanilla attachments and systems.

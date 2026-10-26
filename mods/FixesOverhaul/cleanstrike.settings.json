@@ -1,3 +1,104 @@
 {
-  "settings": []
+  "settings": [
+    {
+      "key": "doors",
+      "type": "bool",
+      "default": true,
+      "label": "Doors swing away from you",
+      "description": "A door could swing into you depending on your side; now it always opens away."
+    },
+    {
+      "key": "overlapping_areas",
+      "type": "bool",
+      "default": true,
+      "label": "Overlapping areas all apply",
+      "description": "Indoors by a fire, at a heated workbench: the game only counted the last area it checked."
+    },
+    {
+      "key": "event_odds",
+      "type": "bool",
+      "default": true,
+      "label": "Fair event odds",
+      "description": "Event chances are what they say. The game picks one event and rolls only that, so a 15% event happened under 4% of the time."
+    },
+    {
+      "key": "event_empty",
+      "type": "float",
+      "default": 20.0,
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "label": "Visits without an event (at least, %)",
+      "description": "If the events' chances add up to more than the rest, they're scaled down."
+    },
+    {
+      "key": "ai_night_fog",
+      "type": "bool",
+      "default": true,
+      "label": "AI sight on foggy nights",
+      "description": "AI see 40 m at night and 100 m in fog; on foggy nights the game used 100 m."
+    },
+    {
+      "key": "catalog_full",
+      "type": "bool",
+      "default": true,
+      "label": "No furniture lost to a full catalog",
+      "description": "Picking furniture up with a full catalog deleted it, with anything stored inside."
+    },
+    {
+      "key": "decor_cancel",
+      "type": "bool",
+      "default": true,
+      "label": "Put furniture back if it can't go there",
+      "description": "Moving furniture with nowhere valid to place it left you stuck holding it."
+    },
+    {
+      "key": "tooltips",
+      "type": "bool",
+      "default": true,
+      "label": "Steady tooltips",
+      "description": "Tooltips closed on the tiniest mouse move."
+    },
+    {
+      "key": "trader_info",
+      "type": "bool",
+      "default": true,
+      "label": "Right trader tax on arrival",
+      "description": "Just after loading a map, a trader could show full tax and no tasks done until you came back."
+    },
+    {
+      "key": "floor_loot",
+      "type": "bool",
+      "default": true,
+      "label": "Floor loot spawns properly",
+      "description": "Some floor loot never appeared, and some appeared several times over."
+    },
+    {
+      "key": "empty_marker",
+      "type": "bool",
+      "default": true,
+      "label": "Emptied containers say [Empty]"
+    },
+    {
+      "key": "unstuck",
+      "type": "bool",
+      "default": true,
+      "label": "Unstuck key",
+      "description": "Stuck in the scenery? Hold the key for 2 seconds to go back to where you stood a few seconds ago."
+    },
+    {
+      "key": "unstuck_key",
+      "type": "string",
+      "default": "F9",
+      "label": "Unstuck key name",
+      "description": "A key name like F9."
+    },
+    {
+      "key": "trader_shadows",
+      "type": "bool",
+      "default": false,
+      "label": "No shadows around traders (performance)",
+      "description": "For frame drops when looking toward a trader."
+    }
+  ]
 }

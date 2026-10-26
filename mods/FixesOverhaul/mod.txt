@@ -3,7 +3,7 @@ name="CleanStrike Fixes Overhaul"
 id="cs_fixes_overhaul"
 version="1.0.0"
 author="Cleanstrike"
-description="Fixes for Road to Vostok bugs: doors, traders, events, overlapping effect areas and more, all in one mod."
+description="Fixes for Road to Vostok bugs, each with its own switch: doors swing away from you, overlapping areas all apply, fair event odds, AI night sight in fog, no furniture lost to a full catalog, no decor soft-lock, steady tooltips, correct trader tax on arrival, floor loot that spawns properly, [Empty] containers, and an unstuck key."
 priority=0
 
 [cleanstrike]
@@ -12,5 +12,19 @@ premium=true
 game_min="0.2.2.0"
 godot_min="4.6.0"
 tags=["Fixes", "QoL"]
+; Event Hints does fair event odds itself when it's on.
+defer_to="cs_event_hints"
+defer_targets=["res://Scripts/EventSystem.gd"]
 
 [script_extend]
+res://Scripts/Door.gd="res://CSFixesOverhaul/Ext/Door.gd"
+res://Scripts/Interactor.gd="res://CSFixesOverhaul/Ext/Interactor.gd"
+res://Scripts/LootContainer.gd="res://CSFixesOverhaul/Ext/LootContainer.gd"
+res://Scripts/Trader.gd="res://CSFixesOverhaul/Ext/Trader.gd"
+res://Scripts/Controller.gd="res://CSFixesOverhaul/Ext/Controller.gd"
+res://Scripts/Detector.gd="res://CSFixesOverhaul/Ext/Detector.gd"
+res://Scripts/Sensor.gd="res://CSFixesOverhaul/Ext/Sensor.gd"
+res://Scripts/Placer.gd="res://CSFixesOverhaul/Ext/Placer.gd"
+res://Scripts/LootSimulation.gd="res://CSFixesOverhaul/Ext/LootSimulation.gd"
+res://Scripts/EventSystem.gd="res://CSFixesOverhaul/Ext/EventSystem.gd"
+res://Scripts/Interface.gd="res://CSFixesOverhaul/Ext/Interface.gd"
