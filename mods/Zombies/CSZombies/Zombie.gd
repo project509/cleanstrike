@@ -95,6 +95,8 @@ func Activate(_state = "Wander") -> void:
 	visible = true
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_set_state(S.WANDER)
+	if ZM.heat > 0.35 and randf() < ZM.heat:          # the swarm closes in on you
+		Hear(gameData.playerPosition, false)
 
 
 func ChangeState(_s) -> void:      # the spawner's "go and check this out"
@@ -184,6 +186,7 @@ func _decide() -> void:
 				if not crawler and randf() < 0.5:
 					_play("scream", 0.0, true)
 		last_seen = now
+		ZM.notice(0.004)
 		target = gameData.playerPosition
 		if state != S.ATTACK and state != S.DOOR:
 			_set_state(S.CHASE)

@@ -203,8 +203,28 @@ func run(r) -> void:
 	sp.activeEnemyLimit = 2
 	await sp.CreatePools()
 	var all_dead: bool = sp.EPool.get_children().all(func(e): return e.has_method("Hit"))
-	r.check("Zombies: every enemy is a zombie", all_dead and sp.EPool.get_child_count() == 6 and sp.NPool.get_child_count() == 0, "%d enemies, %d nomads" % [sp.EPool.get_child_count(), sp.NPool.get_child_count()])
+	r.check("Zombies: every enemy is a zombie", all_dead and sp.EPool.get_child_count() == int(round(3 * float(ZM.setting("horde")))) and sp.NPool.get_child_count() == 0, "%d enemies, %d nomads" % [sp.EPool.get_child_count(), sp.NPool.get_child_count()])
 	r.check("Zombies: bosses too", sp.BPool.get_children().all(func(e): return e.has_method("Hit")))
+	# Pressure: shots build it, the spawner sends more and closer; hiding cools it
+	ZM.heat = 0.0
+	for i in 10:
+		ZM.note_shot(Vector3(0, -900, 0))
+	r.check("Zombies: shooting builds pressure", ZM.heat > 0.4, "%.2f" % ZM.heat)
+	var calm_limit: int = sp.zs_base_limit
+	sp.active = true
+	sp._physics_process(0.016)
+	r.check("Zombies: pressure means more of them, closer", sp.activeEnemyLimit > calm_limit and sp.spawnDistance < sp.zs_base_distance, "%d > %d, %.0f m" % [sp.activeEnemyLimit, calm_limit, sp.spawnDistance])
+	var h: float = ZM.heat
+	ZM.cool(5.0)
+	r.check("Zombies: no cooling while they still know where you are", ZM.heat == h)
+	ZM.noticed_at -= 40.0
+	ZM.cool(60.0)
+	r.check("Zombies: hiding cools it", ZM.heat < h)
+	ZM.heat = 0.0
+	var pool_before: int = sp.EPool.get_child_count()
+	sp.ZS_Replenish()
+	r.check("Zombies: the dead are replaced", sp.EPool.get_child_count() == pool_before + 1)
+	sp.active = false
 	sp.queue_free()
 	door.queue_free()
 	for m in made:

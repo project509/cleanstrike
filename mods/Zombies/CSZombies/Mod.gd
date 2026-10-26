@@ -3,7 +3,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_zombies"
-const VERSION := "1.0.0"
+const VERSION := "1.1.0"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {
@@ -11,7 +11,9 @@ const DEFAULTS := {
 	"damage": 60.0,           # a blow takes 15-30 health before armour
 	"speed": 1.0,             # how fast they move (and animate) (x)
 	"rage_chance": 0.12,      # shot at, a zombie may charge you for a few seconds
-	"horde": 2.0,             # how many more than the game's enemies
+	"horde": 4.0,             # how many more than the game's enemies
+	"respawn": true,          # the dead are replaced, 30-90 s later
+	"escalation": 1.0,        # how hard the pressure builds while you are noticed
 	"start_share": 0.5,       # share of the alive cap already out when you arrive
 	"hearing": 1.0,           # gunshots carry 140 m at 1
 	"sight": 35.0,
@@ -48,6 +50,9 @@ static var _scene: PackedScene
 static var living: Array = []
 static var corpses: Array = []
 static var _blood_mat: StandardMaterial3D
+static var spawners: Array = []
+static var heat := 0.0                    # 0 calm .. 1 swarming: builds while you are noticed
+static var noticed_at := -1000.0          # last time a zombie saw or heard you
 static var last_shot := -1000.0          # when and where you last fired
 static var last_shot_at := Vector3.ZERO
 
@@ -106,6 +111,7 @@ static func sound(kind: String) -> AudioStream:
 
 # A shot: every zombie in earshot hears it, right away (nothing to miss).
 static func note_shot(at: Vector3) -> int:
+	notice(0.06)
 	last_shot = Time.get_ticks_msec() / 1000.0
 	last_shot_at = at
 	var reach := 140.0 * float(setting("hearing"))
@@ -115,6 +121,18 @@ static func note_shot(at: Vector3) -> int:
 			z.Hear(at, true)
 			n += 1
 	return n
+
+
+# Pressure: every shot and every zombie on you raises it; it only cools once
+# nothing has seen or heard you for 30 s.
+static func notice(amount: float) -> void:
+	noticed_at = Time.get_ticks_msec() / 1000.0
+	heat = clampf(heat + amount * float(setting("escalation")), 0.0, 1.0)
+
+
+static func cool(delta: float) -> void:
+	if Time.get_ticks_msec() / 1000.0 - noticed_at > 30.0:
+		heat = maxf(0.0, heat - delta / 120.0)          # about two minutes hidden to calm fully
 
 
 static func limb_health(part: String) -> float:
@@ -217,6 +235,8 @@ static func register(z) -> void:
 
 static func release() -> void:
 	_scene = null
+	spawners.clear()
+	heat = 0.0
 	_sounds.clear()
 	living.clear()
 	corpses.clear()
@@ -441,6 +461,11 @@ static func _stump(att: Node3D) -> GPUParticles3D:
 # ---------------------------------------------------------------- death
 
 static func died(z, _vector: Vector3) -> void:
+	if bool(setting("respawn")) and z.AISpawner and z.AISpawner.has_method("ZS_Replenish"):
+		var sp = z.AISpawner
+		z.get_tree().create_timer(randf_range(30.0, 90.0), false).timeout.connect(func():
+			if is_instance_valid(sp):
+				sp.ZS_Replenish())
 	living.erase(z)
 	corpses.append(z)
 	corpses = corpses.filter(func(c): return is_instance_valid(c))
