@@ -1,7 +1,7 @@
 [mod]
 name="Road to Tarkov"
 id="road_to_tarkov"
-version="0.2.0"
+version="0.3.0"
 author="Cleanstrike"
 description="Tarkov-style looting (search containers and bodies item by item, examine unknown items, Tarkov-style cells) and travel to Customs from every School exit. Customs map art by re3mr.com (CC BY-NC-SA 4.0)."
 priority=0
@@ -24,3 +24,4 @@ res://Scripts/HUD.gd="res://RoadToTarkov/Ext/HUD.gd"
 res://Scripts/Compiler.gd="res://RoadToTarkov/Ext/Compiler.gd"
 res://Scripts/Loader.gd="res://RoadToTarkov/Ext/Loader.gd"
 res://Scripts/Interface.gd="res://RoadToTarkov/Ext/Interface.gd"
+res://Scripts/Menu.gd="res://RoadToTarkov/Ext/Menu.gd"

@@ -35,7 +35,69 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	await customs_views()
+	if OS.get_cmdline_user_args().has("--perf") or FileAccess.file_exists("user://cleanstrike/perf_mode"):
+		await perf_run("Customs", [[330, 150, 640, 560, 0, 330], [250, 1.7, 343, 420, 3, 362], [505, 1.7, 418, 505, 6, 470], [702, 2.5, 372, 795, 4, 351], [300, 1.7, 420, 340, 3, 380]])
+		Loader.LoadScene("Village")
+		while not map_ready("Village"):
+			await wait(0.5)
+		await wait(3.0)
+		await perf_run("Village", [])
 	get_tree().quit()
+
+func perf_sample(label: String) -> void:
+	await wait(1.5)
+	var frames := 0
+	var t0 := Time.get_ticks_usec()
+	var worst := 0.0
+	var last := t0
+	var dc := 0
+	var prims := 0
+	var objs := 0
+	while Time.get_ticks_usec() - t0 < 3000000:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		worst = maxf(worst, (now - last) / 1000.0)
+		last = now
+		frames += 1
+		dc = maxi(dc, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
+		prims = maxi(prims, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
+		objs = maxi(objs, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME))
+	var avg := 3000.0 / frames
+	var line := "%s avg %.1f ms (%.0f fps) worst %.1f ms | draws %d objects %d prims %.1fM | vram %.0f MB" % [label, avg, 1000.0 / avg, worst, dc, objs, prims / 1e6, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0]
+	print("[perf] " + line)
+	var f := FileAccess.open("user://cleanstrike/perf.txt", FileAccess.READ_WRITE if FileAccess.file_exists("user://cleanstrike/perf.txt") else FileAccess.WRITE)
+	f.seek_end()
+	f.store_line(line)
+	f.close()
+
+func perf_run(map: String, views: Array) -> void:
+	get_node("/root/Map/Core/UI").hide()
+	if views.is_empty():
+		# Vostok map: sample from where the player stands plus a high view.
+		await perf_sample(map + " player")
+		var c := Camera3D.new()
+		c.far = 3000.0
+		get_node("/root/Map").add_child(c)
+		c.global_position = Vector3(0, 150, 300)
+		c.look_at(Vector3.ZERO, Vector3.UP)
+		c.make_current()
+		await perf_sample(map + " overview")
+		return
+	var cam := Camera3D.new()
+	cam.far = 3000.0
+	cam.fov = 70.0
+	get_node("/root/Map").add_child(cam)
+	var k := 0
+	for v in views:
+		var ex = float(v[0]) - 540.0
+		var ez = float(v[2]) - 340.0
+		var tx = float(v[3]) - 540.0
+		var tz = float(v[5]) - 340.0
+		cam.global_position = Vector3(ex, ground(ex, ez) + float(v[1]), ez)
+		cam.look_at(Vector3(tx, ground(tx, tz) + float(v[4]), tz), Vector3.UP)
+		cam.make_current()
+		await perf_sample("%s view %d" % [map, k])
+		k += 1
 
 func ground(x: float, z: float) -> float:
 	var space = get_node("/root/Map").get_world_3d().direct_space_state
@@ -82,6 +144,11 @@ func customs_views():
 		["garages", 1000, 1.7, 304, 990, 2, 270],
 		["forest_edge", 300, 1.7, 420, 340, 3, 380],
 		["dorms_outside", 497, 1.7, 470, 523, 6, 462],
+		["scav_hall", 545, 1.7, 300, 500, 10, 255],
+		["gantries", 300, 1.7, 345, 285, 6, 315],
+		["trailer_park", 982, 1.7, 256, 982, 2, 232],
+		["west_checkpoint", 150, 1.7, 395, 120, 3, 362],
+		["bridge_checkpoint", 680, 1.7, 372, 720, 3, 352],
 		["dorm_corridor", 522.5, 1.65, 450.0, 522.5, 1.5, 485.0],
 		["dorm_room", 521.0, 1.6, 462.9, 516.2, 1.1, 461.2],
 		["dorm_stairs", 524.0, 1.65, 447.8, 517.5, 2.5, 446.5],

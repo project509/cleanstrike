@@ -103,6 +103,7 @@ func _ready() -> void:
 	build_road_details()
 	build_backdrop()
 	build_dressing()
+	build_set_pieces()
 	log_step("buildings & props", t0)
 	build_exits()
 	build_border()
@@ -645,6 +646,8 @@ func build_buildings() -> void:
 				build_generated(holder, b)
 			"dorm":
 				build_dorm(holder, b)
+			"hall_ruin":
+				build_hall_ruin(holder, b)
 			_:
 				if KINDS.has(kind):
 					var best := ""
@@ -1538,6 +1541,8 @@ func build_dressing() -> void:
 				continue
 			var mid := (a + b) / 2.0
 			var path := "res://Assets/Pipeline/Pipeline_C_Overpass.tscn" if _near_road(mid) else "res://Assets/Pipeline/Pipeline_C.tscn"
+			if bool(pdef.get("small", false)):
+				path = "res://Assets/Pipeline/Pipeline_A.tscn"
 			var from := W(a.x, a.y)
 			var to := W(b.x, b.y)
 			to.y = from.y
@@ -1599,7 +1604,8 @@ func build_dressing() -> void:
 	var bar := group(g, "Barriers")
 	for p in [[118, 336], [124, 340], [1022, 300], [1018, 306], [690, 382], [517, 432]]:
 		place("res://Assets/Barrier_Construction/Barrier_Construction.tscn", bar, float(p[0]), float(p[1]), rng.randf_range(0, PI))
-	build_crane(g)
+	if L.has("crane"):
+		build_crane(g)
 
 
 func _near_road(p: Vector2) -> bool:
@@ -2293,3 +2299,305 @@ func _collect_faces(n: Node, xf: Transform3D, src: PackedVector3Array, water: fl
 	for c in n.get_children():
 		count += _collect_faces(c, t, src, water)
 	return count
+
+
+
+# ================================================================== fidelity pass 2
+# Set pieces traced from re3mr's map: placements, cranes, gantries, the
+# ruined scav-base hall, pipe tower and bridge, parked wagons, crossings.
+
+func build_set_pieces() -> void:
+	var g := group(content, "SetPieces")
+	for pl in L.get("placements", []):
+		var path: String = pl.scene
+		if not ResourceLoader.exists(path):
+			push_warning("missing scene " + path)
+			continue
+		var p := v2(pl.pos)
+		place(path, g, p.x, p.y, deg_to_rad(float(pl.get("yaw", 0.0))), float(pl.get("lift", 0.0)))
+		var a := asset_aabb(path)
+		if a.size.y > 1.0 and a.size.y < 6.0:
+			cover_objects.append([p, maxf(a.size.x, a.size.z) / 2.0])
+	for cr in L.get("cranes", []):
+		build_tower_crane(g, cr)
+	for gd in L.get("gantries", []):
+		build_gantry(g, gd)
+	for t in L.get("pipe_towers", []):
+		build_pipe_tower(g, t)
+	for pb in L.get("pipe_bridges", []):
+		build_pipe_bridge(g, pb)
+	build_wagons(g)
+	build_crossings(g)
+
+
+func build_tower_crane(parent: Node, cr: Dictionary) -> void:
+	var p := v2(cr.pos)
+	var base := W(p.x, p.y)
+	var h := float(cr.height)
+	batch_begin()
+	batch_box("concrete", base + Vector3(0, 0.4, 0), Vector3(4.0, 0.8, 4.0))
+	for cx in [-1.0, 1.0]:
+		for cz in [-1.0, 1.0]:
+			batch_box("metal_red", base + Vector3(float(cx) * 0.9, h / 2.0, float(cz) * 0.9), Vector3(0.22, h, 0.22))
+	var y := 0.0
+	while y < h:
+		for s in 4:
+			var rot := Basis(Vector3.UP, s * PI / 2.0)
+			batch_box("metal_red", base + rot * Vector3(0, 0, 0.9) + Vector3(0, y + 1.5, 0), Vector3(2.5, 0.12, 0.12), rot * Basis(Vector3.BACK, deg_to_rad(45.0)), false)
+		y += 3.0
+	var heading := deg_to_rad(float(cr.heading))
+	var dir := Vector3(sin(heading), 0, cos(heading))
+	var jib := float(cr.jib)
+	var jb := Basis.looking_at(dir, Vector3.UP)
+	batch_box("metal_red", base + Vector3(0, h + 0.6, 0) + dir * (jib / 2.0), Vector3(1.2, 1.2, jib), jb, false)
+	batch_box("metal_red", base + Vector3(0, h + 0.6, 0) - dir * 6.0, Vector3(1.2, 1.0, 12.0), jb, false)
+	batch_box("concrete", base + Vector3(0, h - 0.4, 0) - dir * 10.5, Vector3(3.0, 2.6, 2.4), jb, false)
+	batch_box("metal_red", base + Vector3(0, h + 3.5, 0), Vector3(0.5, 6.0, 0.5), Basis.IDENTITY, false)
+	batch_box("brick_grey", base + Vector3(1.6, h - 1.5, 0), Vector3(2.0, 2.4, 2.0), Basis.IDENTITY, false)
+	# hoist cable and hook block part way along the jib
+	var hook := base + dir * (jib * 0.6)
+	batch_box("metal_rust", hook + Vector3(0, h - 6.0, 0), Vector3(0.05, 12.0, 0.05), Basis.IDENTITY, false)
+	batch_box("metal_rust", hook + Vector3(0, h - 12.4, 0), Vector3(0.6, 0.8, 0.4), Basis.IDENTITY, false)
+	batch_commit(parent, String(cr.get("name", "TowerCrane")), "Metal")
+	footprints.append(Rect2(p - Vector2(3, 3), Vector2(6, 6)))
+
+
+# Overhead gantry crane: two A-frame legs, a box girder and a hoist.
+func build_gantry(parent: Node, gd: Dictionary) -> void:
+	var a := v2(gd.from)
+	var b := v2(gd.to)
+	var span := float(gd.span)
+	var h := float(gd.height)
+	var dir := (b - a).normalized()
+	var side := dir.orthogonal()
+	batch_begin()
+	for end in [a, b]:
+		for s in [-1.0, 1.0]:
+			var foot: Vector2 = end + side * (span / 2.0 * float(s))
+			var fp := W(foot.x, foot.y)
+			batch_box("metal_rust", fp + Vector3(0, h / 2.0, 0), Vector3(0.5, h, 0.5))
+		var mid := W(end.x, end.y)
+		var across := Basis.looking_at(Vector3(side.x, 0, side.y), Vector3.UP)
+		batch_box("metal_rust", mid + Vector3(0, h, 0), Vector3(0.6, 0.8, span + 0.6), across, false)
+	var len := a.distance_to(b)
+	var c := (a + b) / 2.0
+	var along := Basis.looking_at(Vector3(dir.x, 0, dir.y), Vector3.UP)
+	var top := maxf(ground(a.x, a.y), ground(b.x, b.y)) + h
+	for s in [-1.0, 1.0]:
+		var gp: Vector2 = c + side * (span / 2.0 - 0.4) * float(s)
+		batch_box("metal_red", Vector3(gp.x - OX, top + 0.8, gp.y - OZ), Vector3(0.7, 1.0, len + 0.8), along, false)
+	var hoist := c + dir * (len * 0.15)
+	batch_box("metal_rust", Vector3(hoist.x - OX, top + 1.6, hoist.y - OZ), Vector3(span - 1.0, 0.8, 2.0), Basis.looking_at(Vector3(side.x, 0, side.y), Vector3.UP), false)
+	batch_box("metal_rust", Vector3(hoist.x - OX, top - 2.0, hoist.y - OZ), Vector3(0.05, 6.0, 0.05), Basis.IDENTITY, false)
+	batch_commit(parent, "Gantry", "Metal")
+
+
+func build_pipe_tower(parent: Node, t: Dictionary) -> void:
+	var p := v2(t.pos)
+	var h := float(t.height)
+	var mi := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.height = h
+	cyl.top_radius = float(t.radius)
+	cyl.bottom_radius = float(t.radius)
+	cyl.radial_segments = 16
+	mi.mesh = cyl
+	mi.material_override = swatch("metal_rust")
+	mi.transform.origin = W(p.x, p.y, h / 2.0)
+	add(parent, mi, "PipeTower")
+	var body := StaticBody3D.new()
+	body.set_script(load(SCR_SURFACE))
+	body.set("surface", "Metal")
+	add(mi, body, "StaticBody3D")
+	var cs := CollisionShape3D.new()
+	var shape := CylinderShape3D.new()
+	shape.height = h
+	shape.radius = float(t.radius)
+	cs.shape = shape
+	add(body, cs, "CollisionShape3D")
+	# ring platforms every 6 m
+	batch_begin()
+	var y := 6.0
+	while y < h:
+		batch_box("metal_rust", W(p.x, p.y, y), Vector3(float(t.radius) * 2.0 + 1.6, 0.15, float(t.radius) * 2.0 + 1.6), Basis.IDENTITY, false)
+		y += 6.0
+	batch_commit(parent, "PipeTowerRings", "Metal")
+
+
+func build_pipe_bridge(parent: Node, pb: Dictionary) -> void:
+	var a := v2(pb.from)
+	var b := v2(pb.to)
+	var h := float(pb.height)
+	var dir := (b - a).normalized()
+	var len := a.distance_to(b)
+	var along := Basis.looking_at(Vector3(dir.x, 0, dir.y), Vector3.UP)
+	var y := maxf(ground(a.x, a.y), ground(b.x, b.y)) + h
+	batch_begin()
+	var c := (a + b) / 2.0
+	for s in [-0.6, 0.6]:
+		var q: Vector2 = c + dir.orthogonal() * float(s)
+		batch_box("metal_rust", Vector3(q.x - OX, y + 0.9, q.y - OZ), Vector3(0.18, 0.18, len), along, false)
+		batch_box("metal_rust", Vector3(q.x - OX, y, q.y - OZ), Vector3(0.18, 0.18, len), along, false)
+	var n := int(len / 3.0)
+	for k in n + 1:
+		var q := a + dir * (k * len / n)
+		batch_box("metal_rust", Vector3(q.x - OX, y + 0.45, q.y - OZ), Vector3(1.4, 0.9, 0.12), along, false)
+		if k % 4 == 0:
+			var gy := ground(q.x, q.y)
+			batch_box("metal_rust", Vector3(q.x - OX, (gy + y) / 2.0, q.y - OZ), Vector3(0.3, y - gy, 0.3))
+	batch_commit(parent, "PipeBridge", "Metal")
+	# the pipes themselves
+	var pipe := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.height = len
+	cyl.top_radius = 0.35
+	cyl.bottom_radius = 0.35
+	cyl.radial_segments = 12
+	pipe.mesh = cyl
+	pipe.material_override = swatch("metal_rust")
+	pipe.transform = Transform3D(along * Basis(Vector3.RIGHT, PI / 2.0), Vector3(c.x - OX, y + 0.45, c.y - OZ))
+	add(parent, pipe, "BridgePipe")
+
+
+func _rail_points(name: String) -> Array:
+	for r in L.rails:
+		if r.name == name:
+			return resample(r.points, 1.0)
+	return []
+
+
+func build_wagons(parent: Node) -> void:
+	var wagon := "res://Assets/Train_Oil/Train_Oil.tscn"
+	var wl := maxf(asset_aabb(wagon).size.z, 10.0) + 1.0
+	for w in L.get("wagons", []):
+		var pts := _rail_points(String(w.rail))
+		if pts.size() < 3:
+			continue
+		var d := float(w.from)
+		for k in int(w.count):
+			var i0 := clampi(int(d), 0, pts.size() - 2)
+			var i1 := clampi(int(d + wl), 1, pts.size() - 1)
+			if i1 <= i0:
+				break
+			var a: Vector2 = pts[i0]
+			var b: Vector2 = pts[i1]
+			var c := (a + b) / 2.0
+			var from := W(a.x, a.y, 0.05)
+			var to := W(b.x, b.y, 0.05)
+			var n := instance(wagon)
+			n.transform = Transform3D(Basis.looking_at(to - from, Vector3.UP), W(c.x, c.y, 0.05))
+			add(parent, n, "Wagon")
+			cover_objects.append([c, 2.0])
+			d += wl
+	stats["wagons"] = parent.get_children().filter(func(x): return x.name.begins_with("Wagon")).size()
+
+
+# Level crossings wherever a rail meets a road (not on bridges).
+func build_crossings(parent: Node) -> void:
+	var xing := "res://Assets/Railroad/Railroad_Crossing.tscn"
+	var count := 0
+	for r in L.rails:
+		var rp: Array = r.points
+		for i in rp.size() - 1:
+			var a := v2(rp[i])
+			var b := v2(rp[i + 1])
+			for road in L.roads:
+				var qp: Array = road.points
+				for j in qp.size() - 1:
+					var c := v2(qp[j])
+					var d := v2(qp[j + 1])
+					var hit = Geometry2D.segment_intersects_segment(a, b, c, d)
+					if hit == null or bridge_height(hit) > -INF:
+						continue
+					var dir := (b - a).normalized()
+					var n := instance(xing)
+					var from := W(hit.x, hit.y, 0.02)
+					n.transform = Transform3D(Basis.looking_at(Vector3(dir.x, 0, dir.y), Vector3.UP), from)
+					add(parent, n, "Crossing")
+					count += 1
+	stats["crossings"] = count
+
+
+# Ruined hall (Tarkov's scav base "fortress"): tall brick walls with big
+# openings, exposed roof trusses, part of the roof still clad.
+func build_hall_ruin(holder: Node, b: Dictionary) -> void:
+	var r: Array = b.rect
+	var x0 := float(r[0])
+	var z0 := float(r[1])
+	var x1 := float(r[2])
+	var z1 := float(r[3])
+	var h := float(b.height)
+	var floor_y := ground((x0 + x1) / 2.0, (z0 + z1) / 2.0) + 0.05
+	var w := x1 - x0
+	var d := z1 - z0
+	var thick := 0.5
+	var bands := [[0.6, "concrete"], [h + 1.0, "brick_red"]]
+	batch_begin()
+	var long_ops := func(len: float) -> Array:
+		var ops: Array = []
+		var k := 4.0
+		while k < len - 6.0:
+			ops.append([k, 3.4, 2.0, h - 3.0, "window"])
+			k += 6.0
+		ops.append([len * 0.5 - 3.0, 6.0, 0.0, 6.0, "bay"])
+		return ops
+	var short_ops := func(len: float) -> Array:
+		return [[len * 0.5 - 3.5, 7.0, 0.0, 7.0, "bay"], [2.0, 2.4, h - 5.0, h - 2.0, "window"], [len - 4.4, 2.4, h - 5.0, h - 2.0, "window"]]
+	var sides := [[Vector3(x0 - OX, floor_y, z0 - OZ), Vector3.RIGHT, Vector3.BACK, w, w >= d],
+		[Vector3(x1 - OX, floor_y, z0 - OZ), Vector3.BACK, Vector3.LEFT, d, d > w],
+		[Vector3(x1 - OX, floor_y, z1 - OZ), Vector3.LEFT, Vector3.FORWARD, w, w >= d],
+		[Vector3(x0 - OX, floor_y, z1 - OZ), Vector3.FORWARD, Vector3.RIGHT, d, d > w]]
+	for sd in sides:
+		var ops: Array = long_ops.call(float(sd[3])) if bool(sd[4]) else short_ops.call(float(sd[3]))
+		wall(sd[0], sd[1], sd[2], float(sd[3]), h, thick, ops, bands)
+		for o in ops:
+			if o[4] == "window":
+				_detail_opening(sd[0], sd[1], sd[2], thick, o)
+	batch_box("slab", Vector3((x0 + x1) / 2.0 - OX, floor_y - 0.15, (z0 + z1) / 2.0 - OZ), Vector3(w, 0.3, d))
+	# Trusses across the short span every 6 m along the long axis.
+	var long_x := w >= d
+	var run := w if long_x else d
+	var span := d if long_x else w
+	var rise := span * 0.22
+	var n := int(run / 6.0)
+	for k in n + 1:
+		var t := 1.0 + k * (run - 2.0) / n
+		var base := Vector3(x0 + t - OX, floor_y + h, (z0 + z1) / 2.0 - OZ) if long_x else Vector3((x0 + x1) / 2.0 - OX, floor_y + h, z0 + t - OZ)
+		var across := Vector3.BACK if long_x else Vector3.RIGHT
+		var ang := atan2(rise, span / 2.0)
+		var rafter := Vector3(0.25, 0.3, span / 2.0 / cos(ang))
+		for s in [-1.0, 1.0]:
+			var mid := base + across * (float(s) * span / 4.0) + Vector3.UP * (rise / 2.0)
+			var bas := Basis.looking_at(across * float(s), Vector3.UP)
+			batch_box("metal_rust", mid, rafter, Basis(bas.x, -ang) * bas, false)
+		batch_box("metal_rust", base, (Vector3(0.25, 0.25, span) if long_x else Vector3(span, 0.25, 0.25)), Basis.IDENTITY, false)
+		batch_box("metal_rust", base + Vector3.UP * (rise / 2.0), Vector3(0.18, rise, 0.18), Basis.IDENTITY, false)
+	# Purlins along the run, and roof cladding on the first ~40 %.
+	for s in [-1.0, 1.0]:
+		for f in [0.25, 0.5, 0.75]:
+			var off: float = float(s) * span / 2.0 * (1.0 - float(f))
+			var y: float = floor_y + h + rise * float(f)
+			var pos := Vector3((x0 + x1) / 2.0 - OX, y, (z0 + z1) / 2.0 - OZ + off) if long_x else Vector3((x0 + x1) / 2.0 - OX + off, y, (z0 + z1) / 2.0 - OZ)
+			batch_box("metal_rust", pos, (Vector3(run, 0.15, 0.15) if long_x else Vector3(0.15, 0.15, run)), Basis.IDENTITY, false)
+		var clad := run * 0.4
+		var ang2 := atan2(rise, span / 2.0)
+		var cpos := Vector3(x0 + clad / 2.0 - OX, floor_y + h + rise / 2.0 + 0.2, (z0 + z1) / 2.0 - OZ + float(s) * span / 4.0) if long_x else Vector3((x0 + x1) / 2.0 - OX + float(s) * span / 4.0, floor_y + h + rise / 2.0 + 0.2, z0 + clad / 2.0 - OZ)
+		var size := Vector3(clad, 0.1, span / 2.0 / cos(ang2)) if long_x else Vector3(span / 2.0 / cos(ang2), 0.1, clad)
+		var tilt := Basis(Vector3.RIGHT, float(s) * ang2) if long_x else Basis(Vector3.BACK, -float(s) * ang2)
+		batch_box("roof_metal", cpos, size, tilt)
+	batch_commit(holder, "Structure", "Concrete")
+	var area := Area3D.new()
+	area.collision_layer = 512
+	area.collision_mask = 0
+	area.monitoring = false
+	area.set_script(load("res://Scripts/Area.gd"))
+	area.set("type", "Indoor")
+	area.transform.origin = Vector3((x0 + x1) / 2.0 - OX, floor_y + h / 2.0, (z0 + z1) / 2.0 - OZ)
+	add(holder, area, "Area")
+	var acs := CollisionShape3D.new()
+	var abox := BoxShape3D.new()
+	abox.size = Vector3(w - 1.0, h, d - 1.0)
+	acs.shape = abox
+	add(area, acs, "CollisionShape3D")
+	footprints.append(Rect2(x0, z0, w, d).grow(3.0))
+	_dress_interior(holder, x0, z0, x1, z1, floor_y, "concrete")

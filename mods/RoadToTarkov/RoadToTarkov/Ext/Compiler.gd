@@ -27,9 +27,15 @@ func _rtt_spawn_customs() -> void:
 	NavigationServer3D.map_set_use_edge_connections(nav_map, true)
 	NavigationServer3D.map_set_edge_connection_margin(nav_map, 0.5)
 	controller.global_position = Vector3(0, 2, 0)
-	Loader.LoadWorld()
-	Loader.LoadCharacter()
-	Simulation.simulate = true
+	if gameData.tutorial:
+		# Preview: no save is read; fixed daylight.
+		Simulation.simulate = false
+		Simulation.time = 1000.0
+		Simulation.weather = "Neutral"
+	else:
+		Loader.LoadWorld()
+		Loader.LoadCharacter()
+		Simulation.simulate = true
 
 	var target := "Transition_" + str(gameData.previousMap)
 	for t in get_tree().get_nodes_in_group("Transition"):

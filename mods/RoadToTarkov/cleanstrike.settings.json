@@ -8,6 +8,13 @@
       "description": "School travel points let you choose School or Customs. Customs is an early preview while the map is being built."
     },
     {
+      "key": "customs_preview_button",
+      "type": "bool",
+      "default": true,
+      "label": "Customs preview in main menu",
+      "description": "Adds 'Customs (Preview)' to the main menu: walk around Customs in daylight with no gear. Your saves are never touched."
+    },
+    {
       "key": "search_enabled",
       "type": "bool",
       "default": true,

@@ -8,6 +8,10 @@ var rtt_picker: Control
 
 
 func Interact():
+	# Leaving the Customs preview goes back to the menu, never saving.
+	if gameData.tutorial and currentMap == "Customs":
+		Loader.LoadScene("Menu")
+		return
 	if not RTT_OffersCustoms():
 		super()
 		return

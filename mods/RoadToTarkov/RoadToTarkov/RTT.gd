@@ -3,7 +3,7 @@
 extends RefCounted
 
 const MOD_ID := "road_to_tarkov"
-const VERSION := "0.2.0"
+const VERSION := "0.3.0"
 
 # Defaults; each one can be changed in the Cleanstrike app (settings.json).
 const DEFAULTS := {
@@ -15,6 +15,7 @@ const DEFAULTS := {
 	"item_colors": true,
 	"reveal_sound": true,
 	"customs_enabled": true,
+	"customs_preview_button": true,
 }
 
 # Tarkov-style cell background tints, keyed by RTV item type.

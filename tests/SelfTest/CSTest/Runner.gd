@@ -2,6 +2,7 @@
 extends Node
 
 var started := false
+var menu_preview_button := false
 var results := []
 var failures := 0
 
@@ -29,6 +30,7 @@ func run() -> void:
 	var cs = Engine.get_meta("Cleanstrike")
 	check("mod loaded", cs.is_loaded("road_to_tarkov"))
 	check("RTT active", RTT.active())
+	check("main menu has Customs preview", menu_preview_button)
 	var ui = get_node("/root/Map/Core/UI")
 	var interface = get_node("/root/Map/Core/UI/Interface")
 	check("interface extended", interface.has_method("RTT_ContextExamine"))
@@ -125,7 +127,7 @@ func run() -> void:
 
 func map_name() -> String:
 	var m = get_node_or_null("/root/Map")
-	return m.mapName if m else ""
+	return m.mapName if m and "mapName" in m else ""
 
 func wait_for_map(name: String, limit: float) -> bool:
 	var t := 0.0
@@ -266,6 +268,29 @@ func customs_tests(ui, interface) -> void:
 	var vworld: TextureRect = get_node("/root/Map/Core/UI/Interface").mapScroll.get_child(0)
 	check("world map has Customs marker", vworld.get_node_or_null("Customs") != null)
 	vui.ToggleInterface()
+	await wait(0.5)
+	# Customs preview must never touch the player's saves.
+	var save_files := ["user://Character.tres", "user://World.tres"]
+	var before := {}
+	for f in save_files:
+		before[f] = FileAccess.get_modified_time(f) if FileAccess.file_exists(f) else 0
+	Loader.LoadScene("CustomsPreview")
+	check("preview loads Customs", await wait_for_map("Customs", 120.0), map_name())
+	check("preview is save-free (tutorial mode)", gd.tutorial == true)
+	var exit_node = null
+	for t in get_tree().get_nodes_in_group("Transition"):
+		if t.owner.name == "Transition_Village": exit_node = t.owner
+	gd.isTransitioning = true
+	exit_node.Interact()
+	var tm := 0.0
+	while tm < 60.0 and (get_tree().current_scene == null or get_tree().current_scene.scene_file_path != "res://Scenes/Menu.tscn"):
+		await wait(0.5); tm += 0.5
+	check("preview exit returns to menu", get_tree().current_scene != null and get_tree().current_scene.scene_file_path == "res://Scenes/Menu.tscn", str(get_tree().current_scene.scene_file_path if get_tree().current_scene else ""))
+	var unchanged := true
+	for f in save_files:
+		var now = FileAccess.get_modified_time(f) if FileAccess.file_exists(f) else 0
+		if now != before[f]: unchanged = false
+	check("preview left saves untouched", unchanged)
 
 func close_ui(ui) -> void:
 	ui.gameData.interface = true

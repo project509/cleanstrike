@@ -13,7 +13,7 @@ cp "$T/override.cfg" "$R/dist/test/override.bak"; mv "$T/Cleanstrike/active.json
 printf '; Managed by Cleanstrike (shots.sh)\n[autoload_prepend]\nCleanstrike="*res://Cleanstrike/loader.gd"\n\n[autoload]\nCSShot="*res://Shot/Runner.gd"\n' > "$T/override.cfg"
 SNAP="$R/dist/test/save_snapshot"; rm -rf "$SNAP"; mkdir -p "$SNAP"; cp "$U"/*.tres "$SNAP"/
 rm -f "$U/cleanstrike/"shot_*.png
-(cd "$T" && timeout 400 ./RTV.exe --windowed --resolution 1920x1080 --position -4000,100 >/dev/null 2>&1)
+(cd "$T" && timeout 600 ./RTV.exe --windowed --resolution 1920x1080 --position -4000,100 >/dev/null 2>&1)
 for f in "$U"/*.tres; do [ -e "$SNAP/$(basename "$f")" ] || rm -f "$f"; done
 cp "$SNAP"/*.tres "$U"/
 rm -f "$T/Cleanstrike/mods/Shots.csmod"

@@ -310,15 +310,15 @@
     ],
     [
      735,
-     362
+     367
     ],
     [
-     800,
+     805,
+     364
+    ],
+    [
+     860,
      352
-    ],
-    [
-     870,
-     340
     ],
     [
      950,
@@ -391,16 +391,16 @@
    "width": 6,
    "points": [
     [
-     690,
-     378
+     688,
+     380
     ],
     [
-     688,
+     684,
      410
     ],
     [
-     678,
-     452
+     680,
+     443
     ]
    ]
   },
@@ -629,6 +629,82 @@
      395
     ]
    ]
+  },
+  {
+   "name": "wh5_siding",
+   "points": [
+    [
+     235,
+     253
+    ],
+    [
+     215,
+     262
+    ],
+    [
+     203,
+     280
+    ],
+    [
+     198,
+     300
+    ],
+    [
+     196,
+     330
+    ]
+   ]
+  },
+  {
+   "name": "wh3_siding",
+   "points": [
+    [
+     275,
+     252
+    ],
+    [
+     262,
+     265
+    ],
+    [
+     257,
+     282
+    ],
+    [
+     252,
+     322
+    ]
+   ]
+  },
+  {
+   "name": "river_rail",
+   "points": [
+    [
+     700,
+     350
+    ],
+    [
+     805,
+     349
+    ],
+    [
+     843,
+     347
+    ]
+   ]
+  },
+  {
+   "name": "east_rail_2",
+   "points": [
+    [
+     857,
+     185
+    ],
+    [
+     857,
+     330
+    ]
+   ]
   }
  ],
  "bridges": [
@@ -636,11 +712,11 @@
    "name": "road_bridge",
    "from": [
     735,
-    352
+    366
    ],
    "to": [
     805,
-    349
+    363
    ],
    "width": 9,
    "deck_height": 2.0
@@ -649,11 +725,11 @@
    "name": "rail_bridge",
    "from": [
     735,
-    366
+    350
    ],
    "to": [
     805,
-    363
+    348
    ],
    "width": 6,
    "deck_height": 2.0
@@ -873,15 +949,16 @@
   },
   {
    "name": "ScavBase",
-   "kind": "concrete_frame",
+   "kind": "hall_ruin",
    "rect": [
     481,
-    229,
+    227,
     514,
     286
    ],
-   "height": 18,
-   "roof": "gable"
+   "height": 15,
+   "roof": "skeleton",
+   "style": "brick_red"
   },
   {
    "name": "ConstructionFrame",
@@ -986,10 +1063,10 @@
    "name": "DormsWest",
    "kind": "dorm",
    "rect": [
-    463,
-    433,
-    476,
-    473
+    460,
+    438,
+    479,
+    468
    ],
    "height": 7.2,
    "roof": "flat",
@@ -999,10 +1076,10 @@
    "name": "DormsEast",
    "kind": "dorm",
    "rect": [
-    515.5,
-    443.5,
-    529.5,
-    489.5
+    513,
+    448,
+    532,
+    482
    ],
    "height": 10.4,
    "roof": "flat",
@@ -1022,55 +1099,146 @@
    "style": "metal_red"
   },
   {
-   "name": "StorageRowA",
-   "kind": "generated",
-   "rect": [
-    961,
-    229,
-    980,
-    289
-   ],
-   "height": 3.6,
-   "roof": "flat",
-   "style": "garages"
-  },
-  {
-   "name": "StorageRowB",
-   "kind": "generated",
-   "rect": [
-    984,
-    229,
-    1003,
-    289
-   ],
-   "height": 3.6,
-   "roof": "flat",
-   "style": "garages"
-  },
-  {
-   "name": "StorageLongShed",
-   "kind": "generated",
-   "rect": [
-    1009,
-    225,
-    1017,
-    290
-   ],
-   "height": 3.6,
-   "roof": "flat",
-   "style": "garages"
-  },
-  {
    "name": "ShorelineBooth",
    "kind": "booth",
    "rect": [
-    668,
-    415,
-    678,
-    428
+    665,
+    430,
+    673,
+    437
    ],
    "height": 3,
    "roof": "flat"
+  },
+  {
+   "name": "DormsAnnex",
+   "kind": "generated",
+   "style": "brick_grey",
+   "rect": [
+    500,
+    467,
+    513,
+    482
+   ],
+   "height": 6.6,
+   "roof": "flat"
+  },
+  {
+   "name": "BoilerAnnex",
+   "kind": "generated",
+   "style": "brick_red",
+   "rect": [
+    582,
+    280,
+    602,
+    297
+   ],
+   "height": 8,
+   "roof": "flat"
+  },
+  {
+   "name": "TP_West",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    949,
+    230,
+    955,
+    303
+   ],
+   "height": 3.6,
+   "roof": "flat"
+  },
+  {
+   "name": "TP_North",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    965,
+    219,
+    1010,
+    225
+   ],
+   "height": 3.6,
+   "roof": "flat"
+  },
+  {
+   "name": "TP_East",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    1009,
+    230,
+    1016,
+    288
+   ],
+   "height": 3.6,
+   "roof": "flat"
+  },
+  {
+   "name": "TP_South",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    962,
+    296,
+    1008,
+    303
+   ],
+   "height": 3.6,
+   "roof": "flat"
+  },
+  {
+   "name": "TP_Block_NW",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    962,
+    229,
+    978,
+    253
+   ],
+   "height": 3.4,
+   "roof": "gable"
+  },
+  {
+   "name": "TP_Block_NE",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    987,
+    229,
+    1002,
+    253
+   ],
+   "height": 3.4,
+   "roof": "gable"
+  },
+  {
+   "name": "TP_Block_SW",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    962,
+    260,
+    977,
+    291
+   ],
+   "height": 3.4,
+   "roof": "gable"
+  },
+  {
+   "name": "TP_Block_SE",
+   "kind": "generated",
+   "style": "garages",
+   "rect": [
+    986,
+    260,
+    1002,
+    288
+   ],
+   "height": 3.4,
+   "roof": "gable"
   }
  ],
  "fences": [],
@@ -1113,7 +1281,7 @@
    "name": "WH7_chimney_1906",
    "pos": [
     132,
-    245
+    277
    ],
    "height": 42,
    "radius": 2.6
@@ -1121,8 +1289,8 @@
   {
    "name": "WH7_chimney_b",
    "pos": [
-    158,
-    250
+    157,
+    285
    ],
    "height": 40,
    "radius": 2.4
@@ -1130,8 +1298,8 @@
   {
    "name": "boiler_chimney_a",
    "pos": [
-    574,
-    257
+    575,
+    300
    ],
    "height": 46,
    "radius": 2.8
@@ -1139,8 +1307,8 @@
   {
    "name": "boiler_chimney_b",
    "pos": [
-    589,
-    266
+    590,
+    296
    ],
    "height": 40,
    "radius": 2.4
@@ -1148,14 +1316,24 @@
  ],
  "cranes": [
   {
-   "name": "tower_crane",
+   "name": "crane_scav_base",
    "pos": [
-    525,
-    300
+    528,
+    277
    ],
-   "height": 38,
-   "jib": 30,
-   "heading": 200
+   "height": 40,
+   "jib": 34,
+   "heading": 300
+  },
+  {
+   "name": "crane_south",
+   "pos": [
+    517,
+    330
+   ],
+   "height": 32,
+   "jib": 26,
+   "heading": 20
   }
  ],
  "pylons": [
@@ -1186,24 +1364,6 @@
  ],
  "props": [
   {
-   "kind": "rail_tankers",
-   "rect": [
-    186,
-    285,
-    198,
-    310
-   ]
-  },
-  {
-   "kind": "rail_tankers",
-   "rect": [
-    430,
-    225,
-    445,
-    232
-   ]
-  },
-  {
    "kind": "tanker_yard",
    "rect": [
     557,
@@ -1225,9 +1385,18 @@
    "kind": "parking",
    "rect": [
     482,
-    455,
-    510,
-    480
+    447,
+    500,
+    478
+   ]
+  },
+  {
+   "kind": "rail_tankers",
+   "rect": [
+    430,
+    225,
+    445,
+    232
    ]
   }
  ],
@@ -1388,6 +1557,14 @@
     198
    ],
    "to": "Outpost"
+  },
+  {
+   "name": "ZB-1013",
+   "pos": [
+    543,
+    210
+   ],
+   "to": "Highway"
   }
  ],
  "surfaces": {
@@ -1955,6 +2132,135 @@
      8
     ]
    ]
+  },
+  {
+   "name": "road_north_west",
+   "points": [
+    [
+     98,
+     327
+    ],
+    [
+     250,
+     331
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     175,
+     329,
+     8
+    ]
+   ]
+  },
+  {
+   "name": "road_north_center",
+   "points": [
+    [
+     385,
+     353
+    ],
+    [
+     502,
+     362
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     440,
+     357,
+     8
+    ]
+   ]
+  },
+  {
+   "name": "wh17_east",
+   "points": [
+    [
+     676,
+     318
+    ],
+    [
+     660,
+     340
+    ],
+    [
+     647,
+     352
+    ]
+   ],
+   "kind": "po2"
+  },
+  {
+   "name": "road_east",
+   "points": [
+    [
+     703,
+     307
+    ],
+    [
+     757,
+     322
+    ]
+   ],
+   "kind": "po2"
+  },
+  {
+   "name": "bridge_west",
+   "points": [
+    [
+     700,
+     337
+    ],
+    [
+     735,
+     345
+    ]
+   ],
+   "kind": "po2"
+  },
+  {
+   "name": "dorm_south",
+   "points": [
+    [
+     430,
+     486
+    ],
+    [
+     470,
+     500
+    ],
+    [
+     520,
+     506
+    ],
+    [
+     560,
+     498
+    ],
+    [
+     600,
+     470
+    ],
+    [
+     640,
+     449
+    ],
+    [
+     665,
+     446
+    ]
+   ],
+   "kind": "po2",
+   "gates": [
+    [
+     520,
+     506,
+     8
+    ]
+   ]
   }
  ],
  "pipelines": [
@@ -2033,6 +2339,54 @@
      280
     ]
    ]
+  },
+  {
+   "name": "east_pipe_a",
+   "points": [
+    [
+     716,
+     286
+    ],
+    [
+     772,
+     284
+    ]
+   ]
+  },
+  {
+   "name": "east_pipe_b",
+   "points": [
+    [
+     716,
+     302
+    ],
+    [
+     762,
+     302
+    ]
+   ]
+  },
+  {
+   "name": "dorm_pipe",
+   "points": [
+    [
+     388,
+     374
+    ],
+    [
+     472,
+     378
+    ],
+    [
+     512,
+     384
+    ],
+    [
+     512,
+     418
+    ]
+   ],
+   "small": true
   }
  ],
  "containers": [
@@ -2086,15 +2440,6 @@
    "count": 4
   }
  ],
- "crane": {
-  "pos": [
-   528,
-   262
-  ],
-  "height": 40,
-  "jib": 32,
-  "heading": 200
- },
  "ai": {
   "_about": "Scav spawns, group camps and lurk spots at Customs' usual scav locations.",
   "spawns": [
@@ -2231,5 +2576,560 @@
     420
    ]
   ]
- }
+ },
+ "wagons": [
+  {
+   "rail": "wh5_siding",
+   "from": 30,
+   "count": 4
+  },
+  {
+   "rail": "north_rail",
+   "from": 300,
+   "count": 3
+  },
+  {
+   "rail": "north_rail",
+   "from": 420,
+   "count": 3
+  },
+  {
+   "rail": "east_rail",
+   "from": 100,
+   "count": 4
+  },
+  {
+   "rail": "east_rail_2",
+   "from": 40,
+   "count": 4
+  },
+  {
+   "rail": "south_spur",
+   "from": 250,
+   "count": 5
+  }
+ ],
+ "gantries": [
+  {
+   "from": [
+    247,
+    316
+   ],
+   "to": [
+    292,
+    328
+   ],
+   "span": 12,
+   "height": 9
+  },
+  {
+   "from": [
+    295,
+    312
+   ],
+   "to": [
+    338,
+    316
+   ],
+   "span": 12,
+   "height": 9
+  }
+ ],
+ "pipe_towers": [
+  {
+   "pos": [
+    445,
+    315
+   ],
+   "height": 26,
+   "radius": 1.8
+  }
+ ],
+ "pipe_bridges": [
+  {
+   "from": [
+    452,
+    301
+   ],
+   "to": [
+    493,
+    301
+   ],
+   "height": 8
+  }
+ ],
+ "placements": [
+  {
+   "scene": "res://Assets/Gas_Station/Gas_Station_Canopy.tscn",
+   "pos": [
+    351,
+    231
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Gas_Station/Gas_Station_Canopy.tscn",
+   "pos": [
+    358,
+    231
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Kiosk/Kiosk.tscn",
+   "pos": [
+    372,
+    229
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Vehicles/Truck_Trailers/Truck_Trailer_Fuel/Truck_Trailer_Fuel.tscn",
+   "pos": [
+    388,
+    237
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Shack_A/Shack_A.tscn",
+   "pos": [
+    350,
+    273
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Shack_A/Shack_A.tscn",
+   "pos": [
+    435,
+    275
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Shack_A/Shack_A.tscn",
+   "pos": [
+    446,
+    274
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Garage_Rural/Garage_Rural_B.tscn",
+   "pos": [
+    621,
+    258
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Garage_Rural/Garage_Rural_B.tscn",
+   "pos": [
+    627,
+    258
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Garage_Rural/Garage_Rural_B.tscn",
+   "pos": [
+    633,
+    258
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Shack_Brick/Shack_Brick.tscn",
+   "pos": [
+    618,
+    277
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Garage_Rural/Garage_Rural_A.tscn",
+   "pos": [
+    684,
+    276
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Shack_A/Shack_A.tscn",
+   "pos": [
+    507,
+    444
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Garage_Rural/Garage_Rural_A.tscn",
+   "pos": [
+    524,
+    442
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Vehicles/Tractor/Tractor.tscn",
+   "pos": [
+    473,
+    224
+   ],
+   "yaw": 30
+  },
+  {
+   "scene": "res://Assets/Vehicles/Tractor/Tractor.tscn",
+   "pos": [
+    524,
+    222
+   ],
+   "yaw": 160
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    591,
+    247
+   ],
+   "yaw": 70
+  },
+  {
+   "scene": "res://Assets/Vehicles/Tractor/Tractor.tscn",
+   "pos": [
+    567,
+    268
+   ],
+   "yaw": 250
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    539,
+    287
+   ],
+   "yaw": 10
+  },
+  {
+   "scene": "res://Assets/Pipe_Concrete/Pipe_Concrete_Group.tscn",
+   "pos": [
+    552,
+    239
+   ],
+   "yaw": 20
+  },
+  {
+   "scene": "res://Assets/Slab_Concrete/Slab_Concrete_Group_A.tscn",
+   "pos": [
+    176,
+    296
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Slab_Concrete/Slab_Concrete_Group_B.tscn",
+   "pos": [
+    173,
+    313
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Pipe_Concrete/Pipe_Concrete_Group.tscn",
+   "pos": [
+    275,
+    310
+   ],
+   "yaw": 70
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    489,
+    290
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    496,
+    290
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    503,
+    290
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    510,
+    290
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Booth_Ticket/Booth_Ticket.tscn",
+   "pos": [
+    690,
+    343
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Barrier_Highway/Barrier_Highway.tscn",
+   "pos": [
+    698,
+    350
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Barrier_Highway/Barrier_Highway.tscn",
+   "pos": [
+    700,
+    360
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Sandbags/Sandbags_A.tscn",
+   "pos": [
+    693,
+    338
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Vehicles/Truck_Trailers/Truck_Trailer_Cargo/Truck_Trailer_Cargo.tscn",
+   "pos": [
+    717,
+    357
+   ],
+   "yaw": 80
+  },
+  {
+   "scene": "res://Assets/Vehicles/PAZ/PAZ.tscn",
+   "pos": [
+    757,
+    356
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Tower_Guard/Tower_Guard.tscn",
+   "pos": [
+    123,
+    345
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Sandbags/Sandbags_D.tscn",
+   "pos": [
+    110,
+    360
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Sandbags/Sandbags_G.tscn",
+   "pos": [
+    136,
+    372
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Hedgehog/Hedgehog.tscn",
+   "pos": [
+    100,
+    350
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Hedgehog/Hedgehog.tscn",
+   "pos": [
+    140,
+    350
+   ],
+   "yaw": 45
+  },
+  {
+   "scene": "res://Assets/Tent_Civilian/Tent_Civilian_R.tscn",
+   "pos": [
+    200,
+    425
+   ],
+   "yaw": 20
+  },
+  {
+   "scene": "res://Assets/Tent_Civilian/Tent_Civilian_R.tscn",
+   "pos": [
+    214,
+    418
+   ],
+   "yaw": 200
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    209,
+    432
+   ],
+   "yaw": 60
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    216,
+    436
+   ],
+   "yaw": 100
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    195,
+    413
+   ],
+   "yaw": 120
+  },
+  {
+   "scene": "res://Assets/Barrel_Metal/Barrel_Metal_Fire.tscn",
+   "pos": [
+    207,
+    422
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Tower_Lookout/Tower_Lookout.tscn",
+   "pos": [
+    870,
+    207
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Tower_Lookout/Tower_Lookout.tscn",
+   "pos": [
+    877,
+    298
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Vehicles/Tractor/Tractor.tscn",
+   "pos": [
+    868,
+    242
+   ],
+   "yaw": 40
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    905,
+    305
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Vehicles/Truck_Trailers/Truck_Trailer_Cargo/Truck_Trailer_Cargo.tscn",
+   "pos": [
+    892,
+    312
+   ],
+   "yaw": 95
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    907,
+    214
+   ],
+   "yaw": 85
+  },
+  {
+   "scene": "res://Assets/Trailer_Military/Trailer_Military.tscn",
+   "pos": [
+    866,
+    320
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Trailer_Military/Trailer_Military.tscn",
+   "pos": [
+    874,
+    320
+   ],
+   "yaw": 90
+  },
+  {
+   "scene": "res://Assets/Booth_Ticket/Booth_Ticket.tscn",
+   "pos": [
+    900,
+    327
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Vehicles/PAZ/PAZ.tscn",
+   "pos": [
+    1027,
+    205
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Vehicles/Ural/Ural.tscn",
+   "pos": [
+    1030,
+    242
+   ],
+   "yaw": 5
+  },
+  {
+   "scene": "res://Assets/Container_Shipping/Container_Shipping.tscn",
+   "pos": [
+    674,
+    420
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Barrier_Highway/Barrier_Highway.tscn",
+   "pos": [
+    678,
+    447
+   ],
+   "yaw": 0
+  },
+  {
+   "scene": "res://Assets/Bunker/Bunker_Entrance.tscn",
+   "pos": [
+    543,
+    214
+   ],
+   "yaw": 180
+  },
+  {
+   "scene": "res://Assets/Bunker/Bunker_Entrance.tscn",
+   "pos": [
+    74,
+    246
+   ],
+   "yaw": 180
+  }
+ ]
 }
