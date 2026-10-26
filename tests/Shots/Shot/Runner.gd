@@ -603,8 +603,24 @@ func scareq_views():
 		await wait(0.2)
 	await _equip(load("res://Items/Weapons/KAR-21/KAR-21_308.tres"), [])
 	await shot("shot_kar_hip.png")
-	await _equip(WP.scar_item(), [])
+	var mgr = await _equip(WP.scar_item(), [])
 	await shot("shot_scar_hip.png")
+	# The KAR-21 in the same hands, same moment, drawn as a ghost: do they line up?
+	var kar: Node3D = load("res://Items/Weapons/KAR-21/KAR-21_308_Rig.tscn").instantiate()
+	var ghost := StandardMaterial3D.new()
+	ghost.albedo_color = Color(0.2, 0.9, 1.0, 0.45)
+	ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ghost.no_depth_test = true
+	mgr.add_child(kar)
+	for m in kar.find_children("*", "MeshInstance3D", true, false):
+		if m.name == "Arms":
+			m.visible = false
+		else:
+			m.material_override = ghost
+	await wait(1.0)
+	await shot("shot_scar_vs_kar.png")
+	kar.queue_free()
 	await _equip(WP.scar_item(), [load("res://Items/Attachments/EXPS/EXPS.tres")])
 	gd.isAiming = true
 	await wait(1.5)

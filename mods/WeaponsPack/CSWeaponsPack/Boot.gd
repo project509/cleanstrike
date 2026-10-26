@@ -14,6 +14,13 @@ func _ready() -> void:
 	WP.register.call_deferred()
 
 
+func _physics_process(_delta: float) -> void:
+	var manager = get_node_or_null("/root/Map/Core/Camera/Manager")
+	if manager:
+		for rig in manager.get_children():
+			WP.update_sights(rig)
+
+
 func _exit_tree() -> void:
 	if Engine.has_meta("cs_items"):
 		Engine.remove_meta("cs_items")

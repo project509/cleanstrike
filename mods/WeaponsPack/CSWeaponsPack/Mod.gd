@@ -231,3 +231,16 @@ static func register() -> void:
 	reg[SCAR_FILE] = scar_pickup_scene()
 	reg[SCAR_FILE + "_Rig"] = build_scar_rig()
 	Engine.set_meta("cs_items", reg)
+
+
+# The SCAR's folding iron sights fold away while an optic is mounted (or when
+# they're switched off). Called each frame for the weapon in hand.
+static func update_sights(rig: Node) -> void:
+	if rig == null or not ("data" in rig) or rig.data == null or str(rig.data.file) != SCAR_FILE:
+		return
+	var up: bool = rig.get("activeOptic") == null and bool(setting("scar_iron_sights"))
+	if rig.has_meta("wp_sights_up") and bool(rig.get_meta("wp_sights_up")) == up:
+		return
+	rig.set_meta("wp_sights_up", up)
+	for s in rig.find_children("Sight*", "MeshInstance3D", true, false):
+		s.visible = up
