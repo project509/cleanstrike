@@ -19,6 +19,7 @@
 #   silent     no flash; its shots are never heard or noticed
 #   head_damage  a hit to the head (zombies take 3x; the game's AI dies at 100)
 #   bolt       bolt action fed by a magazine: Reload cycles the bolt
+#   energy     energy bolts (Energy.gd) with the pack's own sounds
 extends RefCounted
 
 const RAIL_DONOR := ["KAR-21", "KAR-21_308"]
@@ -99,6 +100,23 @@ static func guns() -> Dictionary:
 			"optics": "none",
 			"hand": false,
 		},
+		"RAYGUN": {
+			"file": "CS_RAYGUN",
+			"name": "Homemade Ray Gun",
+			"short": "Ray Gun",
+			"display": "Ray Gun",
+			"base": ["Glock_17", "Glock_17"],
+			"magazine": {"file": "CS_RAYGUN_Battery", "name": "Ray Gun Battery Pack", "rounds": 20, "value": 650, "weight": 0.35},
+			"ammo": "CS_Ammo_PowerCell",
+			"data": {"caliber": "Plasma Cell", "damage": 75.0, "penetration": 5, "weaponAction": "Semi", "fireRate": 0.22, "weight": 2.6, "value": 26000, "rarity": 3,
+				"civilian": false, "industrial": true, "military": false, "gunsmith": false},
+			"head_damage": 200.0,
+			"energy": {"fire": ["raygun_fire_1.wav", "raygun_fire_2.wav", "raygun_fire_3.wav"], "charge": ["raygun_charge.wav"], "volume": 2.0},
+			"feel": {"recoil": 0.6, "kick": 0.8, "flash": 0.0, "impulse": 0.12, "view_kick": 0.02},
+			"shift": {"aimPosition": Vector3(0, 0, -0.07)},
+			"optics": "none",
+			"hand": false,
+		},
 		"DEAGLE": {
 			"file": "CS_DEAGLE",
 			"name": "Desert Eagle (.50 AE)",
@@ -119,6 +137,13 @@ static func guns() -> Dictionary:
 # New calibres: boxes like the game's, sold by the Gunsmith.
 static func ammo() -> Dictionary:
 	return {
+		"CS_Ammo_PowerCell": {
+			"name": "Plasma Cells",
+			"base": "res://Items/Ammo/Ammo_9x19/Ammo_9x19.tres",
+			"art": "Ammo_PowerCell",
+			"box": 20, "stack": 200, "value": 900, "weight": 0.4,
+			"flags": {"industrial": true, "gunsmith": true},
+		},
 		"CS_Ammo_50BMG": {
 			"name": ".50 BMG",
 			"base": "res://Items/Ammo/Ammo_308/Ammo_308.tres",

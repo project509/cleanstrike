@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.7.0"
+const VERSION := "0.8.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -12,6 +12,7 @@ const DIR := "res://CSWeaponsPack/Guns/"
 const ART := "res://CSWeaponsPack/Ammo/"
 const LOOT_MASTER := "res://Loot/LT_Master.tres"
 const G = preload("res://CSWeaponsPack/Guns.gd")
+const E = preload("res://CSWeaponsPack/Energy.gd")
 const FOLD := -1.6            # the game's own fold angle for flip-up sights
 const VIEW_UP := 1.0          # sign of a camera rotation that looks up
 const SOUNDS := ["fireSemi", "fireAuto", "fireSuppressed", "tailOutdoor", "tailIndoor", "tailOutdoorSuppressed", "tailIndoorSuppressed"]
@@ -90,6 +91,8 @@ static func ammo_item(aid: String) -> Resource:
 		d.set(k, a.name)
 	d.defaultAmount = a.box
 	d.maxAmount = a.stack
+	for k in a.get("flags", {}):
+		d.set(k, a.flags[k])
 	d.value = a.value
 	d.weight = a.weight
 	var icon := tex(ART + a.art + "_Icon.png")
@@ -161,6 +164,17 @@ static func build_gun(id: String) -> void:
 		d.set_meta("cs_head_damage", float(g.head_damage))
 	if g.get("bolt", false):                     # a bolt action fed from a magazine: cycle it with Reload
 		d.set_meta("cs_bolt", true)
+	if g.has("energy"):                          # energy bolts instead of bullets: own voice, no casings
+		d.set_meta("cs_energy", true)
+		d.casing = 0
+		var en: Dictionary = g.energy
+		var fire_ev = _event(en.fire, en.get("volume", 0.0))
+		for k in ["fireSemi", "fireAuto", "fireSuppressed"]:
+			d.set(k, fire_ev)
+		d.tailIndoor = d.tailIndoorSuppressed
+		d.tailOutdoor = d.tailOutdoorSuppressed
+		if en.has("charge"):
+			d.reloadEmpty = _event(en.charge, en.get("volume", 0.0) - 4.0)
 	if g.get("silent", false):                   # no flash, never heard (by the game's AI or the zombies)
 		d.nativeSuppressor = true
 		d.set_meta("cs_silent", true)
@@ -171,7 +185,7 @@ static func build_gun(id: String) -> void:
 		if not compat.has(a):
 			compat.append(a)
 	_list(d, "compatible", compat)
-	d.aimPosition = Vector3(-fit.aim.x, -fit.aim.y, base_data.aimPosition.z)
+	d.aimPosition = Vector3(-fit.aim.x, -fit.aim.y, base_data.aimPosition.z) + g.get("shift", {}).get("aimPosition", Vector3.ZERO)
 	if fit.fold:
 		d.foldSights = true
 		d.foldSightsRotation = FOLD
@@ -217,6 +231,18 @@ static func _voiced(ev, pitch: float, vol: float):
 	e.audioClips = clips
 	e.volume = clampf(ev.volume + vol, -20.0, 20.0)
 	return e
+
+
+# An AudioEvent (the game's sound resource) from the pack's own WAV files.
+static func _event(files: Array, volume: float) -> Resource:
+	var ev = load("res://Scripts/AudioEvent.gd").new()
+	var clips: Array[AudioStreamWAV] = []
+	for f in files:
+		clips.append(AudioStreamWAV.load_from_buffer(FileAccess.get_file_as_bytes(E.SOUNDS + f)))
+	ev.audioClips = clips
+	ev.volume = volume
+	ev.randomPitch = true
+	return ev
 
 
 static func _bone(sk: Skeleton3D, ends: Array) -> int:
@@ -669,6 +695,7 @@ static func unregister() -> void:
 static func release() -> void:
 	built.clear()
 	items.clear()
+	E.release()
 
 
 # After every shot of one of our guns: its own muzzle flash size and how

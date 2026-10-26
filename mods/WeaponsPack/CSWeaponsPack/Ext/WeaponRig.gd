@@ -5,6 +5,7 @@
 extends "res://Scripts/WeaponRig.gd"
 
 const WPR = preload("res://CSWeaponsPack/Mod.gd")
+const WPE = preload("res://CSWeaponsPack/Energy.gd")
 
 
 func FireEvent():
@@ -42,6 +43,14 @@ func Reload():
 		UpdateBullets()
 		return
 	super()
+
+
+# Energy guns (Ray Gun): the shot is a bolt that hits when it arrives.
+func Raycast(spread: float):
+	if data and data.has_meta("cs_energy"):
+		WPE.shot(self)
+		return
+	super(spread)
 
 
 # A silent gun's shots never count as firing: nothing hears or notices them.

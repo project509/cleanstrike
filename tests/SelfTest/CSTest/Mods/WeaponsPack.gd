@@ -59,11 +59,12 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	var mag = d.compatible[0]
 	r.check(tag + "its own name, icon and magazine", d.file == g.file and d.name == g.name and d.icon != null and mag.subtype == "Magazine" and d.magazineSize == mag.maxAmount)
 	r.check(tag + "takes its ammo", mag.compatible.has(d.ammo) and (g.get("data", {}).get("caliber", base.caliber) == d.caliber))
-	r.check(tag + "aims through its own sights", d.aimPosition.z == base.aimPosition.z and d.aimPosition.y < 0.0)
+	var aim_z: float = base.aimPosition.z + g.get("shift", {}).get("aimPosition", Vector3.ZERO).z
+	r.check(tag + "aims through its own sights", is_equal_approx(d.aimPosition.z, aim_z) and d.aimPosition.y < 0.0)
 	var pitch: float = g.get("feel", {}).get("pitch", 1.0)
 	if pitch != 1.0 and base.fireSemi:
 		r.check(tag + "its own voice", d.fireSemi.audioClips[0].mix_rate == int(base.fireSemi.audioClips[0].mix_rate * pitch))
-	r.check(tag + "found in loot, and sold where its base gun is", lt.items.has(d) and d.gunsmith == base.gunsmith)
+	r.check(tag + "found in loot, and sold where its base gun is", lt.items.has(d) and d.gunsmith == g.get("data", {}).get("gunsmith", base.gunsmith))
 	if g.magazine is Dictionary:
 		r.check(tag + "its magazine is an item like the game's", WP.items.has(mag.file) and db.get(mag.file) is PackedScene and lt.items.has(mag) and mag.icon != null)
 	var t: Node = d.tetris.instantiate()
@@ -95,6 +96,9 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	if zl:
 		zl.last_shot = -1000.0
 	fr.FireEvent()
+	if d.has_meta("cs_energy"):
+		var bolt = r.get_tree().current_scene.find_child("CS_RayBolt", true, false)
+		r.check(tag + "an energy bolt leaves the muzzle", bolt != null and bolt.find_children("*", "GPUParticles3D", true, false).size() >= 2 and d.casing == 0)
 	if d.has_meta("cs_bolt"):
 		r.check(tag + "bolt action: the shot leaves the chamber empty, the next round in the magazine", not back.chamber and back.amount == 5)
 	else:
@@ -105,6 +109,8 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 		else:
 			r.check(tag + "the zombies hear it", zl.last_shot > -1000.0)
 	if g.has("head_damage"):
-		r.check(tag + "its own headshot", is_equal_approx(float(d.get_meta("cs_head_damage", 0.0)), float(g.head_damage)) and d.damage < base.damage)
+		r.check(tag + "its own headshot", is_equal_approx(float(d.get_meta("cs_head_damage", 0.0)), float(g.head_damage)))
+	if g.get("bolt", false):
+		r.check(tag + "weak to the body", d.damage < base.damage)
 	fr.queue_free()
 	await r.get_tree().process_frame

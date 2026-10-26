@@ -370,6 +370,13 @@ func build(id: String, s: Dictionary) -> void:
 		var rb := box_of(_role_list(role_arrs, "SightRear"))
 		L.sight_rear = Vector3(rb.get_center().x, rb.end.y, rb.get_center().z)
 		L.sight_rear_box = rb
+	if s.get("sight", "") == "top":          # no usable sights: aim over the highest point along the gun's centre
+		var top := -INF
+		for a in _role_list(role_arrs, "Body"):
+			for p in a[Mesh.ARRAY_VERTEX]:
+				if absf(p.x - L.muzzle.x) < s.get("sight_width", 0.012):
+					top = maxf(top, p.y)
+		L.sight_front = Vector3(L.muzzle.x, top + 0.006, L.muzzle.z)
 	if s.get("sight", "") == "auto":         # moulded-in sights: the highest centreline point just behind the muzzle
 		var best := -INF
 		for a in _role_list(role_arrs, "Body"):

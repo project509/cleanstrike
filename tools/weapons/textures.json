@@ -86,5 +86,22 @@
         "roughness": "Welrod_FinalRoughness_Linear.png"
       }
     }
+  },
+  "RAYGUN": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/raygun/textures",
+    "materials": {
+      "Raygun_A": {
+        "albedo": "Raygun_LP_Raygun_A_BaseColor.png",
+        "normal": "Raygun_LP_Raygun_A_Normal.png",
+        "metallic": "Raygun_LP_Raygun_A_Metallic.png",
+        "roughness": "Raygun_LP_Raygun_A_Roughness.png"
+      },
+      "Raygun_B": {
+        "albedo": "Raygun_LP_Raygun_B_BaseColor.png",
+        "normal": "Raygun_LP_Raygun_B_Normal.png",
+        "metallic": "Raygun_LP_Raygun_B_Metallic.png",
+        "roughness": "Raygun_LP_Raygun_B_Roughness.png"
+      }
+    }
   }
 }
