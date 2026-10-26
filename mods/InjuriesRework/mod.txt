@@ -1,0 +1,16 @@
+[mod]
+name="Injuries Rework"
+id="cs_injuries_rework"
+version="1.0.0"
+author="Cleanstrike"
+description="Injuries that feel different instead of just draining health: bleeding hurts more but stops after a while, fractures hurt when you run, ruptures make you hungry and thirsty, and a headshot leaves you dazed: shaky aim and no running until treated."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Medical", "Gameplay"]
+
+[script_extend]
+res://Scripts/Character.gd="res://CSInjuriesRework/Ext/Character.gd"
