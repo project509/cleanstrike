@@ -112,6 +112,8 @@ static func apply_chances(events: Array) -> void:
 # first and rolls only that, which divides every chance by the number of
 # events). Used when the Fixes Overhaul is on with that fix enabled.
 static func fair_odds() -> bool:
+	if overrides.has("fair_odds"):
+		return bool(overrides["fair_odds"])
 	var c := cs()
 	if c == null or not c.is_loaded("cs_fixes_overhaul"):
 		return false

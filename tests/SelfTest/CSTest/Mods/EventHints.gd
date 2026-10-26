@@ -51,11 +51,11 @@ func run(r) -> void:
 	var sys := Node3D.new()
 	sys.set_script(load("res://Scripts/EventSystem.gd"))
 	sys.dynamicEvents.append(airdrop)
-	EH.overrides = {"airdrop_chance": 100, "max_delay": 0}
+	EH.overrides = {"airdrop_chance": 100, "max_delay": 0, "fair_odds": false}
 	EH.last_hint = ""
 	sys.ActivateDynamicEvent()
 	r.check("EventHints: event starts with its hint", sys.get_child_count() == 1 and EH.last_hint == EH.EVENTS.airdrop[2], EH.last_hint)
-	EH.overrides = {"airdrop_chance": 100, "max_delay": 0, "airdrop_hint": false}
+	EH.overrides = {"airdrop_chance": 100, "max_delay": 0, "airdrop_hint": false, "fair_odds": false}
 	EH.last_hint = ""
 	sys.ActivateDynamicEvent()
 	r.check("EventHints: hint can be switched off", sys.get_child_count() == 2 and EH.last_hint == "")
