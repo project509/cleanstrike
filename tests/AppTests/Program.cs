@@ -3,6 +3,7 @@ using System.IO;
 // Usage: AppTests <TestGame folder> <work folder>   (prepares a launch; does not start the game)
 using System.IO.Compression;
 using Cleanstrike.Services;
+using Cleanstrike.Models;
 
 int fails = 0;
 void Check(string name, bool ok, string detail = "")
@@ -51,6 +52,14 @@ var withSettings = installed.FirstOrDefault(m => m.Settings.Count > 0);
 Check("scan finds Cleanstrike mods", installed.Any(m => m.HasManifest), string.Join(",", installed.Select(m => m.Id)));
 Check("reads settings schema", withSettings != null && withSettings.Settings.All(s => s.Key.Length > 0 && s.Label.Length > 0), withSettings?.Id ?? "none");
 Check("compatible with this game", installed.Where(m => m.HasManifest).All(m => ModLibrary.CompatibilityProblem(m, g, LoaderInstaller.ApiVersion) == null));
+// Opt-in mods (cheats) are added switched off; everything else on.
+var sandbox = installed.FirstOrDefault(m => m.Id == "cs_sandbox_mode");
+if (sandbox != null)
+{
+    var trial = new Profile { Name = "opt-in check" };
+    Store.Reconcile(trial, installed, enableNew: true);
+    Check("opt-in mod added switched off", sandbox.OptIn && trial.Mods.Any(e => e.Id == sandbox.Id && !e.Enabled) && trial.Mods.Any(e => e.Id != sandbox.Id && e.Enabled));
+}
 var rtt = installed.FirstOrDefault(m => m.Id == "tarkov_looting") ?? installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 if (rttWip != null)

@@ -47,7 +47,7 @@ public static class SilentInstall
             var p = Store.LoadProfile(name);
             bool changed = Store.Reconcile(p, installed, enableNew: false);
             if (name == config.ActiveProfile)
-                foreach (var e in p.Mods.Where(m => fresh.Contains(m.Id) && !m.Enabled))
+                foreach (var e in p.Mods.Where(m => fresh.Contains(m.Id) && !m.Enabled && !installed.Any(i => i.Id == m.Id && i.OptIn)))
                 {
                     e.Enabled = true;
                     changed = true;

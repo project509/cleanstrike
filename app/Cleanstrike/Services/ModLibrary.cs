@@ -110,6 +110,7 @@ public static class ModLibrary
         info.GameMax = cfg.GetString("cleanstrike", "game_max");
         info.Tags = cfg.GetList("cleanstrike", "tags");
         info.Premium = cfg.GetBool("cleanstrike", "premium");
+        info.OptIn = cfg.GetBool("cleanstrike", "opt_in");
         info.Incompatible = cfg.Entries("incompatible")
             .GroupBy(e => e.Key).ToDictionary(g => g.Key, g => Convert.ToString(g.First().Value, System.Globalization.CultureInfo.InvariantCulture) ?? "");
         info.Requires = cfg.GetList("dependencies", "required");

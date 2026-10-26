@@ -59,6 +59,8 @@ public sealed class ModInfo
     public long SizeBytes { get; set; }
     public byte[]? Thumbnail { get; set; }
     public bool Premium { get; set; }
+    /// <summary>Added switched off (e.g. cheats): the player turns it on.</summary>
+    public bool OptIn { get; set; }
     public Dictionary<string, string> Incompatible { get; set; } = new();   // [incompatible] other_id="reason"          // [cleanstrike] premium=true: Cleanstrike's flagship mods     // icon.png / icon.jpg at the mod's root
 }
 

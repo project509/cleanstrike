@@ -1,0 +1,21 @@
+[mod]
+name="Sandbox Mode"
+id="cs_sandbox_mode"
+version="1.0.0"
+author="Cleanstrike"
+description="Opt-in cheats for experimenting: F6 opens a menu with god mode, no needs, infinite stamina, no weight limit, enemies ignore you, time, weather and season controls, trader restock and an item spawner. Everything starts off."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Sandbox", "Cheats"]
+opt_in=true
+
+[script_extend]
+res://Scripts/Character.gd="res://CSSandboxMode/Ext/Character.gd"
+res://Scripts/Sensor.gd="res://CSSandboxMode/Ext/Sensor.gd"
+
+[autoload]
+CSSandboxModeBoot="res://CSSandboxMode/Boot.gd"

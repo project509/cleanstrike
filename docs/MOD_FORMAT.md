@@ -32,6 +32,7 @@ game_min="0.2.2.0"          ; optional: oldest game version supported
 game_max=""                 ; optional: newest game version supported
 godot_min="4.6.0"           ; optional
 tags=["UI", "Looting"]
+opt_in=true                 ; optional: added switched off (cheats and the like)
 premium=true                ; Cleanstrike team only: gold "Premium Mod" frame and badge in the app
 
 [script_extend]             ; order matters, see below

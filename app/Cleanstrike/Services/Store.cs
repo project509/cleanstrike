@@ -71,7 +71,7 @@ public static class Store
         foreach (var m in mods.OrderBy(m => m.Priority).ThenBy(m => m.Name, StringComparer.OrdinalIgnoreCase))
         {
             if (p.Mods.Any(e => string.Equals(e.Id, m.Id, StringComparison.OrdinalIgnoreCase))) continue;
-            p.Mods.Add(new ProfileEntry { Id = m.Id, File = m.FileName, Enabled = enableNew });
+            p.Mods.Add(new ProfileEntry { Id = m.Id, File = m.FileName, Enabled = enableNew && !m.OptIn });
             changed = true;
         }
         return changed;

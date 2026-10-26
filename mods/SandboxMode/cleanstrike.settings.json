@@ -1,0 +1,10 @@
+{
+  "settings": [
+    {
+      "key": "menu_key",
+      "type": "string",
+      "default": "F6",
+      "label": "Menu key"
+    }
+  ]
+}
