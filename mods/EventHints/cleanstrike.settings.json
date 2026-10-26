@@ -1,0 +1,229 @@
+{
+  "settings": [
+    {
+      "key": "hints",
+      "type": "bool",
+      "default": true,
+      "label": "Event hints",
+      "description": "A short message when an event is on its way, e.g. 'Police sirens wail in the distance...'"
+    },
+    {
+      "key": "max_delay",
+      "type": "int",
+      "default": 300,
+      "min": 0,
+      "max": 900,
+      "step": 15,
+      "label": "Longest start delay (seconds)",
+      "description": "Events (except crash sites) start up to this long after you arrive (the game: 300)."
+    },
+    {
+      "key": "airdrop_chance",
+      "type": "int",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Airdrop: chance %",
+      "description": "The game: 15%."
+    },
+    {
+      "key": "airdrop_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Airdrop: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "airdrop_hint",
+      "type": "bool",
+      "default": true,
+      "label": "Airdrop: show a hint"
+    },
+    {
+      "key": "helicopter_chance",
+      "type": "int",
+      "default": 25,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Attack helicopter: chance %",
+      "description": "The game: 25%."
+    },
+    {
+      "key": "helicopter_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Attack helicopter: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "helicopter_hint",
+      "type": "bool",
+      "default": false,
+      "label": "Attack helicopter: show a hint"
+    },
+    {
+      "key": "btr_chance",
+      "type": "int",
+      "default": 25,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "BTR patrol (Vostok): chance %",
+      "description": "The game: 25%."
+    },
+    {
+      "key": "btr_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "BTR patrol (Vostok): how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "btr_hint",
+      "type": "bool",
+      "default": true,
+      "label": "BTR patrol (Vostok): show a hint"
+    },
+    {
+      "key": "outpost_chance",
+      "type": "int",
+      "default": 25,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Outpost compromised: chance %",
+      "description": "The game: 25%."
+    },
+    {
+      "key": "outpost_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Outpost compromised: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "outpost_hint",
+      "type": "bool",
+      "default": true,
+      "label": "Outpost compromised: show a hint"
+    },
+    {
+      "key": "crash_chance",
+      "type": "int",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Helicopter crash sites: chance %",
+      "description": "The game: 15%."
+    },
+    {
+      "key": "crash_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Helicopter crash sites: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "crash_hint",
+      "type": "bool",
+      "default": true,
+      "label": "Helicopter crash sites: show a hint"
+    },
+    {
+      "key": "jets_chance",
+      "type": "int",
+      "default": 25,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Fighter jets: chance %",
+      "description": "The game: 25%."
+    },
+    {
+      "key": "jets_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Fighter jets: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "jets_hint",
+      "type": "bool",
+      "default": false,
+      "label": "Fighter jets: show a hint"
+    },
+    {
+      "key": "punisher_chance",
+      "type": "int",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Punisher: chance %",
+      "description": "The game: 15%."
+    },
+    {
+      "key": "punisher_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Punisher: how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "punisher_hint",
+      "type": "bool",
+      "default": true,
+      "label": "Punisher: show a hint"
+    },
+    {
+      "key": "bogeyman_chance",
+      "type": "int",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "label": "Bogeyman (night): chance %",
+      "description": "The game: 15%."
+    },
+    {
+      "key": "bogeyman_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "label": "Bogeyman (night): how often it's picked",
+      "description": "Each visit one possible event is picked, by weight. 0 = never."
+    },
+    {
+      "key": "bogeyman_hint",
+      "type": "bool",
+      "default": true,
+      "label": "Bogeyman (night): show a hint"
+    }
+  ]
+}

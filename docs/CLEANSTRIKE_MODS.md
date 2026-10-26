@@ -19,8 +19,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 | 1 | No Permadeath | cs_no_permadeath | Done (1.0.0) |
 | 2 | Better Traders | cs_better_traders | Done (1.0.0) |
 | 3 | Loot Settings, Better Enemy Loot | cs_loot_settings, cs_better_enemy_loot | Done (1.0.0) |
-| 4 | Event Hints | | Next |
-| 5 | Focus Zoom, Hold Breath | | Planned |
+| 4 | Event Hints | cs_event_hints | Done (1.0.0) |
+| 5 | Focus Zoom, Hold Breath | | Next |
 | 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Skeleton |
 | 7 | Medical Durability | | Planned |
 | 8 | Gear Spawns | | Planned |
@@ -118,6 +118,10 @@ Source: Event Hints (notyme, mod/55994; vostokmods.net 0.3.2, tested 0.2.2.0).
   rules respected.
 Vanilla: EventSystem.ActivateDynamicEvent picks one available dynamic event
 uniformly, then succeeds if randi_range(0, 100) <= possibility.
+Built (1.0.0): per-event chance (written into the EventData so the game's
+Events panel shows it), weight, hint toggle; max delay; our own hint texts.
+Fair odds (one roll over all events, >=20% quiet) live here and switch on
+when CleanStrike Fixes Overhaul is loaded with its event_odds fix.
 
 ## 5. Focus Zoom + Hold Breath
 Focus Eye (Gugluv, mod/55962):

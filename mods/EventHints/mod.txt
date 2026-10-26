@@ -1,0 +1,16 @@
+[mod]
+name="Event Hints"
+id="cs_event_hints"
+version="1.0.0"
+author="Cleanstrike"
+description="Hints when a world event is coming (airdrops, helicopters, the Punisher...), and settings for how often each event happens and how long it takes to start."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Events", "QoL"]
+
+[script_extend]
+res://Scripts/EventSystem.gd="res://CSEventHints/Ext/EventSystem.gd"
