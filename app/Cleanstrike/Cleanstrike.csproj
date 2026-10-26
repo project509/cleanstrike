@@ -11,7 +11,7 @@
     <RootNamespace>Cleanstrike</RootNamespace>
     <ApplicationIcon>Assets\cleanstrike.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Product>Cleanstrike</Product>
     <Company>Cleanstrike</Company>
     <Description>Mod manager for Road to Vostok</Description>

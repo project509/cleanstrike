@@ -2,9 +2,10 @@
 # gun's animations place the left hand on the base gun's handguard,
 # magazine and charging handle; near each of those the hand is moved by the
 # difference to this gun's (two-bone arm IK, the hand keeps its angle and
-# finger pose), and eased back in between. Runs right after the game's
-# animation tree poses the skeleton each frame (a child of the skeleton).
-extends Node
+# finger pose), and eased back in between. A skeleton modifier: it runs
+# after the game's animation has posed the skeleton and before the gun's
+# parts are moved onto their bones.
+extends SkeletonModifier3D
 
 const HOLD := 0.16          # wrist to magazine middle while holding one (long magazines held low)
 
@@ -30,16 +31,8 @@ const HOLD := 0.16          # wrist to magazine middle while holding one (long m
 @export var flip_to := Vector3.ZERO       # this gun's
 
 
-func _ready() -> void:
-	var rig := get_parent()
-	while rig and not ("animator" in rig):
-		rig = rig.get_parent()
-	if rig and rig.get("animator"):
-		rig.get("animator").mixer_applied.connect(_fit)
-
-
-func _fit() -> void:
-	var sk := get_parent() as Skeleton3D
+func _process_modification_with_delta(_delta: float) -> void:
+	var sk := get_skeleton()
 	if sk == null or wrist < 0 or upper < 0 or lower < 0 or body < 0:
 		return
 	var g := sk.get_bone_global_pose(body)

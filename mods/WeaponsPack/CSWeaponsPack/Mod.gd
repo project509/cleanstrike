@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "1.1.0"
+const VERSION := "1.1.1"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 	"start_kit": false,            # new games start with the pack's guns and ammo

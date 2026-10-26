@@ -669,6 +669,25 @@ func gun_views():
 		d = load(OS.get_environment("WPVANILLA"))
 	var mgr = await _equip(d, [d.compatible[0]])
 	await wait(1.0)
+	if OS.get_environment("WPDBG") == "2":
+		var r0: Node = mgr.get_child(0)
+		var sk0: Skeleton3D = r0.get("skeleton")
+		for a in sk0.get_children():
+			if a is BoneAttachment3D:
+				var b := sk0.find_bone(a.bone_name)
+				print("DBG att ", a.name, " bone ", a.bone_name, " #", b, " gpos ", a.global_position, " pose ", sk0.get_bone_global_pose(b).origin, " rest ", sk0.get_bone_global_rest(b).origin, " override ", a.override_pose, " ext ", a.use_external_skeleton)
+				for m in a.get_children():
+					if m is MeshInstance3D:
+						print("DBG   mesh ", m.name, " vis ", m.visible, " gpos ", m.global_position, " aabb ", m.global_transform * m.get_aabb())
+		print("DBG skel ", sk0.global_position, " arms ", (r0.get("arms") as Node3D).global_position, " cam ", get_viewport().get_camera_3d().global_position)
+		var body_mesh: Mesh = sk0.get_node("CS_Colt_1911_Body/CS_Body").mesh if sk0.has_node("CS_Colt_1911_Body/CS_Body") else null
+		for n in get_tree().root.find_children("*", "", true, false):
+			if n is MeshInstance3D and n.mesh == body_mesh:
+				print("DBG copy ", n.get_path(), " vis ", n.is_visible_in_tree(), " gt ", n.global_transform, " layers ", n.layers)
+			if n is Skeleton3D and n != sk0 and n.get_bone_count() > 0 and n.get_bone_name(0).begins_with("Colt"):
+				print("DBG other skel ", n.get_path())
+			if n is Camera3D or n is SubViewport:
+				print("DBG view ", n.get_path(), " ", n.get("cull_mask"))
 	await shot("shot_gun_hip.png")
 	Input.action_press("aim")
 	await wait(1.5)

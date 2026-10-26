@@ -21,7 +21,7 @@ SNAP="$R/dist/test/save_snapshot"; rm -rf "$SNAP"; mkdir -p "$SNAP/cs"; cp "$U"/
 for f in data last_launch.json boot.json; do [ -e "$U/cleanstrike/$f" ] && cp -r "$U/cleanstrike/$f" "$SNAP/cs/"; done
 rm -rf "$U/cleanstrike/data"
 rm -f "$U/cleanstrike/"shot_*.png
-(cd "$T" && timeout 600 ./RTV.exe --windowed --resolution 1920x1080 --position -4000,100 >/dev/null 2>&1)
+(cd "$T" && timeout 600 ./RTV.exe --windowed --resolution 1920x1080 --position -4000,100 > "${GAMELOG:-/dev/null}" 2>&1)
 for f in "$U"/*.tres; do [ -e "$SNAP/$(basename "$f")" ] || rm -f "$f"; done
 cp "$SNAP"/*.tres "$U"/
 rm -f "$T/Cleanstrike/mods/Shots.csmod" "$U/cleanstrike/"shot_mode_*
