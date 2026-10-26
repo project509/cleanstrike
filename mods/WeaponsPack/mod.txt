@@ -1,0 +1,20 @@
+[mod]
+name="CleanStrike Weapons Pack (In Progress)"
+id="cs_weapons_pack"
+version="0.1.0"
+author="Cleanstrike"
+description="New weapons that work like the game's own: same attachments, magazines, ammo and handling. First up: the FN SCAR-17 (.308)."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Weapons"]
+premium=true
+opt_in=true
+
+[script_extend]
+
+[autoload]
+CSWeaponsPackBoot="res://CSWeaponsPack/Boot.gd"

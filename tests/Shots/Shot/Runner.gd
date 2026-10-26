@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -545,3 +545,22 @@ func _frame_stats(seconds: float) -> Array:
 	for x in times:
 		avg += x
 	return [avg / maxf(1, times.size()), times[int(times.size() * 0.99)]]
+
+
+# Weapons Pack: the SCAR rig held in first person, and side on.
+func scar_views():
+	var WP = load("res://CSWeaponsPack/Mod.gd")
+	var cam = get_viewport().get_camera_3d()
+	var rig: Node3D = WP.build_scar_rig().instantiate()
+	cam.add_child(rig)
+	rig.position = Vector3(0.12, -0.16, -0.32)
+	rig.rotation = Vector3(0, PI, 0)
+	for m in rig.find_children("*", "MeshInstance3D", true, false):
+		m.layers = 1
+	rig.process_mode = Node.PROCESS_MODE_DISABLED
+	await wait(1.0)
+	await shot("shot_scar_fp.png")
+	rig.position = Vector3(0, -0.05, -0.75)
+	rig.rotation = Vector3(0, PI / 2.0, 0)
+	await wait(0.5)
+	await shot("shot_scar_side.png")

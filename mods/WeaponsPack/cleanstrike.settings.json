@@ -1,0 +1,5 @@
+{
+  "settings": [
+    {"key": "scar_iron_sights", "type": "bool", "default": true, "label": "SCAR iron sights", "description": "Folding iron sights when no optic is mounted."}
+  ]
+}
