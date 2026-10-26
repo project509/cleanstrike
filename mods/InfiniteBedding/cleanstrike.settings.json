@@ -1,0 +1,28 @@
+{
+  "settings": [
+    {
+      "key": "Sleeping_Bag",
+      "type": "bool",
+      "default": true,
+      "label": "Sleeping bag is kept"
+    },
+    {
+      "key": "Mattress",
+      "type": "bool",
+      "default": true,
+      "label": "Mattress is kept"
+    },
+    {
+      "key": "Pillow",
+      "type": "bool",
+      "default": true,
+      "label": "Pillow is kept"
+    },
+    {
+      "key": "Blanket",
+      "type": "bool",
+      "default": false,
+      "label": "Blanket is kept"
+    }
+  ]
+}
