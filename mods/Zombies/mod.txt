@@ -15,3 +15,8 @@ premium=true
 opt_in=true
 
 [script_extend]
+res://Scripts/AISpawner.gd="res://CSZombies/Ext/AISpawner.gd"
+res://Scripts/WeaponRig.gd="res://CSZombies/Ext/WeaponRig.gd"
+
+[autoload]
+CSZombiesBoot="res://CSZombies/Boot.gd"

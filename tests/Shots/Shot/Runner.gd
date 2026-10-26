@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -430,8 +430,9 @@ func zombies_views():
 	var pack := [["walk", -1.2, 5.0], ["walk_2", 0.6, 6.0], ["run", 0.0, 8.5], ["walk_3", 1.8, 9.0], ["stumble", -2.4, 10.0],
 		["crawl", -0.6, 3.6], ["crawl_run", 1.2, 4.4], ["walk", -1.6, 12.0], ["idle_scratch", 2.6, 12.5]]
 	for p in pack:
-		var z: Node3D = load(ZM.MODEL).instantiate()
+		var z: Node3D = ZM.scene().instantiate()
 		get_tree().current_scene.add_child(z)
+		z.active = false
 		var at: Vector3 = feet + fwd * p[2] + right * p[1]
 		var q := PhysicsRayQueryParameters3D.create(at + Vector3.UP * 2.0, at + Vector3.DOWN * 4.0, 1)
 		var hit = space.intersect_ray(q)
@@ -439,8 +440,34 @@ func zombies_views():
 			at.y = hit.position.y
 		z.global_position = at
 		z.global_basis = Basis.looking_at((feet - at) * Vector3(1, 0, 1), Vector3.UP)   # the model faces -z: towards you
-		var ap: AnimationPlayer = z.get_node("AnimationPlayer")
+		var ap: AnimationPlayer = z.get_node("Model/AnimationPlayer")
 		ap.play(p[0])
 		ap.seek(randf() * ap.current_animation_length, true)
 	await wait(1.5)
 	await shot("shot_zombies.png")
+
+
+# CleanStrike Zombies: limbs shot off (baked limbs on the floor, a crawler).
+func zgore_views():
+	var ZM = load("res://CSZombies/Mod.gd")
+	var cam = get_viewport().get_camera_3d()
+	var player = get_node("/root/Map/Core/Controller")
+	var fwd: Vector3 = -Vector3(cam.global_basis.z.x, 0, cam.global_basis.z.z).normalized()
+	var right: Vector3 = fwd.cross(Vector3.UP)
+	var feet: Vector3 = player.global_position
+	var zs := []
+	for i in 2:
+		var z = ZM.scene().instantiate()
+		get_tree().current_scene.add_child(z)
+		z.global_position = feet + fwd * 4.0 + right * (i * 1.6 - 0.8)
+		z.global_basis = Basis.looking_at(-fwd, Vector3.UP)   # -z (its front) towards you
+		z.Activate("Wander")
+		z.active = false                    # posed: no AI, animation still plays
+		z.anim.play("idle")
+		zs.append(z)
+	await wait(0.8)
+	zs[0].Hit("arm_r_upper", 200.0, right, null, zs[0].global_position + Vector3.UP * 1.3)
+	zs[1].Hit("leg_l_upper", 200.0, -right, null, zs[1].global_position + Vector3.UP * 0.6)
+	zs[1].anim.play("crawl")
+	await wait(1.2)
+	await shot("shot_zgore.png")

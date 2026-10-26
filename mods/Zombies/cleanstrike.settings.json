@@ -7,7 +7,93 @@
       "min": 0.25,
       "max": 4,
       "step": 0.25,
-      "label": "Zombie health (x)"
+      "label": "Zombie health (x)",
+      "description": "250 at 1; headshots do three times the damage."
+    },
+    {
+      "key": "damage",
+      "type": "float",
+      "default": 60.0,
+      "min": 10,
+      "max": 150,
+      "step": 5,
+      "label": "Blow strength",
+      "description": "60: a blow takes 15-30 health before armour."
+    },
+    {
+      "key": "runners",
+      "type": "float",
+      "default": 0.15,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Runners (share)",
+      "description": "The rest shamble."
+    },
+    {
+      "key": "horde",
+      "type": "float",
+      "default": 2.0,
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "label": "Horde size (x the game enemies)"
+    },
+    {
+      "key": "hearing",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 3,
+      "step": 0.25,
+      "label": "Hearing (x)",
+      "description": "At 1, gunshots carry 140 m, running 30 m, walking 10 m."
+    },
+    {
+      "key": "sight",
+      "type": "float",
+      "default": 35.0,
+      "min": 5,
+      "max": 100,
+      "step": 5,
+      "label": "Sight (m)"
+    },
+    {
+      "key": "forget_seconds",
+      "type": "float",
+      "default": 180.0,
+      "min": 60,
+      "max": 600,
+      "step": 30,
+      "label": "They lose interest after (s unseen)"
+    },
+    {
+      "key": "alert_radius",
+      "type": "float",
+      "default": 35.0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "label": "A zombie calls others within (m)"
+    },
+    {
+      "key": "door_hits",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 40,
+      "step": 1,
+      "label": "Blows to break a door"
+    },
+    {
+      "key": "loot_chance",
+      "type": "float",
+      "default": 0.25,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Bodies with loot (share)",
+      "description": "A few rounds or something to eat."
     }
   ]
 }

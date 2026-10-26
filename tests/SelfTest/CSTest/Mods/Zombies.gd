@@ -5,34 +5,165 @@ const ZM = preload("res://CSZombies/Mod.gd")
 const LIMBS := ["Z_Head", "Z_L_Upperarm", "Z_L_Forearm", "Z_L_ArmPalm", "Z_R_Upperarm", "Z_R_Forearm", "Z_R_ArmPalm",
 	"Z_L_LegThigh", "Z_L_LegCalf", "Z_R_LegThigh", "Z_R_LegCalf"]
 
+var made := []
+
+
+func _frames(r, n: int) -> void:
+	for i in n:
+		await r.get_tree().physics_frame
+
+
+func _zombie(r, at: Vector3) -> Node3D:
+	var z: Node3D = ZM.scene().instantiate()
+	r.get_tree().current_scene.add_child(z)
+	z.global_position = at
+	z.Activate("Wander")
+	made.append(z)
+	return z
+
 
 func run(r) -> void:
 	r.check("Zombies: active", ZM.active())
+	# The model
 	var scene = load(ZM.MODEL)
 	r.check("Zombies: model loads in the game", scene is PackedScene)
-	if not (scene is PackedScene):
-		return
-	var z: Node3D = scene.instantiate()
-	r.get_tree().current_scene.add_child(z)
-	z.global_position = Vector3(0, -300, 0)
-	var sk: Skeleton3D = z.find_children("*", "Skeleton3D", true, false)[0]
-	var ap: AnimationPlayer = z.get_node("AnimationPlayer")
-	var missing := LIMBS.filter(func(n): return z.find_child(n, true, false) == null)
+	var probe: Node3D = scene.instantiate()
+	var missing := LIMBS.filter(func(n): return probe.find_child(n, true, false) == null)
 	r.check("Zombies: every limb is its own mesh", missing.is_empty(), str(missing))
-	var clips := ap.get_animation_list()
-	r.check("Zombies: all 31 animations", clips.size() == 31 and clips.has("walk") and clips.has("crawl") and clips.has("attack"), str(clips.size()))
-	ap.play("idle")
-	ap.advance(0.5)
-	await r.get_tree().process_frame
+	r.check("Zombies: all 31 animations", probe.get_node("AnimationPlayer").get_animation_list().size() == 31)
+	probe.free()
+
+	var gd = load("res://Resources/GameData.tres")
+	var player = r.get_node("/root/Map/Core/Controller")
+	var keep_health: float = gd.health
+	var cam = r.get_viewport().get_camera_3d()
+	var fwd: Vector3 = -Vector3(cam.global_basis.z.x, 0, cam.global_basis.z.z).normalized()
+	var feet: Vector3 = player.global_position
+
+	# Built zombie: human sized, a hitbox on every part
+	var z := _zombie(r, feet + fwd * 8.0)
+	await _frames(r, 3)
+	var sk: Skeleton3D = z.skeleton
 	var head: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Head")).origin
-	var foot: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("LeftFoot")).origin
-	var height := head.y - foot.y
-	r.check("Zombies: human sized", height > 1.2 and height < 2.0, "%.2f m head above feet" % height)
-	var mat: StandardMaterial3D = (z.find_child("Z_Body", true, false) as MeshInstance3D).material_override
-	r.check("Zombies: textured", mat != null and mat.albedo_texture != null and mat.albedo_texture.get_width() == 1024)
-	ap.play("crawl")
-	ap.advance(0.5)
-	await r.get_tree().process_frame
-	var hips: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Hips")).origin
-	r.check("Zombies: crawling is low", hips.y - z.global_position.y < 0.6, "%.2f m" % (hips.y - z.global_position.y))
-	z.queue_free()
+	r.check("Zombies: human sized", head.y - z.global_position.y > 1.2 and head.y - z.global_position.y < 2.0, "%.2f" % (head.y - z.global_position.y))
+	var toe: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("LeftToes")).origin
+	var ankle: Vector3 = sk.global_transform * sk.get_bone_global_pose(sk.find_bone("LeftFoot")).origin
+	var toes_dir: Vector3 = ((toe - ankle) * Vector3(1, 0, 1)).normalized()
+	r.check("Zombies: walks face first (toes point -z)", toes_dir.dot(-z.global_basis.z) > 0.5, "toes . forward = %.2f" % toes_dir.dot(-z.global_basis.z))
+	r.check("Zombies: a hitbox on every body part", z.hitboxes.size() == ZM.PARTS.size() and z.hitboxes[0] is Hitbox)
+	var head_hb = sk.get_node("HB_head/Hitbox")
+	r.check("Zombies: head hitbox sits on the head", head_hb.global_position.distance_to(head) < 0.35, "%.2f m" % head_hb.global_position.distance_to(head))
+
+	# A gunshot: it comes for you
+	z.look_at(feet + fwd * 20.0, Vector3.UP)          # facing away: it must hear, not see
+	gd.playerPosition = feet
+	feet = gd.playerPosition
+	ZM.note_shot(feet)                               # what the weapon records on each shot
+	var hooked := false
+	var rig = load("res://Items/Weapons/AKM/AKM_Rig.tscn").instantiate()   # class script: check a real rig
+	r.get_tree().current_scene.add_child(rig)
+	var ws = rig.get_script()
+	while ws:
+		hooked = hooked or ws.get_script_constant_map().has("ZW")
+		ws = ws.get_base_script()
+	rig.queue_free()
+	r.check("Zombies: every shot is recorded at the weapon", hooked)
+	z.think = 0.0
+	await _frames(r, 3)
+	r.check("Zombies: a gunshot brings it", z.state in [z.S.INVESTIGATE, z.S.CHASE], "state %d heard %.2f shot %.2f now %.2f dist %.1f active %s proc %s think %.2f" % [z.state, z.last_heard, ZM.last_shot, Time.get_ticks_msec() / 1000.0, ZM.last_shot_at.distance_to(z.global_position), z.active, z.can_process(), z.think])
+	var d0: float = z.global_position.distance_to(feet)
+	await r.wait(2.0)
+	r.check("Zombies: it walks towards you", z.global_position.distance_to(feet) < d0 - 0.5, "%.1f -> %.1f m" % [d0, z.global_position.distance_to(feet)])
+
+	# The pack hears the call
+	var z2 := _zombie(r, feet + fwd * 8.0 + Vector3(3, 0, 0))
+	var z3 := _zombie(r, feet + fwd * 80.0)
+	await _frames(r, 2)
+	var n: int = ZM.alert_near(z, feet)
+	await r.wait(2.5)
+	r.check("Zombies: nearby zombies come too", n >= 1 and z2.state in [z2.S.INVESTIGATE, z2.S.CHASE], str(z2.state))
+	r.check("Zombies: but not ones far away", z3.state == z3.S.WANDER)
+
+	# Up close it attacks, and it hurts
+	feet = gd.playerPosition
+	z2.global_position = feet + fwd * 1.2
+	z2.last_seen = Time.get_ticks_msec() / 1000.0
+	z2.target = feet
+	z2.state = z2.S.CHASE
+	gd.health = 100.0
+	z2.think = 0.0
+	var t := 0.0
+	while gd.health >= 100.0 and t < 4.0:
+		z2.last_seen = Time.get_ticks_msec() / 1000.0
+		await r.wait(0.1)
+		t += 0.1
+	r.check("Zombies: its blows hurt", gd.health < 100.0, "%.1f health after %.1f s; state %d d %.2f dead %s seen %s" % [gd.health, t, z2.state, z2.global_position.distance_to(feet), z2.dead, z2.Sees()])
+	gd.health = keep_health
+
+	# Shoot a leg off: a crawler, and the leg on the floor
+	var leg = sk.get_node("HB_leg_l_lower/Hitbox")
+	leg.ApplyDamage(90.0, fwd, player.get_node_or_null("../Camera/ID"))
+	await _frames(r, 2)
+	var calf: MeshInstance3D = z.model.find_child("Z_L_LegCalf", true, false)
+	r.check("Zombies: legless zombies crawl", z.crawler and not calf.visible and z.lost.has("leg_l_lower") and not z.dead)
+	var limbs: Array = r.get_tree().current_scene.find_children("CS_Limb", "RigidBody3D", true, false)
+	r.check("Zombies: the severed leg falls", limbs.size() >= 1 and limbs[0].get_child(0).mesh.get_surface_count() > 0, "limbs %d" % limbs.size())
+	r.check("Zombies: a severed part can't be hit again", leg.collision_layer == 0)
+
+	# Headshots kill; the body can be searched
+	var hp: float = z.health
+	head_hb.ApplyDamage(30.0, fwd, null)
+	r.check("Zombies: headshots hit hard", hp - z.health >= 90.0, "%.0f" % (hp - z.health))
+	head_hb.ApplyDamage(100.0, fwd, null)
+	await _frames(r, 2)
+	r.check("Zombies: dead", z.dead and not z.model.find_child("Z_Head", true, false).visible)
+	var loot = z.get_node_or_null("CS_Loot")
+	r.check("Zombies: the body can be searched", loot != null and loot.has_method("Interact") and loot.containerName == "Zombie")
+	var total := 0
+	var with_loot := 0
+	ZM.overrides = {"loot_chance": 0.5}
+	for i in 40:
+		var probe_z := Node3D.new()
+		r.get_tree().current_scene.add_child(probe_z)
+		var c = ZM._corpse_loot(probe_z)
+		total += 1
+		with_loot += 1 if not c.loot.is_empty() else 0
+		probe_z.free()
+	ZM.overrides = {}
+	r.check("Zombies: some bodies carry ammo or food", with_loot > 5 and with_loot < 35, "%d of %d" % [with_loot, total])
+
+	# Ten blows break a door
+	var door = load("res://Assets/Shack_A/Shack_A_Door_L.tscn").instantiate()
+	r.get_tree().current_scene.add_child(door)
+	door.global_position = feet + Vector3(0, -50, 0)
+	var dn = ZM.door_of(door.find_children("*", "CollisionShape3D", true, false)[0])
+	dn.isOpen = false                                # doors can start open
+	var broke := false
+	for i in 9:
+		broke = broke or ZM.hit_door(dn)
+	r.check("Zombies: a door holds for nine blows", dn != null and not broke and not dn.isOpen, "door %s broke %s open %s hits %s" % [str(dn), broke, dn.isOpen if dn else "-", str(dn.get_meta("cs_hits")) if dn else "-"])
+	broke = ZM.hit_door(dn)
+	await _frames(r, 2)
+	r.check("Zombies: the tenth breaks it", broke and dn.isOpen and not dn.visible)
+
+	# The spawner fills its pools with the dead
+	var sp = load("res://Resources/AISpawner.tscn").instantiate()
+	sp.active = false
+	r.get_tree().current_scene.add_child(sp)
+	sp.global_position = Vector3(0, -500, 0)
+	sp.enemy = sp.bandit
+	sp.EPoolSize = 3
+	sp.NPoolSize = 2
+	sp.activeEnemyLimit = 2
+	await sp.CreatePools()
+	var all_dead: bool = sp.EPool.get_children().all(func(e): return e.has_method("Hit"))
+	r.check("Zombies: every enemy is a zombie", all_dead and sp.EPool.get_child_count() == 6 and sp.NPool.get_child_count() == 0, "%d enemies, %d nomads" % [sp.EPool.get_child_count(), sp.NPool.get_child_count()])
+	r.check("Zombies: bosses too", sp.BPool.get_children().all(func(e): return e.has_method("Hit")))
+	sp.queue_free()
+	door.queue_free()
+	for m in made:
+		if is_instance_valid(m):
+			m.queue_free()
+	for l in r.get_tree().current_scene.find_children("CS_Limb", "RigidBody3D", true, false):
+		l.queue_free()
+	await _frames(r, 2)

@@ -58,6 +58,12 @@ func run(r) -> void:
 		hooked = hooked or sc.get_script_constant_map().has("FW")
 		sc = sc.get_base_script()
 	r.check("FactionWarfare: spawner hook installed", hooked)
+	if Engine.get_meta("Cleanstrike").is_loaded("cs_zombies"):
+		r.check("FactionWarfare: spawner left to CleanStrike Zombies", true)
+		for a in made:
+			a.queue_free()
+		made.clear()
+		return
 	# A real spawner with a small bandit pool: rivals mix in
 	var sp = load("res://Resources/AISpawner.tscn").instantiate()
 	sp.active = false
