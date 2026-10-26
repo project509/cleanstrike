@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar", "scareq"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -564,3 +564,49 @@ func scar_views():
 	rig.rotation = Vector3(0, PI / 2.0, 0)
 	await wait(0.5)
 	await shot("shot_scar_side.png")
+
+
+# Weapons Pack: the SCAR equipped the player's way (into the primary slot,
+# then loaded), hip and aimed with an EXPS; the KAR-21 first for comparison.
+func _equip(data, nested: Array) -> Node:
+	var gd = load("res://Resources/GameData.tres")
+	var ui = get_node("/root/Map/Core/UI/Interface")
+	var manager = get_node("/root/Map/Core/Camera/Manager")
+	manager.ClearRig()
+	for c in manager.primarySlot.get_children():
+		c.queue_free()
+	await wait(0.3)
+	var sd := SlotData.new()
+	sd.itemData = data
+	sd.amount = 20
+	for n in nested:
+		sd.nested.append(n)
+	ui.Create(sd, ui.inventoryGrid, false)
+	await wait(0.3)
+	var item = null
+	for c in ui.inventoryGrid.get_children():
+		if c is Item and c.slotData.itemData == data:
+			item = c
+	ui.inventoryGrid.Pick(item)
+	ui.Equip(item, manager.primarySlot)
+	gd.primary = true
+	manager.LoadPrimary()
+	await wait(2.5)
+	print("[SCAREQ] ", data.name, " in hand: ", manager.get_children().map(func(c): return c.name))
+	return manager
+
+
+func scareq_views():
+	var WP = load("res://CSWeaponsPack/Mod.gd")
+	var gd = load("res://Resources/GameData.tres")
+	while not (Engine.has_meta("cs_items") and Engine.get_meta("cs_items").has("CS_SCAR_Rig")):
+		await wait(0.2)
+	await _equip(load("res://Items/Weapons/KAR-21/KAR-21_308.tres"), [])
+	await shot("shot_kar_hip.png")
+	await _equip(WP.scar_item(), [])
+	await shot("shot_scar_hip.png")
+	await _equip(WP.scar_item(), [load("res://Items/Attachments/EXPS/EXPS.tres")])
+	gd.isAiming = true
+	await wait(1.5)
+	await shot("shot_scar_ads.png")
+	gd.isAiming = false

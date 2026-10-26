@@ -23,6 +23,9 @@ func _ready() -> void:
 	# SCAR space -> rig space: +X (muzzle) -> +Z, scaled, magazine well at z 0.07, bore at y 0
 	var fit := Transform3D(Basis(Vector3.UP, -PI / 2.0).scaled(Vector3.ONE * s), Vector3.ZERO)
 	fit.origin = Vector3(0, -SCAR_BORE_Y * s, KAR_MAG_Z) - fit.basis * Vector3(SCAR_MAG_X, 0, 0)
+	# Measured against the KAR-21: its trigger and magazine sit 4.8 cm further forward
+	# and the grip 1.2 cm higher; put the SCAR's there so the hands land on them.
+	fit.origin += Vector3(0, 0.012, 0.048)
 	print("scale ", s)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = _tex("DefaultMaterial_Base_Color.jpg", false)
@@ -93,7 +96,7 @@ func _preview(scene: PackedScene) -> void:
 	vp.add_child(scar)
 	var kar: Node3D = load("res://Items/Weapons/KAR-21/KAR-21_308_Rig.tscn").instantiate()
 	vp.add_child(kar)
-	kar.position = Vector3(0, -0.3, 0)                    # below, same scale, for comparison
+	kar.position = Vector3(0, -0.28, 0)                   # below, same scale, for comparison
 	for n in kar.find_children("*", "MeshInstance3D", true, false):
 		n.layers = 1
 		if n.name == "Arms":
@@ -102,9 +105,18 @@ func _preview(scene: PackedScene) -> void:
 		n.layers = 1
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 0.75
+	cam.size = 1.0
 	vp.add_child(cam)
-	cam.look_at_from_position(Vector3(1.5, -0.12, 0.2), Vector3(0, -0.12, 0.2))   # from the right side
+	cam.look_at_from_position(Vector3(1.5, -0.14, 0.12), Vector3(0, -0.14, 0.12))   # from the right side
+	for nm in ["Trigger_Low", "Magazine_Low", "Handle_Low", "Gun_Low", "Charge_Low"]:
+		var m = scar.get_node_or_null(nm)
+		if m:
+			print("SCAR ", nm, " ", m.transform * m.get_aabb())
+	var ksk: Skeleton3D = kar.find_children("*", "Skeleton3D", true, false)[0]
+	for nm in ["KAR-21_Trigger", "KAR-21_308_Magazine", "KAR-21_Body", "KAR-21_Charging_Handle"]:
+		var m = ksk.get_node_or_null(nm)
+		if m:
+			print("KAR  ", nm, " ", m.get_aabb())
 	for i in 4:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw

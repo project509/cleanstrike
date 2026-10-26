@@ -28,6 +28,7 @@ const SCAR_BONES := {
 }
 const BODY_BONE := "KAR-21_Body"
 const OPTIC_RAIL_Y := 0.075   # optics on the KAR-21 sit at about this height
+const MUZZLE_SHIFT := 0.048   # the SCAR's muzzle is this much further out than the KAR-21's
 
 static var scar_rig: PackedScene
 static var scar_data: Resource
@@ -82,6 +83,14 @@ static func build_scar_rig() -> PackedScene:
 		for o in mounts.get_children():
 			if o is Node3D and o.position.y > 0.05:
 				o.position.y += lift
+			elif o is Node3D and o.position.z > 0.5:
+				o.position.z += MUZZLE_SHIFT          # muzzle devices on the SCAR's muzzle
+	var refs = sk.get_node_or_null("References")
+	if refs:
+		for n in ["Muzzle", "Raycast"]:
+			var r = refs.get_node_or_null(n)
+			if r:
+				r.position.z += MUZZLE_SHIFT
 	rig.name = "CS_SCAR_Rig"
 	rig.set("data", scar_item())
 	rig.set_meta("cs_rail_lift", lift)
