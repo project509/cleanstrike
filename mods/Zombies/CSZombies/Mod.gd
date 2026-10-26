@@ -3,7 +3,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_zombies"
-const VERSION := "1.1.0"
+const VERSION := "1.1.1"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {
@@ -490,6 +490,10 @@ static func _corpse_loot(z: Node3D) -> Node:
 	c.set_script(load("res://Scripts/LootContainer.gd"))
 	c.set("containerName", "Zombie")
 	c.set("limit", "CS_Nothing")
+	c.set("containerSize", Vector2(4, 6))
+	c.set("corpse", true)
+	# opening and closing play this; without one the game crashes
+	c.set("audioEvent", load("res://Audio/Interaction/Container_Corpse.tres"))
 	var body := StaticBody3D.new()
 	body.collision_layer = 16
 	body.collision_mask = 0

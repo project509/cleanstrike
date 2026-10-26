@@ -166,6 +166,31 @@ func run(r) -> void:
 	r.check("Zombies: dead", z.dead and not z.model.find_child("Z_Head", true, false).visible)
 	var loot = z.get_node_or_null("CS_Loot")
 	r.check("Zombies: the body can be searched", loot != null and loot.has_method("Interact") and loot.containerName == "Zombie")
+	# searched the player's way: through the game's loot screen
+	var ammo_item = null
+	for it in load("res://Loot/LT_Master.tres").items:
+		if it and str(it.type) == "Ammo":
+			ammo_item = it
+			break
+	loot.CreateLoot(ammo_item)
+	var ui_mgr = r.get_tree().current_scene.get_node("/root/Map/Core/UI")
+	var iface = ui_mgr.get_node("Interface")
+	r.check("Zombies: the body makes the game's search sound", loot.audioEvent != null)
+	loot.Interact()
+	await _frames(r, 30)
+	r.check("Zombies: the body opens in the loot screen", iface.container == loot and iface.visible, "container %s" % str(iface.container))
+	await _frames(r, 240)
+	ui_mgr.Return()
+	await _frames(r, 10)
+	# reopened, then the body is cleared away while still open
+	loot.Interact()
+	await _frames(r, 20)
+	z.queue_free()
+	await _frames(r, 60)
+	ui_mgr.Return()
+	await _frames(r, 10)
+	r.check("Zombies: a body cleared away while searched closes cleanly", not iface.visible)
+	z = null
 	var total := 0
 	var with_loot := 0
 	ZM.overrides = {"loot_chance": 0.5}
