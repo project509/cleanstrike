@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -416,3 +416,31 @@ func grades_views():
 		await wait(0.4)
 		await shot("shot_grade_%s.png" % p.replace(" ", "_"))
 	V.overrides = {}
+
+
+# CleanStrike Zombies: a pack of walkers, a runner and crawlers coming at you.
+func zombies_views():
+	var ZM = load("res://CSZombies/Mod.gd")
+	var cam = get_viewport().get_camera_3d()
+	var player = get_node("/root/Map/Core/Controller")
+	var fwd: Vector3 = -Vector3(cam.global_basis.z.x, 0, cam.global_basis.z.z).normalized()
+	var right: Vector3 = fwd.cross(Vector3.UP)
+	var feet: Vector3 = player.global_position
+	var space = player.get_world_3d().direct_space_state
+	var pack := [["walk", -1.2, 5.0], ["walk_2", 0.6, 6.0], ["run", 0.0, 8.5], ["walk_3", 1.8, 9.0], ["stumble", -2.4, 10.0],
+		["crawl", -0.6, 3.6], ["crawl_run", 1.2, 4.4], ["walk", -1.6, 12.0], ["idle_scratch", 2.6, 12.5]]
+	for p in pack:
+		var z: Node3D = load(ZM.MODEL).instantiate()
+		get_tree().current_scene.add_child(z)
+		var at: Vector3 = feet + fwd * p[2] + right * p[1]
+		var q := PhysicsRayQueryParameters3D.create(at + Vector3.UP * 2.0, at + Vector3.DOWN * 4.0, 1)
+		var hit = space.intersect_ray(q)
+		if hit:
+			at.y = hit.position.y
+		z.global_position = at
+		z.global_basis = Basis.looking_at((feet - at) * Vector3(1, 0, 1), Vector3.UP)   # the model faces -z: towards you
+		var ap: AnimationPlayer = z.get_node("AnimationPlayer")
+		ap.play(p[0])
+		ap.seek(randf() * ap.current_animation_length, true)
+	await wait(1.5)
+	await shot("shot_zombies.png")
