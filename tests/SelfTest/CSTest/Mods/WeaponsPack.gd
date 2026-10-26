@@ -41,3 +41,23 @@ func run(r) -> void:
 	pk.global_position = Vector3(0, -620, 0)
 	r.check("WeaponsPack: the SCAR on the ground is a SCAR", pk is Pickup and pk.slotData.itemData.file == "CS_SCAR" and pk.get_node("SCAR/Gun_Low") != null and not pk.get_node("LOD0").visible)
 	pk.queue_free()
+	# Saved and loaded (the game writes the item into the save), then fired.
+	var sd := SlotData.new()
+	sd.itemData = d
+	sd.amount = 20
+	sd.chamber = true
+	sd.condition = 100
+	var path := "user://cs_wp_test.tres"
+	ResourceSaver.save(sd, path)
+	var back = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	r.check("WeaponsPack: a saved SCAR loads back as a SCAR", back.itemData.file == "CS_SCAR" and back.itemData.name == "FN SCAR-17" and back.amount == 20)
+	var fr = db.get(back.itemData.file + "_Rig").instantiate()
+	fr.process_mode = Node.PROCESS_MODE_DISABLED
+	r.get_tree().current_scene.add_child(fr)
+	fr.slotData = back
+	fr.fireTimer = 1.0
+	if fr.has_method("FireEvent"):
+		fr.FireEvent()
+	r.check("WeaponsPack: the loaded SCAR fires: a round used", back.amount == 19)
+	fr.queue_free()
