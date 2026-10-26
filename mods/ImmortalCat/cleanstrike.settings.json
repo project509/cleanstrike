@@ -1,0 +1,5 @@
+{
+  "settings": [
+    {"key": "never_hungry", "type": "bool", "default": false, "label": "Never hungry", "description": "The cat stays fed, so you never need to feed it."}
+  ]
+}

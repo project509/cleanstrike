@@ -1,0 +1,16 @@
+[mod]
+name="Immortal Cat"
+id="cs_immortal_cat"
+version="1.0.0"
+author="Cleanstrike"
+description="Your cat can't die. It still gets hungry, so feed it, but an empty bowl won't take it from you."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Shelter", "QoL"]
+
+[script_extend]
+res://Scripts/Character.gd="res://CSImmortalCat/Ext/Character.gd"
