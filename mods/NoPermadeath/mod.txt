@@ -3,7 +3,7 @@ name="No Permadeath"
 id="cs_no_permadeath"
 version="1.0.0"
 author="Cleanstrike"
-description="Dying never deletes your saves: permadeath zones and Hardcore deaths work like normal deaths. Optionally keep your gear when you die."
+description="Dying never deletes your saves: permadeath zones and Hardcore deaths work like normal deaths. Optionally keep your gear when you die or quit outside a shelter."
 priority=0
 
 [cleanstrike]
@@ -13,3 +13,6 @@ godot_min="4.6.0"
 tags=["Survival", "QoL"]
 
 [script_extend]
+res://Scripts/Character.gd="res://CSNoPermadeath/Ext/Character.gd"
+res://Scripts/Settings.gd="res://CSNoPermadeath/Ext/Settings.gd"
+res://Scripts/HUD.gd="res://CSNoPermadeath/Ext/HUD.gd"

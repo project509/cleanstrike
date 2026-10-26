@@ -1,3 +1,37 @@
 {
-  "settings": []
+  "settings": [
+    {
+      "key": "zones",
+      "type": "bool",
+      "default": true,
+      "label": "No permadeath in Vostok zones",
+      "description": "Dying in Apartments, Terminal or Airfield works like dying anywhere else: you wake up at your shelter instead of losing every save."
+    },
+    {
+      "key": "hardcore",
+      "type": "bool",
+      "default": true,
+      "label": "No permadeath on Hardcore",
+      "description": "On the hardest difficulty every map is permadeath. With this on, deaths there work like normal deaths too."
+    },
+    {
+      "key": "on_death",
+      "type": "choice",
+      "default": "Lose everything",
+      "options": [
+        "Lose everything",
+        "Keep worn gear and weapons",
+        "Keep everything"
+      ],
+      "label": "When you die",
+      "description": "What you still have when you wake up at your shelter. You always come back at full health."
+    },
+    {
+      "key": "keep_on_quit",
+      "type": "bool",
+      "default": false,
+      "label": "Keep your gear when quitting outside a shelter",
+      "description": "Quitting to the menu or desktop away from a shelter normally deletes what you carry. With this on it's saved, and you continue from your shelter."
+    }
+  ]
 }

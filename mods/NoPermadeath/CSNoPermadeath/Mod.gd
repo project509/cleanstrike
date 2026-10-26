@@ -5,9 +5,19 @@ extends RefCounted
 const MOD_ID := "cs_no_permadeath"
 const VERSION := "1.0.0"
 
+const LOSE_ALL := "Lose everything"
+const KEEP_WORN := "Keep worn gear and weapons"
+const KEEP_ALL := "Keep everything"
+
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {
+	"zones": true,
+	"hardcore": true,
+	"on_death": LOSE_ALL,
+	"keep_on_quit": false,
 }
+
+const CHARACTER := "user://Character.tres"
 
 # Self-test hook: values here win over the player's settings.
 static var overrides := {}
@@ -42,3 +52,45 @@ static func say(text: String) -> void:
 		c.log_message(MOD_ID, text)
 	else:
 		print("[%s] %s" % [MOD_ID, text])
+
+
+# ---------------------------------------------------------------- permadeath
+
+# Is permadeath switched off for this difficulty? Hardcore (difficulty 3)
+# makes every map permadeath; otherwise only the Vostok zones are.
+static func spares(difficulty: int) -> bool:
+	if not active():
+		return false
+	return bool(setting("hardcore")) if difficulty == 3 else bool(setting("zones"))
+
+
+static func keep_mode() -> String:
+	var m := str(setting("on_death"))
+	return m if m in [LOSE_ALL, KEEP_WORN, KEEP_ALL] else LOSE_ALL
+
+
+# ---------------------------------------------------------------- gear
+
+# The character as it is right now (the game's own save routine, read back
+# without the resource cache).
+static func capture_character() -> CharacterSave:
+	Loader.SaveCharacter()
+	return ResourceLoader.load(CHARACTER, "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterSave
+
+
+# After the game has reset the character for a death, put back what the
+# player keeps. Stats stay reset (you come back at full health), weapons
+# holstered, reputation and the cat as the game left them.
+static func restore_gear(kept: CharacterSave, mode: String, path := CHARACTER) -> bool:
+	if kept == null or mode == LOSE_ALL:
+		return false
+	var fresh := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterSave
+	if fresh == null:
+		return false
+	fresh.equipment = kept.equipment
+	if mode == KEEP_ALL:
+		fresh.inventory = kept.inventory
+		fresh.catalog = kept.catalog
+	var err := ResourceSaver.save(fresh, path)
+	say("Kept on death (%s): %d equipped, %d carried, %d catalog." % [mode, fresh.equipment.size(), fresh.inventory.size(), fresh.catalog.size()])
+	return err == OK

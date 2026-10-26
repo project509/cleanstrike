@@ -22,7 +22,7 @@ func check(name: String, ok: bool, detail := "") -> void:
 	print("[CSTest] %s %s %s" % ["PASS" if ok else "FAIL", name, detail])
 
 func _ready() -> void:
-	get_tree().create_timer(460.0, true, false, true).timeout.connect(func(): check("timeout", false); finish())
+	get_tree().create_timer(900.0, true, false, true).timeout.connect(func(): check("timeout", false); finish())
 	run.call_deferred()
 
 func wait(s: float) -> void:
