@@ -1,0 +1,40 @@
+{
+  "settings": [
+    {
+      "key": "angle",
+      "type": "float",
+      "default": 15.0,
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "label": "Lean angle (degrees)",
+      "description": "The game: 15."
+    },
+    {
+      "key": "offset",
+      "type": "float",
+      "default": 0.35,
+      "min": 0.1,
+      "max": 0.6,
+      "step": 0.05,
+      "label": "Lean distance (m)",
+      "description": "How far your head moves sideways. The game: 0.2."
+    },
+    {
+      "key": "speed",
+      "type": "float",
+      "default": 7.0,
+      "min": 2,
+      "max": 15,
+      "step": 0.5,
+      "label": "Lean speed",
+      "description": "The game: 5."
+    },
+    {
+      "key": "sprint_cancels",
+      "type": "bool",
+      "default": true,
+      "label": "Sprinting ends a toggled lean"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[mod]
+name="Better Lean"
+id="cs_better_lean"
+version="1.0.0"
+author="Cleanstrike"
+description="Lean further and faster to peek corners, with your own angle, distance and speed; a toggled lean ends when you sprint."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay", "Movement"]
+
+[script_extend]
+res://Scripts/Lean.gd="res://CSBetterLean/Ext/Lean.gd"
