@@ -41,7 +41,7 @@ func run(r) -> void:
 	trader.CreateSupply()
 
 	# Goods and furniture are separate lists
-	r.check("BetterTraders: goods restock count", trader.bt_goods.size() == 40, str(trader.bt_goods.size()))
+	r.check("BetterTraders: goods restock count", _nc(trader.bt_goods).size() == 40, str(_nc(trader.bt_goods).size()))
 	r.check("BetterTraders: no furniture among goods", not trader.bt_goods.any(func(s): return M.is_furniture(s.itemData)))
 	r.check("BetterTraders: furniture list is furniture", trader.bt_furniture.all(func(s): return M.is_furniture(s.itemData)), "%d furniture" % trader.bt_furniture.size())
 
@@ -59,7 +59,7 @@ func run(r) -> void:
 	if not trader.bt_furniture.is_empty():
 		interface.BT_SetSupplyTab("furniture")
 		await r.wait(0.3)
-		items = interface.supplyGrid.get_children()
+		items = _nc(interface.supplyGrid.get_children())
 		r.check("BetterTraders: Furniture tab shows furniture", items.size() > 0 and items.all(func(i): return M.is_furniture(i.slotData.itemData)), "%d items" % items.size())
 		interface.BT_SetSupplyTab("goods")
 		await r.wait(0.2)
@@ -67,14 +67,14 @@ func run(r) -> void:
 	# Stock by reputation
 	interface.BT_ShowStock()
 	await r.wait(0.3)
-	items = interface.supplyGrid.get_children()
+	items = _nc(interface.supplyGrid.get_children())
 	r.check("BetterTraders: stock at Unknown = 3 items, no key", items.size() == 3 and not items.any(func(i): return i.slotData.itemData.type == "Key"), "%d items" % items.size())
 	r.check("BetterTraders: header says Stock", interface.supplyUI.get_node("Header/Label").text == "Stock")
 	M.overrides["rep"] = 50.0
 	trader.CreateSupply()
 	interface.Resupply()
 	await r.wait(0.3)
-	items = interface.supplyGrid.get_children()
+	items = _nc(interface.supplyGrid.get_children())
 	var key = null
 	for i in items:
 		if i.slotData.itemData.resource_path == M.KEYS["Generalist"]:
@@ -193,3 +193,8 @@ func run(r) -> void:
 		if not (c in had):
 			interface.inventoryGrid.Pick(c)
 			c.queue_free()
+
+
+# Without Cash Money's cash stacks (they sit outside the reputation stock).
+func _nc(a: Array) -> Array:
+	return a.filter(func(x): return str((x.slotData if x is Item else x).itemData.file) != "CS_Euro")

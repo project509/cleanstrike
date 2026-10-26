@@ -1,0 +1,36 @@
+{
+  "settings": [
+    {
+      "key": "markup",
+      "type": "float",
+      "default": 20.0,
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "label": "Cash markup (%)",
+      "description": "How much worse cash is than bartering, buying and selling."
+    },
+    {
+      "key": "container_chance",
+      "type": "float",
+      "default": 8.0,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "label": "Containers with cash (%)"
+    },
+    {
+      "key": "trader_cash",
+      "type": "bool",
+      "default": true,
+      "label": "Traders pay in cash",
+      "description": "Traders carry cash you can take for your goods."
+    },
+    {
+      "key": "show_total",
+      "type": "bool",
+      "default": true,
+      "label": "Show my cash in the inventory"
+    }
+  ]
+}

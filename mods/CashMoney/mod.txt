@@ -1,0 +1,22 @@
+[mod]
+name="Cash Money"
+id="cs_cash_money"
+version="1.0.0"
+author="Cleanstrike"
+description="Euro banknotes: find small amounts in civilian and military containers and trade with them. Bartering is the better deal; with cash you pay 20% more and get 20% less. Spend or sell your cash before uninstalling."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Economy", "Traders"]
+
+[script_extend]
+res://Scripts/Item.gd="res://CSCashMoney/Ext/Item.gd"
+res://Scripts/LootContainer.gd="res://CSCashMoney/Ext/LootContainer.gd"
+res://Scripts/Trader.gd="res://CSCashMoney/Ext/Trader.gd"
+res://Scripts/Interface.gd="res://CSCashMoney/Ext/Interface.gd"
+
+[autoload]
+CSCashMoneyBoot="res://CSCashMoney/Boot.gd"
