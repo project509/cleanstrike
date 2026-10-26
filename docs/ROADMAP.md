@@ -26,7 +26,7 @@ that was always meant to be this way.
 |---|---|---|
 | 1 | Container & body searching, unknown items, examine, Tarkov cell tints | **Done** (v0.1) |
 | 2 | School / Customs destination picker, Customs routing, map tool | **Done** (v0.2) |
-| 3 | Customs: full-scale map build | **In progress** |
+| 3 | Customs: full-scale map build | **In progress**: terrain, river, layout, Vostok buildings, generated warehouses, pipelines, fences, vehicles, forest, exits |
 | 4 | Tarkov UI overhaul | Planned |
 | 5 | Raids: timer, extracts, MIA/KIA, raid summary | Planned |
 | 6 | Hideout: Cabin becomes Tarkov's underground hideout | Planned |

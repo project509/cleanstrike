@@ -336,6 +336,7 @@ func build_terrain(dir: String) -> void:
 		var img := Image.load_from_file(dir.path_join("mask_%d.png" % t))
 		img.generate_mipmaps()
 		var tex := PortableCompressedTexture2D.new()
+		tex.keep_compressed_buffer = true   # without this nothing is saved
 		tex.create_from_image(img, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS)
 		save_res(tex, "TX_Customs_Roads_%d.res" % t)
 		var mat := base.duplicate() as ShaderMaterial
@@ -1187,6 +1188,7 @@ func png_texture(path: String, file: String) -> Texture2D:
 	var img := Image.load_from_file(path)
 	img.generate_mipmaps()
 	var tex := PortableCompressedTexture2D.new()
+	tex.keep_compressed_buffer = true   # without this nothing is saved
 	tex.create_from_image(img, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSY, false, 0.85)
 	return save_res(tex, file)
 
