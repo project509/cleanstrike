@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud"]:
+	for mode in ["loot", "trader", "hud", "reticle"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -273,3 +273,27 @@ func hud_views():
 		tw.shown = true
 	await wait(1.0)
 	await shot("shot_hud.png")
+
+
+# Reticles: each style through a sight glass straight ahead (the reticle is
+# projected at infinity, so it only shows looking straight through).
+func reticle_views():
+	var R = load("res://CSReticles/Mod.gd")
+	var cam = get_viewport().get_camera_3d()
+	var styles := ["Dot", "Circle dot", "Chevron", "Cross", "Circle cross", "Triangle"]
+	var colors := ["Red", "Green", "Amber", "Blue", "White", "Magenta"]
+	var q := MeshInstance3D.new()
+	q.mesh = QuadMesh.new()
+	q.mesh.size = Vector2(0.3, 0.3)
+	get_tree().current_scene.add_child(q)
+	q.global_transform = cam.global_transform
+	q.global_position = cam.global_position - cam.global_basis.z * 0.4
+	for i in styles.size():
+		R.overrides = {"style": styles[i], "color": colors[i]}
+		R.apply()
+		q.material_override = load(R.MATERIALS[0])
+		await wait(0.5)
+		await shot("shot_reticle_%d.png" % i)
+	q.queue_free()
+	R.overrides = {}
+	R.apply()

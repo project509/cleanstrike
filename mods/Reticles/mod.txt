@@ -1,0 +1,18 @@
+[mod]
+name="Reticles"
+id="cs_reticles"
+version="1.0.0"
+author="Cleanstrike"
+description="Change red-dot reticles: dot, circle-dot, chevron, cross and more, in red, green, amber, blue, white or magenta, with adjustable brightness. U cycles the reticle, J the colour."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Weapons", "Visual"]
+
+[script_extend]
+
+[autoload]
+CSReticlesBoot="res://CSReticles/Boot.gd"

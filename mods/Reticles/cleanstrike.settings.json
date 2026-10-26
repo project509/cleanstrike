@@ -1,0 +1,9 @@
+{
+  "settings": [
+    {"key": "style", "type": "choice", "default": "Optic default", "options": ["Optic default", "Dot", "Circle dot", "Chevron", "Cross", "Circle cross", "Triangle"], "label": "Reticle", "description": "For red dots and holographic sights. U cycles it in game."},
+    {"key": "color", "type": "choice", "default": "Red", "options": ["Red", "Green", "Amber", "Blue", "White", "Magenta"], "label": "Colour", "description": "J cycles it in game."},
+    {"key": "brightness", "type": "float", "default": 1.0, "min": 0.3, "max": 2.0, "step": 0.1, "label": "Brightness (x)"},
+    {"key": "style_key", "type": "string", "default": "U", "label": "Cycle reticle key"},
+    {"key": "color_key", "type": "string", "default": "J", "label": "Cycle colour key"}
+  ]
+}
