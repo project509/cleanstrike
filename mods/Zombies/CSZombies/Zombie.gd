@@ -37,7 +37,7 @@ var health := 250.0
 var parts := {}             # part -> damage taken
 var lost := {}              # part -> true once severed
 var crawler := false
-var runner := false
+var enraged_until := -1000.0   # shot at: now and then one charges you
 var target := Vector3.ZERO
 var last_seen := -1000.0
 var last_heard := -1000.0
@@ -49,6 +49,9 @@ var door_timer := 0.0
 var think := 0.0
 var current_anim := ""
 var path_next := Vector3.ZERO
+var voice: AudioStreamPlayer3D
+var moan_in := 0.0
+var screamed := -1000.0
 
 
 func _ready() -> void:
@@ -59,9 +62,16 @@ func _ready() -> void:
 	for hb in find_children("*", "StaticBody3D", true, false):
 		if hb.has_method("ApplyDamage"):
 			hitboxes.append(hb)
-	runner = randf() < float(ZM.setting("runners"))
 	health = 250.0 * float(ZM.setting("health"))
 	think = randf() * 0.3
+	voice = AudioStreamPlayer3D.new()
+	voice.bus = &"SFX"
+	voice.unit_size = 6.0
+	voice.max_distance = 45.0
+	voice.position = Vector3(0, 1.5, 0)
+	voice.finished.connect(func(): ZM.speaking = maxi(0, ZM.speaking - 1))
+	add_child(voice)
+	moan_in = randf_range(1.0, 8.0)
 	ZM.register(self)
 
 
@@ -127,9 +137,7 @@ func Sees() -> bool:
 func _listen() -> void:
 	var d: float = global_position.distance_to(gameData.playerPosition)
 	var h := float(ZM.setting("hearing"))
-	if (gameData.isFiring or _now() - ZM.last_shot < 1.0) and ZM.last_shot_at.distance_to(global_position) < 140.0 * h:
-		Hear(ZM.last_shot_at if ZM.last_shot_at != Vector3.ZERO else gameData.playerPosition, true)
-	elif gameData.isRunning and d < 30.0 * h:
+	if gameData.isRunning and d < 30.0 * h:
 		Hear(gameData.playerPosition, false)
 	elif gameData.isWalking and not gameData.isCrouching and d < 10.0 * h:
 		Hear(gameData.playerPosition, false)
@@ -159,11 +167,20 @@ func _physics_process(delta: float) -> void:
 
 func _decide() -> void:
 	_listen()
+	moan_in -= 0.25
+	if moan_in <= 0.0:
+		moan_in = randf_range(3.0, 7.0) if state in [S.CHASE, S.INVESTIGATE] else randf_range(6.0, 14.0)
+		Say("moan")
 	var now := _now()
 	var d: float = global_position.distance_to(gameData.playerPosition)
 	if not gameData.isDead and Sees():
 		if last_seen < now - 5.0:
-			ZM.alert_near(self, gameData.playerPosition)       # it moans; the others come
+			ZM.alert_near(self, gameData.playerPosition)       # it screams; the others come
+			if now - screamed > 20.0:
+				screamed = now
+				Say("scream", true)
+				if not crawler and randf() < 0.5:
+					_play("scream", 0.0, true)
 		last_seen = now
 		target = gameData.playerPosition
 		if state != S.ATTACK and state != S.DOOR:
@@ -208,7 +225,7 @@ func _speed() -> float:
 		return 0.45
 	if state == S.WANDER:
 		return 0.6
-	return 2.4 if runner else 1.05
+	return 2.4 if _enraged() else 1.05
 
 
 func _move(delta: float) -> void:
@@ -254,6 +271,7 @@ func _attack(delta: float) -> void:
 		attack_ready = 1.8
 		var a: String = "bite_2" if crawler else ["attack", "punch", "headbutt", "bite_2"].pick_random()
 		_play(a, 0.0, true)
+		Say("attack")
 		get_tree().create_timer(0.55, false).timeout.connect(_land_blow.bind(reach))
 
 
@@ -307,6 +325,9 @@ func Hit(part: String, damage: float, vector: Vector3, id: Node3D, at: Vector3) 
 	ZM.gore_hit(self, at, vector)
 	if id and id.is_in_group("Player"):
 		Hear(gameData.playerPosition, true)
+		if not crawler and not _enraged() and randf() < float(ZM.setting("rage_chance")):
+			enraged_until = _now() + randf_range(6.0, 12.0)    # it charges, screaming
+			Say("scream", true)
 		last_seen = _now()
 		target = gameData.playerPosition
 		if state in [S.IDLE, S.WANDER, S.INVESTIGATE]:
@@ -317,7 +338,9 @@ func Hit(part: String, damage: float, vector: Vector3, id: Node3D, at: Vector3) 
 		if part == "head" and parts[part] >= ZM.limb_health("head"):
 			Sever("head", vector)
 		Death(vector)
-	elif randf() < 0.25 and state != S.ATTACK:
+	elif randf() < 0.5:
+		Say("hit", true)
+	if not dead and randf() < 0.25 and state != S.ATTACK:
 		_play("hit" if not crawler else "crawl", 0.0, true)
 
 
@@ -353,9 +376,32 @@ func Death(vector: Vector3 = Vector3.ZERO) -> void:
 	for hb in hitboxes:
 		hb.collision_layer = 0
 	_play("dying" if crawler else ["death", "dying"].pick_random(), 0.0, true)
+	Say("death", true)
 	ZM.died(self, vector)
 	if AISpawner and "activeEnemies" in AISpawner:
 		AISpawner.activeEnemies -= 1
+
+
+# ---------------------------------------------------------------- voice
+
+# A sound from this zombie. Urgent ones (screams, pain, death) cut in;
+# moans wait their turn so a horde doesn't drown everything.
+func Say(kind: String, urgent := false) -> void:
+	if voice == null or not is_inside_tree():
+		return
+	if voice.playing and not urgent:
+		return
+	if not voice.playing and ZM.speaking >= ZM.MAX_VOICES and not urgent:
+		return
+	var s := ZM.sound(kind)
+	if s == null:
+		return
+	if not voice.playing:
+		ZM.speaking += 1
+	voice.stream = s
+	voice.pitch_scale = randf_range(0.85, 1.1)
+	voice.volume_db = 3.0 if kind == "scream" else 0.0
+	voice.play()
 
 
 # ---------------------------------------------------------------- animation
@@ -369,7 +415,7 @@ func _move_anim() -> String:
 		return "crawl_run" if state == S.CHASE else "crawl"
 	if state == S.WANDER:
 		return ["walk", "walk_3", "stumble"][get_instance_id() % 3]
-	return ("run" if get_instance_id() % 2 == 0 else "run_2") if runner else ["walk", "walk_2", "walk_3"][get_instance_id() % 3]
+	return ("run" if get_instance_id() % 2 == 0 else "run_2") if _enraged() else ["walk", "walk_2", "walk_3"][get_instance_id() % 3]
 
 
 # Crossfade into a clip; moving clips are sped to the feet; one-shots finish
@@ -390,6 +436,10 @@ func _play(clip: String, move_speed: float, once := false) -> void:
 
 func _busy() -> bool:
 	return anim.has_meta("cs_once_until") and _now() < float(anim.get_meta("cs_once_until"))
+
+
+func _enraged() -> bool:
+	return _now() < enraged_until
 
 
 func _now() -> float:

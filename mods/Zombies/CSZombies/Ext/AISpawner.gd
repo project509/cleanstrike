@@ -1,5 +1,6 @@
 # CleanStrike Zombies: every enemy pool is filled with the dead (bosses too),
-# more of them than the game's soldiers, and no nomads.
+# more of them than the game's soldiers, no nomads. They keep coming quickly,
+# and some are already about when you arrive.
 extends "res://Scripts/AISpawner.gd"
 
 const ZS = preload("res://CSZombies/Mod.gd")
@@ -16,4 +17,8 @@ func CreatePools():
 	activeNomadLimit = 0
 	EPoolSize = int(round(EPoolSize * horde))
 	activeEnemyLimit = int(round(activeEnemyLimit * horde))
+	spawnFrequency = SpawnFrequency.High
 	await super()
+	for i in int(activeEnemyLimit * float(ZS.setting("start_share"))):
+		if activeEnemies < activeEnemyLimit and EPool.get_child_count() > 0:
+			SpawnEnemy()

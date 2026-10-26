@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -471,3 +471,41 @@ func zgore_views():
 	zs[1].anim.play("crawl")
 	await wait(1.2)
 	await shot("shot_zgore.png")
+
+
+# CleanStrike Zombies on a real map: spawns, navigation, a gunshot, the pack.
+func zmap_views():
+	var ZM = load("res://CSZombies/Mod.gd")
+	var gd = load("res://Resources/GameData.tres")
+	Loader.LoadScene("Village")
+	while not map_ready("Village"):
+		await wait(0.5)
+	await wait(12.0)                                  # pools fill, first spawns
+	var zs: Array = ZM.living.filter(func(z): return is_instance_valid(z) and z.active)
+	var cam = get_viewport().get_camera_3d()
+	var me: Vector3 = gd.playerPosition
+	var start := {}
+	for z in zs:
+		start[z] = z.global_position.distance_to(me)
+	print("[ZMAP] active zombies %d, pooled %d, nav map %s" % [zs.size(), ZM.living.size(), str(zs[0].agent.get_navigation_map()) if zs.size() > 0 else "-"])
+	ZM.note_shot(me)
+	await wait(1.5)
+	var heard := zs.filter(func(z): return z.state in [z.S.INVESTIGATE, z.S.CHASE]).size()
+	await wait(25.0)
+	var closer := 0
+	var with_path := 0
+	for z in zs:
+		if is_instance_valid(z) and z.global_position.distance_to(me) < start[z] - 3.0:
+			closer += 1
+		if is_instance_valid(z) and not z.agent.get_current_navigation_path().is_empty():
+			with_path += 1
+	print("[ZMAP] heard the shot %d / %d, closer by 3 m+ %d, with nav path %d" % [heard, zs.size(), closer, with_path])
+	var near = null
+	for z in zs:
+		if is_instance_valid(z) and (near == null or z.global_position.distance_to(me) < near.global_position.distance_to(me)):
+			near = z
+	if near:
+		print("[ZMAP] nearest %.1f m, state %d" % [near.global_position.distance_to(me), near.state])
+		cam.look_at(near.global_position + Vector3.UP * 1.2, Vector3.UP)
+	await wait(0.3)
+	await shot("shot_zmap.png")

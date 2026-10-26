@@ -21,14 +21,14 @@
       "description": "60: a blow takes 15-30 health before armour."
     },
     {
-      "key": "runners",
+      "key": "rage_chance",
       "type": "float",
-      "default": 0.15,
+      "default": 0.12,
       "min": 0,
       "max": 1,
-      "step": 0.05,
-      "label": "Runners (share)",
-      "description": "The rest shamble."
+      "step": 0.02,
+      "label": "Chance a shot enrages it",
+      "description": "Enraged, a zombie charges you for 6-12 s. Otherwise they shamble."
     },
     {
       "key": "horde",
@@ -38,6 +38,15 @@
       "max": 5,
       "step": 0.5,
       "label": "Horde size (x the game enemies)"
+    },
+    {
+      "key": "start_share",
+      "type": "float",
+      "default": 0.5,
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Already about when you arrive (share)"
     },
     {
       "key": "hearing",

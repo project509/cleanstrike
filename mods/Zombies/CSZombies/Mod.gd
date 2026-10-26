@@ -9,8 +9,9 @@ const VERSION := "0.1.0"
 const DEFAULTS := {
 	"health": 1.0,            # zombie health (x); 250 at 1
 	"damage": 60.0,           # a blow takes 15-30 health before armour
-	"runners": 0.15,          # share of zombies that run
+	"rage_chance": 0.12,      # shot at, a zombie may charge you for a few seconds
 	"horde": 2.0,             # how many more than the game's enemies
+	"start_share": 0.5,       # share of the alive cap already out when you arrive
 	"hearing": 1.0,           # gunshots carry 140 m at 1
 	"sight": 35.0,
 	"forget_seconds": 180.0,  # unseen this long, they lose interest
@@ -85,9 +86,32 @@ static func say(text: String) -> void:
 		print("[%s] %s" % [MOD_ID, text])
 
 
-static func note_shot(at: Vector3) -> void:
+const VOICES := {"moan": 8, "scream": 3, "attack": 4, "hit": 3, "death": 3}
+const MAX_VOICES := 6                    # a horde stays readable
+
+static var _sounds := {}
+static var speaking := 0
+
+
+static func sound(kind: String) -> AudioStream:
+	var key := "%s_%d" % [kind, randi_range(1, int(VOICES.get(kind, 1)))]
+	if not _sounds.has(key):
+		var bytes := FileAccess.get_file_as_bytes("res://CSZombies/Sounds/%s.wav" % key)
+		_sounds[key] = AudioStreamWAV.load_from_buffer(bytes) if bytes.size() > 44 else null
+	return _sounds[key]
+
+
+# A shot: every zombie in earshot hears it, right away (nothing to miss).
+static func note_shot(at: Vector3) -> int:
 	last_shot = Time.get_ticks_msec() / 1000.0
 	last_shot_at = at
+	var reach := 140.0 * float(setting("hearing"))
+	var n := 0
+	for z in living:
+		if is_instance_valid(z) and z.active and not z.dead and z.global_position.distance_to(at) < reach:
+			z.Hear(at, true)
+			n += 1
+	return n
 
 
 static func limb_health(part: String) -> float:
@@ -190,6 +214,7 @@ static func register(z) -> void:
 
 static func release() -> void:
 	_scene = null
+	_sounds.clear()
 	living.clear()
 	corpses.clear()
 	_blood_mat = null

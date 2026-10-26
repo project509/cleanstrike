@@ -54,6 +54,18 @@ func run(r) -> void:
 	var head_hb = sk.get_node("HB_head/Hitbox")
 	r.check("Zombies: head hitbox sits on the head", head_hb.global_position.distance_to(head) < 0.35, "%.2f m" % head_hb.global_position.distance_to(head))
 
+	# Its voice: every sound loads, and it speaks
+	var bad := []
+	for kind in ZM.VOICES:
+		for i in 6:
+			if ZM.sound(kind) == null:
+				bad.append(kind)
+	r.check("Zombies: all its sounds load", bad.is_empty(), str(bad))
+	z.Say("scream", true)
+	r.check("Zombies: it screams", z.voice.stream != null and z.voice.bus == &"SFX")
+	z.voice.stop()
+	ZM.speaking = 0
+
 	# A gunshot: it comes for you
 	z.look_at(feet + fwd * 20.0, Vector3.UP)          # facing away: it must hear, not see
 	gd.playerPosition = feet
@@ -69,10 +81,16 @@ func run(r) -> void:
 	rig.queue_free()
 	r.check("Zombies: every shot is recorded at the weapon", hooked)
 	z.think = 0.0
-	await _frames(r, 3)
+	var tw := 0.0
+	while z.last_heard < 0.0 and tw < 2.0:            # until it has had a moment to think
+		await r.wait(0.05)
+		tw += 0.05
 	r.check("Zombies: a gunshot brings it", z.state in [z.S.INVESTIGATE, z.S.CHASE], "state %d heard %.2f shot %.2f now %.2f dist %.1f active %s proc %s think %.2f" % [z.state, z.last_heard, ZM.last_shot, Time.get_ticks_msec() / 1000.0, ZM.last_shot_at.distance_to(z.global_position), z.active, z.can_process(), z.think])
 	var d0: float = z.global_position.distance_to(feet)
-	await r.wait(2.0)
+	var tm := 0.0
+	while z.global_position.distance_to(feet) > d0 - 0.6 and tm < 6.0:   # slow frames in the suite
+		await r.wait(0.1)
+		tm += 0.1
 	r.check("Zombies: it walks towards you", z.global_position.distance_to(feet) < d0 - 0.5, "%.1f -> %.1f m" % [d0, z.global_position.distance_to(feet)])
 
 	# The pack hears the call
@@ -83,6 +101,14 @@ func run(r) -> void:
 	await r.wait(2.5)
 	r.check("Zombies: nearby zombies come too", n >= 1 and z2.state in [z2.S.INVESTIGATE, z2.S.CHASE], str(z2.state))
 	r.check("Zombies: but not ones far away", z3.state == z3.S.WANDER)
+
+	# Shot at, now and then one charges (never otherwise)
+	r.check("Zombies: they shamble", not z2._enraged() and z2._speed() < 1.5)
+	ZM.overrides = {"rage_chance": 1.0}
+	z2.Hit("torso", 1.0, fwd, player.get_node_or_null("../Camera/ID") if player.get_node_or_null("../Camera/ID") else r.get_tree().get_first_node_in_group("Player"), z2.global_position + Vector3.UP)
+	ZM.overrides = {}
+	r.check("Zombies: enraged by a shot, it charges", z2._enraged() and z2._speed() > 2.0)
+	z2.enraged_until = -1000.0
 
 	# Up close it attacks, and it hurts
 	feet = gd.playerPosition

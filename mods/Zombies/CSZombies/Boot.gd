@@ -10,8 +10,8 @@ var gd = preload("res://Resources/GameData.tres")
 
 
 func _physics_process(_delta: float) -> void:
-	if gd.isFiring:
-		ZM.note_shot(gd.playerPosition)
+	if gd.isFiring and Time.get_ticks_msec() / 1000.0 - ZM.last_shot > 0.15:
+		ZM.note_shot(gd.playerPosition)   # a backstop; the weapon reports each shot itself
 
 
 func _exit_tree() -> void:
