@@ -1,0 +1,63 @@
+{
+  "settings": [
+    {
+      "key": "key",
+      "type": "string",
+      "default": "Y",
+      "label": "Key"
+    },
+    {
+      "key": "mode",
+      "type": "choice",
+      "default": "toggle",
+      "options": [
+        "toggle",
+        "hold"
+      ],
+      "label": "Show the panel",
+      "description": "toggle: press to show or hide. hold: while the key is held."
+    },
+    {
+      "key": "needs_watch",
+      "type": "bool",
+      "default": true,
+      "label": "Needs the watch",
+      "description": "Off: the panel works without wearing the Tactical Watch."
+    },
+    {
+      "key": "exits",
+      "type": "bool",
+      "default": true,
+      "label": "Nearest exit"
+    },
+    {
+      "key": "kills",
+      "type": "bool",
+      "default": true,
+      "label": "Kills",
+      "description": "With Kill Counter."
+    },
+    {
+      "key": "enemies",
+      "type": "bool",
+      "default": true,
+      "label": "Hostiles in the area"
+    },
+    {
+      "key": "loot",
+      "type": "bool",
+      "default": true,
+      "label": "Easier to find",
+      "description": "The watch also turns up in civilian loot and at the Gunsmith."
+    },
+    {
+      "key": "scale",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.6,
+      "max": 2,
+      "step": 0.1,
+      "label": "Size"
+    }
+  ]
+}

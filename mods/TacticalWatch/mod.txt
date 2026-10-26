@@ -1,0 +1,17 @@
+[mod]
+name="Tactical Watch"
+id="cs_tactical_watch"
+version="1.0.0"
+author="Cleanstrike"
+description="Wear the Tactical Watch and press Y for a wrist panel: time and day, where you are, your heading, the nearest exit with its distance, and your kills. Found in loot or sold by the Gunsmith."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["HUD", "Items"]
+
+[script_extend]
+res://Scripts/HUD.gd="res://CSTacticalWatch/Ext/HUD.gd"
+res://Scripts/AI.gd="res://CSTacticalWatch/Ext/AI.gd"

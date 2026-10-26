@@ -267,5 +267,9 @@ func hud_views():
 	gd.health = 72.0
 	gd.bodyStamina = 40.0
 	gd.hydration = 55.0
+	if ResourceLoader.exists("res://CSTacticalWatch/Mod.gd"):   # wrist panel too
+		var tw = load("res://CSTacticalWatch/Mod.gd")
+		tw.overrides = {"needs_watch": false}
+		tw.shown = true
 	await wait(1.0)
 	await shot("shot_hud.png")
