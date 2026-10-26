@@ -112,6 +112,23 @@ static func all() -> Dictionary:
 			"cells": Vector2i(8, 2), "mag_cells": Vector2i(1, 2),
 			"tex": {"base": {}, "second": {}},
 		},
+		"WELROD": {
+			"src": "res://cs_assets/welrod/welrod.glb",
+			"dir": "C:/RTVDev/RTVProject/cs_assets/welrod/textures/",
+			"base": ["Makarov", "Makarov"],
+			"fwd": Vector3(0, 0, 1), "up": Vector3(0, 1, 0),
+			"length": 0.32,
+			"parts": {
+				"Magazine": [{"mesh": "L Welrod", "box": AABB(Vector3(-0.5, -2.6, -3.0), Vector3(1.0, 1.2, 1.0))}],
+				"Slide": [{"mesh": "L Welrod", "box": AABB(Vector3(-0.6, -0.6, -4.5), Vector3(1.2, 1.2, 0.8))}],
+			},
+			"align": "Magazine", "align_to": "magazine",
+			"muzzle_point": Vector3(0, -0.27, 4.151),
+			"sight": "auto",
+			"cartridge": [0.0297, 0.0099], "stack": 1,
+			"cells": Vector2i(4, 2), "mag_cells": Vector2i(1, 1),
+			"tex": {"L Welrod": {}},
+		},
 		"DEAGLE": {
 			"src": "res://cs_assets/deagle/deagle.fbx",
 			"dir": "C:/RTVDev/RTVProject/cs_assets/deagle/textures/",

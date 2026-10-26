@@ -15,6 +15,10 @@
 #   fold       flip-up iron sights fold away under an optic
 #   hand       move the support hand onto this gun's handguard (not pistols)
 #   shift      added to the base gun's carry poses (lowPosition...)
+#   voice      fire sounds taken from voice_from's (e.g. suppressed ones)
+#   silent     no flash; its shots are never heard or noticed
+#   head_damage  a hit to the head (zombies take 3x; the game's AI dies at 100)
+#   bolt       bolt action fed by a magazine: Reload cycles the bolt
 extends RefCounted
 
 const RAIL_DONOR := ["KAR-21", "KAR-21_308"]
@@ -76,6 +80,24 @@ static func guns() -> Dictionary:
 			"shift": {"lowPosition": Vector3(0, -0.03, 0), "highPosition": Vector3(0, -0.065, -0.03)},
 			"optics": "rail",
 			"muzzles": false,
+		},
+		"WELROD": {
+			"file": "CS_WELROD",
+			"name": "Welrod Mk I (9×19)",
+			"short": "Welrod",
+			"display": "Welrod",
+			"base": ["Makarov", "Makarov"],
+			"magazine": {"file": "CS_WELROD_Magazine", "name": "Welrod Magazine (9×19)", "rounds": 6, "value": 120, "weight": 0.3},
+			"ammo": "res://Items/Ammo/Ammo_9x19/Ammo_9x19.tres",
+			"data": {"caliber": "9×19", "damage": 15.0, "penetration": 1, "weaponAction": "Semi", "weight": 1.1, "value": 3200, "rarity": 2},
+			"head_damage": 100.0,
+			"bolt": true,
+			"voice_from": "res://Items/Weapons/Glock_17/Glock_17.tres",
+			"voice": {"fireSemi": "fireSuppressed", "fireAuto": "fireSuppressed", "fireSuppressed": "fireSuppressed", "tailOutdoor": "tailOutdoorSuppressed", "tailIndoor": "tailIndoorSuppressed", "reload": ["res://Items/Weapons/Mosin/Mosin.tres", "reload"]},
+			"feel": {"recoil": 0.5, "kick": 0.5, "flash": 0.0, "pitch": 0.8, "volume": -8.0},
+			"silent": true,
+			"optics": "none",
+			"hand": false,
 		},
 		"DEAGLE": {
 			"file": "CS_DEAGLE",

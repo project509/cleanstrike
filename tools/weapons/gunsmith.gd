@@ -284,6 +284,12 @@ func build(id: String, s: Dictionary) -> void:
 	var base_trig: Vector3 = sk.get_bone_global_rest(trig_bone).origin
 	var ab := box_of(_role_list(role_arrs, s.align))
 	var new_trig: Vector3 = Vector3(ab.get_center().x, ab.end.y, ab.get_center().z) * k
+	if s.get("align_to", "") == "magazine":          # line the magazine (grip) up with the base gun's
+		var bm: MeshInstance3D = rig.get("magazine")
+		var bb: AABB = bm.get_aabb()
+		base_trig = Vector3(bb.get_center().x, bb.end.y, bb.get_center().z)
+		var nb := box_of(_role_list(role_arrs, "Magazine"))
+		new_trig = Vector3(nb.get_center().x, nb.end.y, nb.get_center().z) * k
 	var shift: Vector3 = base_trig - new_trig + s.get("offset", Vector3.ZERO)
 	var F := Transform3D(Basis().scaled(Vector3.ONE * k), shift)
 	for role in role_arrs:

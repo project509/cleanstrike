@@ -36,7 +36,8 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	var mag_node: Node = rig.get("magazine")
 	r.check(tag + "the rig shows and hides this gun's magazine", mag_node != null and mag_node.name == "CS_Magazine" and mag_node.get_parent() is BoneAttachment3D and str(mag_node.get_parent().bone_name).contains("Magazine"))
 	var trig = rig.find_child("CS_Trigger", true, false)
-	r.check(tag + "trigger on the trigger bone", trig != null and str(trig.get_parent().bone_name).ends_with("_Trigger"))
+	if trig:                                       # (some models have the trigger fused to the frame)
+		r.check(tag + "trigger on the trigger bone", str(trig.get_parent().bone_name).ends_with("_Trigger"))
 	if rig.get("dynamicSlide") and rig.find_child("CS_Slide", true, false):
 		r.check(tag + "slide on the slide bone", rig.find_child("CS_Slide", true, false).get_parent().bone_name == sk.get_bone_name(rig.get("slideIndex")))
 	var parts: Node = load(WP.DIR + id + "/Parts.scn").instantiate()
@@ -90,7 +91,20 @@ func _gun(r, db, lt, id: String, g: Dictionary) -> void:
 	r.get_tree().current_scene.add_child(fr)
 	fr.slotData = back
 	fr.fireTimer = 1.0
+	var zl = load("res://CSZombies/Mod.gd") if WP.cs() and WP.cs().is_loaded("cs_zombies") else null
+	if zl:
+		zl.last_shot = -1000.0
 	fr.FireEvent()
-	r.check(tag + "fires: a round used", back.amount == 4)
+	if d.has_meta("cs_bolt"):
+		r.check(tag + "bolt action: the shot leaves the chamber empty, the next round in the magazine", not back.chamber and back.amount == 5)
+	else:
+		r.check(tag + "fires: a round used", back.amount == 4)
+	if zl:
+		if g.get("silent", false):
+			r.check(tag + "silent: the zombies never hear it", zl.last_shot == -1000.0 and d.nativeSuppressor)
+		else:
+			r.check(tag + "the zombies hear it", zl.last_shot > -1000.0)
+	if g.has("head_damage"):
+		r.check(tag + "its own headshot", is_equal_approx(float(d.get_meta("cs_head_damage", 0.0)), float(g.head_damage)) and d.damage < base.damage)
 	fr.queue_free()
 	await r.get_tree().process_frame

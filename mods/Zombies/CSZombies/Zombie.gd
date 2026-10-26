@@ -338,6 +338,8 @@ func _bash(delta: float) -> void:
 func Hit(part: String, damage: float, vector: Vector3, id: Node3D, at: Vector3) -> void:
 	if dead:
 		return
+	if part == "head" and Engine.has_meta("cs_head_damage") and id and id.is_in_group("Player"):
+		damage = maxf(damage, float(Engine.get_meta("cs_head_damage")))   # e.g. the Welrod's headshot
 	var mult: float = {"head": 3.0, "torso": 1.0}.get(part, 0.6)
 	health -= damage * mult
 	parts[part] = float(parts.get(part, 0.0)) + damage

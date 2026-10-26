@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.6.0"
+const VERSION := "0.7.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -152,6 +152,18 @@ static func build_gun(id: String) -> void:
 		d.set(k, g.data[k])
 	for k in g.get("shift", {}):                 # carry poses moved for this gun's shape
 		d.set(k, d.get(k) + g.shift[k])
+	if g.has("voice"):                           # sounds taken from other guns: "field" or [gun.tres, "field"]
+		var vd: Resource = load(g.get("voice_from", base_path(g, ".tres")))
+		for k in g.voice:
+			var v = g.voice[k]
+			d.set(k, load(v[0]).get(v[1]) if v is Array else vd.get(v))
+	if g.has("head_damage"):                     # what a hit to the head does (zombies' heads too)
+		d.set_meta("cs_head_damage", float(g.head_damage))
+	if g.get("bolt", false):                     # a bolt action fed from a magazine: cycle it with Reload
+		d.set_meta("cs_bolt", true)
+	if g.get("silent", false):                   # no flash, never heard (by the game's AI or the zombies)
+		d.nativeSuppressor = true
+		d.set_meta("cs_silent", true)
 	d.ammo = ammo
 	d.magazineSize = mag.maxAmount
 	var compat: Array = [mag]

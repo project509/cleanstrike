@@ -6,4 +6,5 @@ const ZW = preload("res://CSZombies/Mod.gd")
 
 func FireEvent():
 	super()
-	ZW.note_shot(gameData.playerPosition)
+	if not (data and data.has_meta("cs_silent")):   # silent guns (Weapons Pack's Welrod) are never heard
+		ZW.note_shot(gameData.playerPosition)

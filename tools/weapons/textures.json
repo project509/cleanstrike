@@ -75,5 +75,16 @@
         "roughness": "barret_second_Roughness.png"
       }
     }
+  },
+  "WELROD": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/welrod/textures",
+    "materials": {
+      "L Welrod": {
+        "albedo": "Welrod_FinalAlbedo_SRGB.png",
+        "normal": "Welrod_FinalNormal_Linear.png",
+        "metallic": "Welrod_FinalMetallic_Linear.png",
+        "roughness": "Welrod_FinalRoughness_Linear.png"
+      }
+    }
   }
 }
