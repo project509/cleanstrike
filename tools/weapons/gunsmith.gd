@@ -193,11 +193,19 @@ func build(id: String, s: Dictionary) -> void:
 	var sk: Skeleton3D = rig.find_children("*", "Skeleton3D", true, false)[0]
 	var data: Resource = load(base_dir + s.base[1] + ".tres")
 	# source -> rig orientation
-	var fwd: Vector3 = s.fwd.normalized()
-	var up: Vector3 = (s.up - fwd * s.up.dot(fwd)).normalized()
-	var R := Basis(up.cross(fwd), up, fwd).transposed()
 	var src: Node = load(s.src).instantiate()
 	add_child(src)
+	var fwd_v: Vector3 = s.get("fwd", Vector3.FORWARD)
+	var up_v: Vector3 = s.get("up", Vector3.UP)
+	if s.has("orient"):                   # directions from part centres: [front, back, top, bottom]
+		var cen := {}
+		for m in src.find_children("*", "MeshInstance3D", true, false):
+			cen[str(m.name)] = (xform_of(m, src) * m.get_aabb()).get_center()
+		fwd_v = cen[s.orient[0]] - cen[s.orient[1]]
+		up_v = cen[s.orient[2]] - cen[s.orient[3]]
+	var fwd: Vector3 = fwd_v.normalized()
+	var up: Vector3 = (up_v - fwd * up_v.dot(fwd)).normalized()
+	var R := Basis(up.cross(fwd), up, fwd).transposed()
 	var rules: Dictionary = s.parts
 	var mats := {}                    # source material -> our material
 	var role_arrs := {}               # role -> {material: [arrays]}
@@ -230,6 +238,8 @@ func build(id: String, s: Dictionary) -> void:
 				for role_name in rules:
 					if matches(nm, rules[role_name]):
 						role = role_name
+				if matches(nm, s.get("round", [])):
+					role = "Round"
 				if not box_rules.is_empty() or s.has("drop_box"):
 					var piece := subset(arr, g, xform_of(m, src))
 					var c: Vector3 = box_of([piece]).get_center()
@@ -248,7 +258,8 @@ func build(id: String, s: Dictionary) -> void:
 				if not role_arrs[role].has(mkey):
 					role_arrs[role][mkey] = []
 				role_arrs[role][mkey].append(a)
-				all_arrs.append(a)
+				if role != "Round":
+					all_arrs.append(a)
 				if not named.has(nm):
 					named[nm] = []
 				named[nm].append(a)
@@ -279,6 +290,21 @@ func build(id: String, s: Dictionary) -> void:
 	# meshes per role
 	var root := Node3D.new()
 	root.name = id
+	if role_arrs.has("Round"):              # the model's cartridge, centred, nose along +Z
+		var rc: Vector3 = box_of(_role_list(role_arrs, "Round")).get_center()
+		for mk in role_arrs.Round:
+			for a in role_arrs.Round[mk]:
+				var pv: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+				for i in pv.size():
+					pv[i] -= rc
+				a[Mesh.ARRAY_VERTEX] = pv
+	elif s.has("cartridge"):
+		var rmi := MeshInstance3D.new()
+		rmi.name = "Round"
+		rmi.mesh = _cartridge(s.cartridge[0], s.cartridge[1], s.get("tip", Color(0.72, 0.42, 0.28)))
+		rmi.layers = 2
+		root.add_child(rmi)
+		rmi.owner = root
 	for role in role_arrs:
 		var am := ArrayMesh.new()
 		for mk in role_arrs[role]:
@@ -305,12 +331,18 @@ func build(id: String, s: Dictionary) -> void:
 		print("  ", role, ": ", am.get_faces().size() / 3, " tris, box ", _box_str(box_of(_role_list(role_arrs, role))))
 	# landmarks (rig skeleton space)
 	var L := {}
-	var mb := box_of(named[s.muzzle])
-	L.muzzle = Vector3(mb.get_center().x, mb.get_center().y, mb.end.z)
-	L.bore_y = mb.get_center().y
+	if s.has("muzzle"):
+		var mb := box_of(named[s.muzzle])
+		L.muzzle = Vector3(mb.get_center().x, mb.get_center().y, mb.end.z)
+		L.bore_y = mb.get_center().y
 	if s.has("ejector"):
 		var eb := box_of(named[s.ejector])
 		L.ejector = Vector3(eb.position.x, eb.get_center().y, eb.get_center().z)
+	if s.has("ejector_point"):            # source-space point on the ejection port
+		L.ejector = F * (R * s.ejector_point)
+	if s.has("muzzle_point"):
+		L.muzzle = F * (R * s.muzzle_point)
+		L.bore_y = L.muzzle.y
 	if role_arrs.has("Magazine"):
 		var gb := box_of(_role_list(role_arrs, "Magazine"))
 		L.mag_top = Vector3(gb.get_center().x, gb.end.y, gb.get_center().z)
@@ -323,14 +355,17 @@ func build(id: String, s: Dictionary) -> void:
 		var rb := box_of(_role_list(role_arrs, "SightRear"))
 		L.sight_rear = Vector3(rb.get_center().x, rb.end.y, rb.get_center().z)
 		L.sight_rear_box = rb
-	if s.has("sight_line"):              # sights that are not separate parts
-		L.sight_front = F * s.sight_line
+	if s.has("sight_line"):              # sights that are not separate parts (source space)
+		L.sight_front = F * (R * s.sight_line)
 	if s.has("rail"):
 		var rl: AABB = box_of(_select(named, s.rail, F))
 		L.rail_top = rl.end.y
 		L.rail_z = Vector2(rl.position.z, rl.end.z)
 	L.box = box_of(all_arrs)
 	L.scale = k
+	if role_arrs.has("Magazine"):
+		_seat_rounds(L, role_arrs, s)
+	await _hand(rig, sk, L, role_arrs)
 	root.set_meta("landmarks", L)
 	root.set_meta("base", s.base)
 	print("  landmarks ", L)
@@ -402,7 +437,7 @@ func _icons(id: String, root: Node3D, s: Dictionary) -> void:
 	var first := true
 	for c in gun.get_children():
 		c.layers = 1
-		if c.name == "Magazine":
+		if c.name == "Magazine" or c.name == "Round":
 			c.visible = false
 			continue
 		var cb: AABB = c.get_aabb()
@@ -497,6 +532,8 @@ func _fit(id: String, root: Node3D, base_rig: Node3D, base_sk: Skeleton3D, data:
 		att.bone_name = sk.get_bone_name(0)
 		sk.add_child(att)
 		for c in parts.get_children():
+			if c.name == "Round":
+				continue
 			var mi: MeshInstance3D = c.duplicate()
 			mi.transform = sk.get_bone_global_rest(0).affine_inverse()
 			att.add_child(mi)
@@ -542,3 +579,170 @@ static func _attach_pt(sk: Skeleton3D, p: Vector3) -> Vector3:
 		if c is BoneAttachment3D and c.name == "Attachments":
 			return sk.get_bone_global_rest(sk.find_bone(c.bone_name)).affine_inverse() * p
 	return p
+
+
+# Where the base gun's animations put the support hand, and how far this gun
+# moves it: the handguard underside at the resting hand, the magazine and the
+# charging handle (all in the base rig's skeleton space, rest pose).
+func _hand(base_rig: Node3D, base_sk: Skeleton3D, L: Dictionary, role_arrs: Dictionary) -> void:
+	var rig: Node3D = base_rig.duplicate()
+	for n in [rig] + rig.find_children("*", "", true, false):
+		if n is AnimationTree:
+			n.active = false
+		if n.get_script() and not (n is AnimationPlayer):
+			n.set_script(null)
+	add_child(rig)
+	var ap: AnimationPlayer = rig.find_children("*", "AnimationPlayer", true, false)[0]
+	for a in ap.get_animation_list():
+		if a.ends_with("_Idle") and not a.contains("Inspect"):
+			ap.play(a)
+			ap.seek(0.0, true)
+			ap.pause()
+	await get_tree().process_frame
+	var sk: Skeleton3D = rig.find_children("*", "Skeleton3D", true, false)[0]
+	var wl := sk.find_bone("Wrist_L")
+	if wl < 0:
+		rig.queue_free()
+		return
+	var W: Vector3 = sk.get_bone_global_pose(wl).origin
+	var body := 0
+	for b in sk.get_bone_count():
+		if sk.get_bone_name(b).ends_with("_Body"):
+			body = b
+	# the rest pose of the gun: the hand's resting point relative to the gun body
+	var bpose: Transform3D = sk.get_bone_global_pose(body)
+	var brest: Transform3D = sk.get_bone_global_rest(body)
+	var Wr: Vector3 = brest * (bpose.affine_inverse() * W)
+	L.hand_rest = Wr
+	# the handguard's underside along the hand (2 cm slices, median), magazines left out
+	var under := func(points: PackedVector3Array) -> float:
+		var mins := []
+		for zi in 6:
+			var z0: float = Wr.z + zi * 0.02
+			var lo := INF
+			for p in points:
+				if p.z > z0 and p.z < z0 + 0.02 and absf(p.x) < 0.035:
+					lo = minf(lo, p.y)
+			if lo < INF:
+				mins.append(lo)
+		if mins.is_empty():
+			return INF
+		mins.sort()
+		return mins[mins.size() / 2]
+	var base_pts := PackedVector3Array()
+	var base_mag := AABB()
+	var base_charge := AABB()
+	var arms_m: MeshInstance3D = rig.get("arms") if rig.get("arms") else null
+	for m in base_sk.get_children():
+		if m is MeshInstance3D and m.mesh and m.name != "Arms":
+			var is_mag := str(m.name).contains("Magazine") and not str(m.name).contains("Release") and not str(m.name).contains("Well")
+			if not is_mag:
+				for si in m.mesh.get_surface_count():
+					base_pts.append_array(m.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
+			elif m.visible:
+				base_mag = m.get_aabb()
+			if str(m.name).contains("Charg") or str(m.name).contains("Cocking"):
+				base_charge = m.get_aabb()
+	var new_pts := PackedVector3Array()
+	for a in _role_list(role_arrs, "Body"):
+		new_pts.append_array(a[Mesh.ARRAY_VERTEX])
+	if OS.get_environment("PROFILE") == "1":
+		for zi in range(-6, 22):
+			var z0 := zi * 0.02
+			var lo_b := INF
+			var lo_n := INF
+			var hi_n := -INF
+			for p in base_pts:
+				if p.z > z0 and p.z < z0 + 0.02 and absf(p.x) < 0.035:
+					lo_b = minf(lo_b, p.y)
+			for p in new_pts:
+				if p.z > z0 and p.z < z0 + 0.02 and absf(p.x) < 0.035:
+					lo_n = minf(lo_n, p.y)
+					hi_n = maxf(hi_n, p.y)
+			print("  z %.2f  base under %.3f   new under %.3f top %.3f" % [z0, lo_b, lo_n, hi_n])
+	var bu: float = under.call(base_pts)
+	var nu: float = under.call(new_pts)
+	L.hand_dy = nu - bu if bu < INF and nu < INF else 0.0
+	if base_mag.size != Vector3.ZERO and role_arrs.has("Magazine"):
+		L.mag_shift = box_of(_role_list(role_arrs, "Magazine")).get_center() - base_mag.get_center()
+	if base_charge.size != Vector3.ZERO and role_arrs.has("Charge"):
+		L.charge_shift = box_of(_role_list(role_arrs, "Charge")).get_center() - base_charge.get_center()
+	print("  hand rest ", Wr, " dy ", L.hand_dy, " mag shift ", L.get("mag_shift"), " charge shift ", L.get("charge_shift"))
+	rig.queue_free()
+
+
+# Where the two rounds showing at the top of the magazine sit: under the feed
+# lips, nose against the front wall; stacked one above the other (pistols) or
+# staggered (double stack). Rig space.
+func _seat_rounds(L: Dictionary, role_arrs: Dictionary, s: Dictionary) -> void:
+	var mb := box_of(_role_list(role_arrs, "Magazine"))
+	var top := mb.end.y
+	var zf := -INF
+	var zr := INF
+	var xl := INF
+	var xh := -INF
+	for a in _role_list(role_arrs, "Magazine"):
+		for p in a[Mesh.ARRAY_VERTEX]:
+			if p.y > top - 0.012:
+				zf = maxf(zf, p.z)
+				zr = minf(zr, p.z)
+				xl = minf(xl, p.x)
+				xh = maxf(xh, p.x)
+	var length: float
+	var dia: float
+	if role_arrs.has("Round"):
+		var rb := box_of(_role_list(role_arrs, "Round"))
+		length = rb.size.z
+		dia = maxf(rb.size.x, rb.size.y)
+	else:
+		length = s.get("cartridge", [0.03, 0.01])[0]
+		dia = s.get("cartridge", [0.03, 0.01])[1]
+	var xc := (xl + xh) / 2.0
+	var z := minf(zf - 0.0035 - length / 2.0, (zf + zr) / 2.0 + maxf(0.0, (zf - zr) - length) / 2.0)
+	var y := top - dia * 0.6
+	if s.get("stack", 2) == 1:
+		L.round_top = Vector3(xc, y, z)
+		L.round_second = Vector3(xc, y - dia * 0.95, z - 0.001)
+	else:
+		L.round_top = Vector3(xc + dia * 0.27, y, z)
+		L.round_second = Vector3(xc - dia * 0.27, y - dia * 0.82, z)
+	print("  rounds ", L.round_top, " / ", L.round_second, " (", length, " x ", dia, ")")
+
+
+# A plain cartridge: brass case and a bullet, nose along +Z, centred.
+func _cartridge(length: float, dia: float, tip: Color) -> ArrayMesh:
+	var brass := StandardMaterial3D.new()
+	brass.albedo_color = Color(0.80, 0.62, 0.32)
+	brass.metallic = 1.0
+	brass.roughness = 0.32
+	var head := StandardMaterial3D.new()
+	head.albedo_color = tip
+	head.metallic = 0.8
+	head.roughness = 0.4
+	var case_len := length * 0.68
+	var out := ArrayMesh.new()
+	var parts := [
+		[_cyl(dia / 2.0, dia / 2.0, case_len, -length / 2.0 + case_len / 2.0), brass],
+		[_cyl(dia * 0.42, dia * 0.12, length - case_len, -length / 2.0 + case_len + (length - case_len) / 2.0), head],
+	]
+	for p in parts:
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, p[0])
+		out.surface_set_material(out.get_surface_count() - 1, p[1])
+	return out
+
+
+func _cyl(r0: float, r1: float, h: float, zc: float) -> Array:
+	var c := CylinderMesh.new()
+	c.bottom_radius = r0
+	c.top_radius = r1
+	c.height = h
+	c.radial_segments = 16
+	c.rings = 1
+	var arr := c.get_mesh_arrays()
+	var xf := Transform3D(Basis(Vector3.RIGHT, PI / 2.0), Vector3(0, 0, zc))     # Y up -> Z forward
+	var st := SurfaceTool.new()
+	st.create_from_arrays(arr)
+	var m := st.commit()
+	var st2 := SurfaceTool.new()
+	st2.append_from(m, 0, xf)
+	return st2.commit_to_arrays()

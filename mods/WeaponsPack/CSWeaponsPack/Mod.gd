@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.3.0"
+const VERSION := "0.4.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -149,6 +149,8 @@ static func build_gun(id: String) -> void:
 	d.display = g.get("display", g.short)
 	for k in g.get("data", {}):
 		d.set(k, g.data[k])
+	for k in g.get("shift", {}):                 # carry poses moved for this gun's shape
+		d.set(k, d.get(k) + g.shift[k])
 	d.ammo = ammo
 	d.magazineSize = mag.maxAmount
 	var compat: Array = [mag]
@@ -179,7 +181,7 @@ static func _feel(d: Resource, f: Dictionary) -> void:
 	var r: float = f.get("recoil", 1.0)
 	d.verticalRecoil *= r
 	d.horizontalRecoil *= r
-	d.kick *= r
+	d.kick *= f.get("kick", r)
 	var rec: float = f.get("recovery", 1.0)
 	d.rotationRecovery *= rec
 	d.kickRecovery *= rec
@@ -297,6 +299,8 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 	var atts := {}
 	for part in src.get_children():
 		var role := str(part.name)
+		if role == "Round":
+			continue
 		var b: int = bones.get(role, bones.Body)
 		if b < 0:
 			b = bones.Body
@@ -317,6 +321,24 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 		if role == "Magazine":
 			rig.set("magazine", mi)
 			mi.visible = false
+	# the support hand onto this gun's handguard, magazine and charging handle
+	var hf: Node = load("res://CSWeaponsPack/HandFit.gd").new()
+	hf.name = "CS_HandFit"
+	var brest := sk.get_bone_global_rest(bones.Body)
+	var to_body := brest.basis.inverse()
+	hf.upper = sk.find_bone("Arm_Upper_L")
+	hf.lower = sk.find_bone("Arm_Lower_L")
+	hf.wrist = sk.find_bone("Wrist_L")
+	hf.body = bones.Body
+	hf.mag = bones.Magazine
+	hf.charge = bones.Charge
+	if L.has("hand_rest") and g.get("hand", true):
+		hf.rest_point = brest.affine_inverse() * L.hand_rest
+		hf.rest_shift = to_body * Vector3(0, L.get("hand_dy", 0.0), 0)
+	hf.mag_shift = to_body * L.get("mag_shift", Vector3.ZERO)
+	hf.charge_shift = to_body * L.get("charge_shift", Vector3.ZERO)
+	sk.add_child(hf)
+	hf.owner = rig
 	# muzzle, aiming ray and ejection on the new gun
 	if refs:
 		var to_ref := rb.affine_inverse()
@@ -332,14 +354,10 @@ static func _fit_rig(rig: Node3D, src: Node3D, L: Dictionary, g: Dictionary) -> 
 		var ej: Node3D = refs.get_node_or_null("Ejector")
 		if ej and L.has("ejector"):
 			ej.position = to_ref * L.ejector
-	# the rounds showing on top of the magazine
+	# the rounds showing at the top of the magazine: this gun's, seated in it
 	var am: BoneAttachment3D = sk.get_node_or_null("Ammo_Magazine")
-	if am and L.has("mag_top") and old_mag_box.size != Vector3.ZERO and am.has_node("Bullets"):
-		var mb := sk.get_bone_global_rest(sk.find_bone(am.bone_name))
-		var old_top := Vector3(old_mag_box.get_center().x, old_mag_box.end.y, old_mag_box.get_center().z)
-		var bullets: Node3D = am.get_node("Bullets")
-		bullets.position += mb.basis.inverse() * (L.mag_top - old_top)
-		bullets.scale *= g.get("bullet_scale", 1.0)
+	if am and am.has_node("Bullets") and src.has_node("Round") and L.has("round_top"):
+		_seat(am.get_node("Bullets"), src.get_node("Round").mesh, sk.get_bone_global_rest(sk.find_bone(am.bone_name)).affine_inverse(), L, arms.layers, rig)
 	_fit_attachments(rig, sk, L, g, base_top, info)
 	# where the sights are, in the frame the game aims with
 	var sight: Vector3 = L.get("sight_front", Vector3(0, L.get("bore_y", 0.0), 0))
@@ -441,10 +459,9 @@ static func _magazine(id: String, g: Dictionary, src: Node3D, L: Dictionary, amm
 		col.shape.size = mbox.size
 		col.position = mbox.get_center() + off
 	var bullets: Node3D = p.get_node_or_null("Bullets")
-	if bullets:
-		var old_top := Vector3(pbox.get_center().x, pbox.end.y, pbox.get_center().z)
-		bullets.position += (L.mag_top + off) - old_top
-		bullets.scale *= g.get("bullet_scale", 1.0)
+	if bullets and src.has_node("Round") and L.has("round_top"):
+		var layers: int = lod0.layers if lod0 else 1
+		_seat(bullets, src.get_node("Round").mesh, Transform3D(Basis(), off), L, layers, p)
 	_set_slot(p, md, -1)
 	p.name = m.file
 	built[m.file] = _pack(p)
@@ -461,7 +478,7 @@ static func _gun_pickup(g: Dictionary, d: Resource, src: Node3D, L: Dictionary, 
 	var off: Vector3 = pbox.get_center() - bbox.get_center()
 	var whole := ArrayMesh.new()
 	for part in src.get_children():
-		if part.name == "Magazine":
+		if part.name == "Magazine" or part.name == "Round":
 			continue
 		var pm: Mesh = part.mesh
 		for s in pm.get_surface_count():
@@ -552,6 +569,23 @@ static func _gun_tetris(base_data: Resource, icon: Texture2D, inserted: Texture2
 
 # ---------------------------------------------------------------- helpers
 
+# The two rounds the game shows at the top of a magazine (child 1 is the top
+# round, shown alone when one is left; child 0 the one under it).
+static func _seat(bullets: Node3D, mesh: Mesh, to_local: Transform3D, L: Dictionary, layers: int, owner: Node) -> void:
+	for c in bullets.get_children():
+		bullets.remove_child(c)
+		c.free()
+	bullets.transform = Transform3D()
+	for p in [L.round_second, L.round_top]:
+		var r := MeshInstance3D.new()
+		r.name = "CS_Round"
+		r.mesh = mesh
+		r.layers = layers
+		r.transform = to_local * Transform3D(Basis(), p)
+		bullets.add_child(r)
+		r.owner = owner
+
+
 static func _retexture(scene: PackedScene, texture: Texture2D, name: String) -> PackedScene:
 	var s: Node = scene.instantiate()
 	if texture and s is Sprite2D:
@@ -615,12 +649,16 @@ static func release() -> void:
 	items.clear()
 
 
-# After every shot of one of our guns: its own muzzle flash size.
+# After every shot of one of our guns: its own muzzle flash size and how
+# long the shot shakes the view.
 static func on_fire(rig: Node) -> void:
 	var g := gun_of(rig.get("data"))
 	if g.is_empty():
 		return
-	var flash: float = g.get("feel", {}).get("flash", 1.0)
+	var f: Dictionary = g.get("feel", {})
+	if f.has("impulse"):
+		rig.set_deferred("fireImpulse", f.impulse)
+	var flash: float = f.get("flash", 1.0)
 	var muzzle: Node3D = rig.get("muzzle")
 	if muzzle and flash != 1.0:
 		var n := muzzle.get_child_count()

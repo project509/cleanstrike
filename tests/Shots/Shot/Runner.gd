@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar", "scareq", "scaranim"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar", "scareq", "scaranim", "gun", "gif"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -652,3 +652,117 @@ func scaranim_views():
 			await wait(0.4)
 			await shot("shot_scaranim_%d.png" % i)
 			i += 1
+
+
+# Weapons Pack: one gun (WPGUN=<ID>) equipped with a loaded magazine the
+# player's way: at the hip, aimed through its sights (the real aim input),
+# then held still through its reload and magazine check.
+func gun_views():
+	var WP = load("res://CSWeaponsPack/Mod.gd")
+	var G = load("res://CSWeaponsPack/Guns.gd")
+	var id := OS.get_environment("WPGUN")
+	var file: String = G.guns()[id].file
+	while not (Engine.has_meta("cs_items") and Engine.get_meta("cs_items").has(file + "_Rig")):
+		await wait(0.2)
+	var d = WP.items[file]
+	if OS.get_environment("WPVANILLA") != "":           # a vanilla gun, for comparison
+		d = load(OS.get_environment("WPVANILLA"))
+	var mgr = await _equip(d, [d.compatible[0]])
+	await wait(1.0)
+	await shot("shot_gun_hip.png")
+	Input.action_press("aim")
+	await wait(1.5)
+	await shot("shot_gun_aim.png")
+	Input.action_release("aim")
+	await wait(1.0)
+	var rig: Node = mgr.get_child(0)
+	var ap: AnimationPlayer = rig.find_children("*", "AnimationPlayer", true, false)[0]
+	for t in rig.find_children("*", "AnimationTree", true, false):
+		t.active = false
+	rig.get("magazine").visible = true
+	if OS.get_environment("WPDBG") == "1":
+		var hi := StandardMaterial3D.new()
+		hi.albedo_color = Color(1, 0, 1)
+		hi.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		rig.get("magazine").material_override = hi
+	var i := 0
+	for suffix in ["_Reload_Empty", "_Magazine_Check"]:
+		var anim := ""
+		for a in ap.get_animation_list():
+			if str(a).ends_with(suffix):
+				anim = a
+		if anim == "":
+			continue
+		var len: float = ap.get_animation(anim).length
+		for f in [0.25, 0.45, 0.65]:
+			ap.play(anim)
+			ap.seek(len * f, true)
+			ap.pause()
+			await wait(0.3)
+			await shot("shot_gun_anim_%d.png" % i)
+			i += 1
+
+
+# Weapons Pack: a clip of one gun (WPGUN) the player's way: raised, fired
+# until the slide locks back, then reloaded from a spare magazine in the
+# inventory. Frames (25 per second) to user://cleanstrike/gif/.
+func gif_views():
+	var WP = load("res://CSWeaponsPack/Mod.gd")
+	var G = load("res://CSWeaponsPack/Guns.gd")
+	var gd = load("res://Resources/GameData.tres")
+	var ui = get_node("/root/Map/Core/UI/Interface")
+	var file: String = G.guns()[OS.get_environment("WPGUN")].file
+	while not (Engine.has_meta("cs_items") and Engine.get_meta("cs_items").has(file + "_Rig")):
+		await wait(0.2)
+	var d = WP.items[file]
+	var mag = d.compatible[0]
+	var mgr = await _equip(d, [mag])
+	var rig = mgr.get_child(0)
+	rig.slotData.amount = 3
+	rig.slotData.chamber = true
+	rig.slotData.mode = 1
+	var spare := SlotData.new()
+	spare.itemData = mag
+	spare.amount = mag.maxAmount
+	ui.Create(spare, ui.inventoryGrid, false)
+	gd.weaponPosition = 2
+	await wait(1.5)
+	var dir := "user://cleanstrike/gif"
+	DirAccess.make_dir_recursive_absolute(dir)
+	for f in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir + "/" + f)
+	_gif_actions()
+	var frames := []
+	var times := []
+	var t0 := Time.get_ticks_msec()
+	var last := -1000
+	while Time.get_ticks_msec() - t0 < 7500:
+		await RenderingServer.frame_post_draw
+		var now := Time.get_ticks_msec() - t0
+		if now - last >= 40:
+			var img := get_viewport().get_texture().get_image()
+			img.resize(960, 540, Image.INTERPOLATE_BILINEAR)
+			frames.append(img)
+			times.append(now)
+			last = now
+		await get_tree().process_frame
+	for i in frames.size():
+		frames[i].save_png(dir + "/f_%03d.png" % i)
+	var fa := FileAccess.open(dir + "/times.txt", FileAccess.WRITE)
+	fa.store_string(" ".join(times.map(func(t): return str(t))))
+	fa.close()
+	print("[GIF] ", frames.size(), " frames")
+
+
+func _gif_actions():
+	for i in 4:
+		await wait(0.55)
+		Input.action_press("fire")
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		Input.action_release("fire")
+	await wait(0.8)
+	Input.action_press("reload")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	Input.action_release("reload")

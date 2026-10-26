@@ -2,15 +2,50 @@
   "SCAR": {
     "dir": "C:/RTVDev/RTVProject/cs_assets/scar/textures",
     "materials": {
-      "DefaultMaterial": {"albedo": "DefaultMaterial_Base_Color.jpg", "normal": "DefaultMaterial_Normal_DirectX.jpg", "dx": true, "metallic": "DefaultMaterial_Metallic.jpg", "roughness": "DefaultMaterial_Roughness.jpg", "ao": "DefaultMaterial_Mixed_AO.jpg"}
+      "DefaultMaterial": {
+        "albedo": "DefaultMaterial_Base_Color.jpg",
+        "normal": "DefaultMaterial_Normal_DirectX.jpg",
+        "dx": true,
+        "metallic": "DefaultMaterial_Metallic.jpg",
+        "roughness": "DefaultMaterial_Roughness.jpg",
+        "ao": "DefaultMaterial_Mixed_AO.jpg"
+      }
     }
   },
   "DEAGLE": {
     "dir": "C:/RTVDev/RTVProject/cs_assets/deagle/textures",
     "materials": {
-      "Slide": {"albedo": "T_Deagle_Slide_BaseColor.png", "normal": "T_Deagle_Slide_Normal.png", "metallic": "T_Deagle_Slide_Metallic.png", "roughness": "T_Deagle_Slide_Roughness.png"},
-      "MainBody": {"albedo": "T_Deagle_MainBody_BaseColor.png", "normal": "T_Deagle_MainBody_Normal.png", "metallic": "T_Deagle_MainBody_Metallic.png", "roughness": "T_Deagle_MainBody_Roughness.png"},
-      "Magazine": {"albedo": "T_Deagle_Magazine_BaseColor.png", "normal": "T_Deagle_Magazine_Normal.png", "metallic": "T_Deagle_Magazine_Metallic.png", "roughness": "T_Deagle_Magazine_Roughness.png"}
+      "Slide": {
+        "albedo": "T_Deagle_Slide_BaseColor.png",
+        "normal": "T_Deagle_Slide_Normal.png",
+        "metallic": "T_Deagle_Slide_Metallic.png",
+        "roughness": "T_Deagle_Slide_Roughness.png"
+      },
+      "MainBody": {
+        "albedo": "T_Deagle_MainBody_BaseColor.png",
+        "normal": "T_Deagle_MainBody_Normal.png",
+        "metallic": "T_Deagle_MainBody_Metallic.png",
+        "roughness": "T_Deagle_MainBody_Roughness.png"
+      },
+      "Magazine": {
+        "albedo": "T_Deagle_Magazine_BaseColor.png",
+        "normal": "T_Deagle_Magazine_Normal.png",
+        "metallic": "T_Deagle_Magazine_Metallic.png",
+        "roughness": "T_Deagle_Magazine_Roughness.png"
+      }
+    }
+  },
+  "VECTOR": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/vector/textures",
+    "materials": {
+      "KSVR": {
+        "albedo": "KSVR_albedo.jpeg",
+        "normal": "KSVR_normal.png",
+        "metallic": "KSVR_metallic.jpeg",
+        "roughness": "KSVR_roughness.jpeg",
+        "ao": "KSVR_AO.jpeg",
+        "emission": "KSVR_emissive.jpeg"
+      }
     }
   }
 }
