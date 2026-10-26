@@ -184,6 +184,67 @@ func customs_tests(ui, interface) -> void:
 	check("exits keep their destinations", to_village >= 5, "%d to Village" % to_village)
 	var player: Vector3 = get_node("/root/Map/Core/Controller").global_position
 	check("player above water line", player.y > -1.5, "y=%.1f" % player.y)
+	# AI on Customs
+	var ai = null
+	for n in get_tree().current_scene.find_children("AI", "Node3D", true, false):
+		if n.get_script() and n.get_script().resource_path.ends_with("AISpawner.gd"):
+			ai = n
+	check("Customs has AI spawner", ai != null and ai.get("active") == true)
+	var wpn := get_tree().get_nodes_in_group("AI_WP").size()
+	var spn := get_tree().get_nodes_in_group("AI_SP").size()
+	var ppn := get_tree().get_nodes_in_group("AI_PP").size()
+	check("AI waypoints/spawns/patrols", wpn >= 100 and spn >= 10 and ppn >= 20, "WP %d SP %d PP %d" % [wpn, spn, ppn])
+	var nav_map: RID = get_node("/root/Map").get_world_3d().get_navigation_map()
+	await wait(1.0)
+	# Customs' own spawns (under AI/Points), the two farthest apart.
+	var own: Array = []
+	for sp in get_tree().get_nodes_in_group("AI_SP"):
+		if sp.get_parent().name == "Points": own.append(sp.global_position)
+	var a3: Vector3 = own[0]
+	var b3: Vector3 = own[0]
+	for p1 in own:
+		for p2 in own:
+			if p1.distance_to(p2) > a3.distance_to(b3):
+				a3 = p1; b3 = p2
+	var qa := NavigationPathQueryParameters3D.new()
+	qa.map = nav_map; qa.start_position = a3; qa.target_position = b3
+	qa.set("path_search_max_polygons", 30000)
+	var qa_r := NavigationPathQueryResult3D.new()
+	NavigationServer3D.query_path(qa, qa_r)
+	var path := qa_r.get_path()
+	var plen := 0.0
+	for i in range(1, path.size()): plen += path[i].distance_to(path[i - 1])
+	# Reachability map of Customs' waypoints from the first spawn (for debugging).
+	var rf := FileAccess.open("user://cleanstrike/nav_reach.txt", FileAccess.WRITE)
+	var reach := 0
+	var wps_all := get_tree().get_nodes_in_group("AI_WP")
+	for wp in wps_all:
+		var pp: Vector3 = wp.global_position
+		var qpp := NavigationPathQueryParameters3D.new()
+		qpp.map = nav_map; qpp.start_position = a3; qpp.target_position = pp
+		qpp.set("path_search_max_polygons", 30000)
+		var qrr := NavigationPathQueryResult3D.new()
+		NavigationServer3D.query_path(qpp, qrr)
+		var pth := qrr.get_path()
+		var ok := pth.size() > 0 and pth[-1].distance_to(pp) < 3.0
+		if ok: reach += 1
+		rf.store_line("%f %f %d" % [pp.x, pp.z, 1 if ok else 0])
+	rf.store_line("S %f %f" % [a3.x, a3.z])
+	rf.close()
+	check("waypoints reachable", reach >= wps_all.size() * 0.85, "%d/%d" % [reach, wps_all.size()])
+	check("navmesh path across Customs", path.size() > 2 and path[-1].distance_to(b3) < 3.0, "%d pts, %.0f m (direct %.0f m)" % [path.size(), plen, a3.distance_to(b3)])
+	await wait(6.0)
+	var pooled := 0
+	if ai:
+		for n in ["E_Pool", "Enemies"]:
+			var nd = ai.get_node_or_null(n)
+			if nd: pooled += nd.get_child_count()
+	var agents := get_tree().current_scene.find_children("*", "NavigationAgent3D", true, false)
+	var budget_ok := agents.size() > 0
+	for ag in agents:
+		if int(ag.get("path_search_max_polygons")) < 30000: budget_ok = false
+	check("scav path budget raised", budget_ok, "%d agents" % agents.size())
+	check("scav pool created", pooled >= 5, "%d agents" % pooled)
 	var cui = get_node("/root/Map/Core/UI")
 	cui.ToggleInterface()
 	await wait(0.4)

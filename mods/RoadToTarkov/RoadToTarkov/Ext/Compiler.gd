@@ -14,6 +14,18 @@ func Spawn():
 
 
 func _rtt_spawn_customs() -> void:
+	# Customs' navmesh uses 0.24 m cells (it is much bigger than Vostok's
+	# maps); the navigation map must use the same cell size.
+	var nav_map: RID = get_viewport().get_world_3d().get_navigation_map()
+	NavigationServer3D.map_set_cell_size(nav_map, 0.24)
+	# Godot caps a path search at 4096 polygons; Customs' long routes need
+	# more, or scavs only get partial paths. Raise it on every agent.
+	for n in get_tree().current_scene.find_children("*", "NavigationAgent3D", true, false):
+		_rtt_agent_budget(n)
+	if not get_tree().node_added.is_connected(_rtt_on_node_added):
+		get_tree().node_added.connect(_rtt_on_node_added)
+	NavigationServer3D.map_set_use_edge_connections(nav_map, true)
+	NavigationServer3D.map_set_edge_connection_margin(nav_map, 0.5)
 	controller.global_position = Vector3(0, 2, 0)
 	Loader.LoadWorld()
 	Loader.LoadCharacter()
@@ -32,3 +44,16 @@ func _rtt_spawn_customs() -> void:
 	gameData.isSleeping = false
 	gameData.isOccupied = false
 	gameData.freeze = false
+
+
+const PATH_SEARCH_POLYGONS := 30000
+
+
+func _rtt_on_node_added(n: Node) -> void:
+	if n is NavigationAgent3D:
+		_rtt_agent_budget(n)
+
+
+func _rtt_agent_budget(agent: Node) -> void:
+	if "path_search_max_polygons" in agent:
+		agent.set("path_search_max_polygons", PATH_SEARCH_POLYGONS)

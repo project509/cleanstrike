@@ -108,10 +108,14 @@ func _ready() -> void:
 	build_border()
 	build_killboxes()
 	log_step("exits & border", t0)
+	build_ai()
+	log_step("ai points", t0)
 	build_trees(dir)
 	log_step("trees", t0)
 	build_grass()
 	log_step("grass", t0)
+	bake_navmesh()
+	log_step("navmesh", t0)
 
 	var ps := PackedScene.new()
 	var err := ps.pack(map_root)
@@ -1552,6 +1556,8 @@ func build_dressing() -> void:
 			var layer := 1 if k >= 3 and rng.randf() < 0.5 else 0
 			var p := c + side * (row * 2.6) + dir * rng.randf_range(-0.6, 0.6)
 			place(cont, conts, p.x, p.y, yaw + rng.randf_range(-0.06, 0.06), layer * 2.6)
+			if layer == 0:
+				cover_objects.append([p, 2.0])
 	var cars := ["res://Assets/Vehicles/Lada/Lada_White.tscn", "res://Assets/Vehicles/Lada/Lada_Blue.tscn", "res://Assets/Vehicles/Lada/Lada_Red.tscn", "res://Assets/Vehicles/Volvo/Volvo.tscn", "res://Assets/Vehicles/Nissan/Nissan.tscn", "res://Assets/Vehicles/PAZ/PAZ.tscn", "res://Assets/Vehicles/Ural/Ural.tscn", "res://Assets/Vehicles/Truck_Trailers/Truck_Trailer_Cargo/Truck_Trailer_Cargo.tscn", "res://Assets/Vehicles/Transporter/Transporter.tscn"]
 	var wrecks := group(g, "Vehicles")
 	for r in L.roads:
@@ -1568,6 +1574,7 @@ func build_dressing() -> void:
 			if bridge_height(q) > -INF:
 				continue
 			place(cars[rng.randi() % cars.size()], wrecks, q.x, q.y, yaw_of(dir) + PI / 2.0 + rng.randf_range(-0.35, 0.35))
+			cover_objects.append([q, 1.8])
 	var yard := group(g, "Clutter")
 	for b in L.buildings:
 		if b.kind != "generated":
@@ -1993,7 +2000,11 @@ func _furnish_room(holder: Node, k: int, side: int, f: int, room_w: float, stair
 		var s: Array = spots[i]
 		var p := _dp(float(s[0]), float(s[1]), y)
 		var n := instance(set[i])
-		n.transform = Transform3D(Basis(Vector3.UP, (rng.randi() % 4) * PI / 2.0), p)
+		# Backs against the outer wall: local +Z faces into the room.
+		var into := _d_v * (1.0 if side == 0 else -1.0)
+		if i == 1:
+			into = -_d_u      # second piece stands against the partition
+		n.transform = Transform3D(Basis(Vector3.UP, atan2(into.x, into.z)), p)
 		add(holder, n)
 	if rng.randf() < 0.35:
 		var junk: String = CLUTTER[rng.randi() % 4]
@@ -2074,3 +2085,211 @@ func chaikin(points: Array, iterations: int) -> Array:
 		out.append(pts[-1])
 		pts = out
 	return pts
+
+
+
+# ================================================================== AI
+# Same setup as Vostok's own maps: an AISpawner node with its pools, typed
+# AI points (waypoints, spawns, patrols, covers, hides, groups, lurks) and a
+# navigation mesh baked from the map's static colliders.
+
+const AI_POINT := {
+	"WP": "res://AI/Tools/AI_WP.tscn", "SP": "res://AI/Tools/AI_SP.tscn", "PP": "res://AI/Tools/AI_PP.tscn",
+	"CP": "res://AI/Tools/AI_CP.tscn", "HP": "res://AI/Tools/AI_HP.tscn", "GP": "res://AI/Tools/AI_GP.tscn",
+	"LP": "res://AI/Tools/AI_LP.tscn",
+}
+var cover_objects: Array = []     # [Vector2 centre, float radius] in layout metres
+var ai_counts := {}
+
+
+func ai_point(parent: Node, kind: String, x: float, z: float, face := Vector2.ZERO, lift := 0.0) -> Node3D:
+	var n := instance(AI_POINT[kind])
+	var pos := W(x, z, lift)
+	var basis := Basis.IDENTITY
+	if face != Vector2.ZERO:
+		# -Z of the point looks at `face` (Vostok's cover test uses basis.z).
+		var d := Vector3(face.x - x, 0.0, face.y - z).normalized()
+		basis = Basis.looking_at(d, Vector3.UP)
+	n.transform = Transform3D(basis, pos)
+	add(parent, n)
+	ai_counts[kind] = int(ai_counts.get(kind, 0)) + 1
+	return n
+
+
+func inside_playable(p: Vector2) -> bool:
+	return Geometry2D.is_point_in_polygon(p, _boundary())
+
+
+var _boundary_cache := PackedVector2Array()
+func _boundary() -> PackedVector2Array:
+	if _boundary_cache.is_empty():
+		for q in L.playable_boundary:
+			_boundary_cache.append(v2(q))
+	return _boundary_cache
+
+
+func blocked(p: Vector2, margin := 0.0) -> bool:
+	for r in footprints:
+		var rr := (r as Rect2).grow(margin - 3.0)
+		if rr.size.x > 0.0 and rr.size.y > 0.0 and rr.has_point(p):
+			return true
+	return ground(p.x, p.y) < float(M.water_level) + 0.4
+
+
+func build_ai() -> void:
+	var ai := Node3D.new()
+	ai.set_script(load("res://Scripts/AISpawner.gd"))
+	ai.set("active", true)
+	ai.set("zone", 0)
+	add(map_root, ai, "AI")
+	for n in ["E_Pool", "N_Pool", "B_Pool", "Enemies", "Nomads"]:
+		add(ai, Node3D.new(), n)
+	var groups_node := group(ai, "Groups")
+	var lurks := group(ai, "Lurks")
+	var wps := group(ai, "Waypoints")
+	var pts := group(ai, "Points")
+	print("[customs] ai: nodes ok")
+
+	# Waypoints: 20 m grid over open, walkable ground.
+	var bb := Rect2(v2(_boundary()[0]), Vector2.ZERO)
+	for q in _boundary():
+		bb = bb.expand(q)
+	var x := bb.position.x + 10.0
+	while x < bb.end.x:
+		var z := bb.position.y + 10.0
+		while z < bb.end.y:
+			var p := Vector2(x + rng.randf_range(-4, 4), z + rng.randf_range(-4, 4))
+			if inside_playable(p) and not blocked(p, 2.0):
+				ai_point(wps, "WP", p.x, p.y)
+			z += 20.0
+		x += 20.0
+
+	print("[customs] ai: waypoints ", ai_counts)
+	# Scav spawns where Tarkov puts them, and patrol loops through the map.
+	for s in L.get("ai", {}).get("spawns", []):
+		ai_point(pts, "SP", float(s[0]), float(s[1]))
+	for r in L.roads:
+		if r.get("surface", "") == "dirt":
+			continue
+		var road_pts := resample(r.points, 40.0)
+		for i in road_pts.size():
+			var p: Vector2 = road_pts[i]
+			var nxt: Vector2 = road_pts[mini(i + 1, road_pts.size() - 1)]
+			var prv: Vector2 = road_pts[maxi(i - 1, 0)]
+			var side := (nxt - prv).normalized().orthogonal() * (float(r.width) / 2.0 + 2.0)
+			var q := p + side * (1.0 if i % 2 == 0 else -1.0)
+			if inside_playable(q) and not blocked(q):
+				ai_point(pts, "PP", q.x, q.y)
+
+	print("[customs] ai: spawns/patrols ", ai_counts)
+	# Cover behind containers, wrecks and building corners, facing the object.
+	for c in cover_objects:
+		var centre: Vector2 = c[0]
+		var rad: float = c[1]
+		for k in 4:
+			var ang := k * PI / 2.0 + rng.randf_range(-0.3, 0.3)
+			var q := centre + Vector2(cos(ang), sin(ang)) * (rad + 1.2)
+			if inside_playable(q) and not blocked(q):
+				ai_point(pts, "CP", q.x, q.y, centre)
+	for b in L.buildings:
+		if b.kind != "generated" and b.kind != "dorm":
+			continue
+		var r: Array = b.rect
+		var corners: Array[Vector2] = [Vector2(float(r[0]), float(r[1])), Vector2(float(r[2]), float(r[1])), Vector2(float(r[2]), float(r[3])), Vector2(float(r[0]), float(r[3]))]
+		var centre: Vector2 = (corners[0] + corners[2]) / 2.0
+		for cn in corners:
+			var out: Vector2 = (cn - centre).normalized()
+			var q: Vector2 = cn + out * 2.2
+			if inside_playable(q) and not blocked(q, -3.0):
+				ai_point(pts, "CP", q.x, q.y, cn)
+		# Hiding spots inside.
+		if b.kind == "generated" and String(b.get("style", "")) != "garages":
+			for k in 2:
+				var hx := lerpf(float(r[0]) + 2.5, float(r[2]) - 2.5, rng.randf())
+				var hz := lerpf(float(r[1]) + 2.5, float(r[3]) - 2.5, rng.randf())
+				var hp := ai_point(pts, "HP", hx, hz)
+				hp.position.y = ground((float(r[0]) + float(r[2])) / 2.0, (float(r[1]) + float(r[3])) / 2.0) + 0.05
+
+	print("[customs] ai: covers ", ai_counts)
+	# Groups: each set of points under one parent spawns together.
+	for gdef in L.get("ai", {}).get("groups", []):
+		var holder := Node3D.new()
+		add(groups_node, holder, "Group")
+		var c := v2(gdef)
+		for k in 3:
+			var ang := k * TAU / 3.0 + rng.randf()
+			var q := c + Vector2(cos(ang), sin(ang)) * 2.5
+			ai_point(holder, "GP", q.x, q.y, c)
+
+	# Lurkers in the forest edge.
+	for l in L.get("ai", {}).get("lurks", []):
+		ai_point(lurks, "LP", float(l[0]), float(l[1]))
+	stats["ai_points"] = ai_counts
+
+
+const NAV_CELL := 0.24     # Customs' navigation map is set to this on load (Compiler ext)
+
+
+func bake_navmesh() -> void:
+	# One seamless region. Tree trunks are left out: 11k trunk holes push a
+	# single Recast mesh past its 65535-vertex limit, and tiled meshes don't
+	# stitch reliably at runtime. Agents slide around trunks physically.
+	var src_all := PackedVector3Array()
+	var water := float(M.water_level)
+	var tri := _collect_faces(content, Transform3D.IDENTITY, src_all, water)
+	var bb := Rect2(v2(_boundary()[0]), Vector2.ZERO)
+	for q in _boundary():
+		bb = bb.expand(q)
+	bb = bb.grow(4.0)
+	var nm := NavigationMesh.new()
+	nm.agent_radius = 0.24
+	nm.agent_height = 1.8
+	nm.agent_max_climb = 0.36
+	nm.agent_max_slope = 60.0
+	nm.cell_size = NAV_CELL
+	nm.cell_height = 0.12
+	nm.region_min_size = 300.0
+	nm.filter_baking_aabb = AABB(Vector3(bb.position.x - OX, -20.0, bb.position.y - OZ), Vector3(bb.size.x, 90.0, bb.size.y))
+	var src := NavigationMeshSourceGeometryData3D.new()
+	src.add_faces(src_all, Transform3D.IDENTITY)
+	var t0 := Time.get_ticks_msec()
+	NavigationServer3D.bake_from_source_geometry_data(nm, src)
+	var verts := nm.get_vertices().size()
+	if verts >= 65000:
+		push_error("navmesh near Recast's 65535-vertex limit (%d): it will be cut into islands" % verts)
+	(content as NavigationRegion3D).navigation_mesh = save_res(nm, "NM_Customs.res")
+	stats["navmesh"] = {"source_tris": tri, "polys": nm.get_polygon_count(), "verts": verts, "bake_s": (Time.get_ticks_msec() - t0) / 1000.0}
+
+
+func _collect_faces(n: Node, xf: Transform3D, src: PackedVector3Array, water: float) -> int:
+	var t := xf
+	if n is Node3D:
+		t = xf * (n as Node3D).transform
+	var count := 0
+	if n.name.begins_with("Trees_"):
+		return 0
+	if n is CollisionShape3D and n.get_parent() is StaticBody3D:
+		var body := n.get_parent() as StaticBody3D
+		var shape: Shape3D = (n as CollisionShape3D).shape
+		if shape and (body.collision_layer & 2081) != 0:
+			var faces := PackedVector3Array()
+			if shape is ConcavePolygonShape3D:
+				faces = (shape as ConcavePolygonShape3D).get_faces()
+			else:
+				var dm := shape.get_debug_mesh()
+				if dm:
+					faces = dm.get_faces()
+			var keep := PackedVector3Array()
+			for k in range(0, faces.size() - 2, 3):
+				var a: Vector3 = t * faces[k]
+				var b: Vector3 = t * faces[k + 1]
+				var c: Vector3 = t * faces[k + 2]
+				if a.y < water - 0.5 and b.y < water - 0.5 and c.y < water - 0.5:
+					continue          # river bed: AI stay out of the water
+				keep.append_array([a, b, c])
+			if keep.size() > 0:
+				src.append_array(keep)
+				count += keep.size() / 3
+	for c in n.get_children():
+		count += _collect_faces(c, t, src, water)
+	return count

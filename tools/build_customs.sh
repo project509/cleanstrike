@@ -12,8 +12,9 @@ python -I "$R/maps/customs/prebuild.py" "$(cygpath -w "$R/maps/customs/layout.js
 mkdir -p "$P/cs_tools/customs"
 cp "$R/maps/customs/build_customs.gd" "$R/maps/customs/Builder.tscn" "$P/cs_tools/customs/"
 rm -rf "$P/RoadToTarkov/Customs/Build"
-"$GODOT" --windowed --resolution 320x180 --position -4000,100 --path "$(cygpath -m "$P")" res://cs_tools/customs/Builder.tscn -- "$(cygpath -m "$DATA")" "$(cygpath -m "$R/maps/customs/layout.json")" 2>&1 | grep -vE "^\s*$|Godot Engine|^WARNING: .*leaked|ObjectDB|resources still in use|^\s+at: " | tail -60
+timeout 1800 "$GODOT" --windowed --resolution 320x180 --position -4000,100 --path "$(cygpath -m "$P")" res://cs_tools/customs/Builder.tscn -- "$(cygpath -m "$DATA")" "$(cygpath -m "$R/maps/customs/layout.json")" 2>&1 | tee "$DEV/last_build.log" | grep -vE "^\s*$|Godot Engine|^WARNING: .*leaked|ObjectDB|resources still in use|^\s+at: " | tail -60
 DST="$R/mods/RoadToTarkov/RoadToTarkov/Customs/Build"
+grep -q "saved res://RoadToTarkov/Customs/Build" "$DEV/last_build.log" || { echo "BUILD FAILED"; exit 1; }
 rm -rf "$DST"; mkdir -p "$DST"
 cp -r "$P/RoadToTarkov/Customs/Build/." "$DST/"
 mkdir -p "$P/RoadToTarkov/Customs"; cp "$R/mods/RoadToTarkov/RoadToTarkov/Customs/Customs.tscn" "$P/RoadToTarkov/Customs/"
