@@ -1,0 +1,17 @@
+[mod]
+name="Sound Indicators"
+id="cs_sound_indicators"
+version="1.0.0"
+author="Cleanstrike"
+description="See where sounds come from: markers around the crosshair show enemy gunshots and footsteps. Also tune your own footstep volume and hear enemy footsteps from farther away."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Audio", "HUD"]
+
+[script_extend]
+res://Scripts/AI.gd="res://CSSoundIndicators/Ext/AI.gd"
+res://Scripts/Controller.gd="res://CSSoundIndicators/Ext/Controller.gd"

@@ -1,0 +1,109 @@
+{
+  "settings": [
+    {
+      "key": "gunshots",
+      "type": "bool",
+      "default": true,
+      "label": "Show enemy gunshots"
+    },
+    {
+      "key": "footsteps",
+      "type": "bool",
+      "default": true,
+      "label": "Show enemy footsteps",
+      "description": "Not while that enemy can see you."
+    },
+    {
+      "key": "shot_min",
+      "type": "float",
+      "default": 15.0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "label": "Gunshots: hide closer than (m)"
+    },
+    {
+      "key": "shot_max",
+      "type": "float",
+      "default": 300.0,
+      "min": 50,
+      "max": 600,
+      "step": 25,
+      "label": "Gunshots: show up to (m)"
+    },
+    {
+      "key": "step_max",
+      "type": "float",
+      "default": 40.0,
+      "min": 5,
+      "max": 75,
+      "step": 5,
+      "label": "Footsteps: show up to (m)"
+    },
+    {
+      "key": "icon_size",
+      "type": "float",
+      "default": 14.0,
+      "min": 6,
+      "max": 32,
+      "step": 1,
+      "label": "Marker size"
+    },
+    {
+      "key": "circle_size",
+      "type": "float",
+      "default": 120.0,
+      "min": 40,
+      "max": 400,
+      "step": 10,
+      "label": "Ring size"
+    },
+    {
+      "key": "my_crouch",
+      "type": "float",
+      "default": 0.6,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "My footsteps: crouching",
+      "description": "What you hear only; enemies hear you the same."
+    },
+    {
+      "key": "my_walk",
+      "type": "float",
+      "default": 0.85,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "My footsteps: walking"
+    },
+    {
+      "key": "my_run",
+      "type": "float",
+      "default": 1.0,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "My footsteps: running"
+    },
+    {
+      "key": "ai_step_range",
+      "type": "float",
+      "default": 1.5,
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "label": "Enemy footsteps carry (x)",
+      "description": "1 = the game (50 m)."
+    },
+    {
+      "key": "close_reset",
+      "type": "float",
+      "default": 10.0,
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "label": "Normal enemy footsteps within (m)"
+    }
+  ]
+}
