@@ -1,0 +1,24 @@
+{
+  "settings": [
+    {
+      "key": "you",
+      "type": "bool",
+      "default": true,
+      "label": "You are here",
+      "description": "A pulsing marker on the area you are in."
+    },
+    {
+      "key": "shelters",
+      "type": "bool",
+      "default": true,
+      "label": "Shelters",
+      "description": "Lists the shelters in each area."
+    },
+    {
+      "key": "traders",
+      "type": "bool",
+      "default": true,
+      "label": "Traders you have met"
+    }
+  ]
+}

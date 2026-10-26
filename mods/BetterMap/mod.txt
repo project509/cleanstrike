@@ -1,0 +1,17 @@
+[mod]
+name="Better Map"
+id="cs_better_map"
+version="1.0.0"
+author="Cleanstrike"
+description="The map shows where you are with a pulsing marker, which shelters are in each area, and the traders you have met."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["UI", "Map"]
+
+[script_extend]
+res://Scripts/Interface.gd="res://CSBetterMap/Ext/Interface.gd"
+res://Scripts/Trader.gd="res://CSBetterMap/Ext/Trader.gd"
