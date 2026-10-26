@@ -1,0 +1,6 @@
+{
+  "settings": [
+    {"key": "smoke_minutes", "type": "float", "default": 3.0, "min": 0.5, "max": 15.0, "step": 0.5, "label": "Smoke lasts (minutes)"},
+    {"key": "night_glow", "type": "bool", "default": true, "label": "Red glow", "description": "A red light at the crate, easy to spot at night."}
+  ]
+}

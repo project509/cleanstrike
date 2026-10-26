@@ -1,0 +1,16 @@
+[mod]
+name="Airdrops"
+id="cs_airdrops"
+version="1.0.0"
+author="Cleanstrike"
+description="Landed airdrops pour out a tall column of red smoke (with a red glow at night), so you can find them from far away."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Events", "Loot"]
+
+[script_extend]
+res://Scripts/CASA.gd="res://CSAirdrops/Ext/CASA.gd"
