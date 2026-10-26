@@ -1,4 +1,4 @@
-# cleanstrike-loader-version: 1.1.0
+# cleanstrike-loader-version: 1.2.0
 # Cleanstrike in-game loader for Road to Vostok (Godot 4.6+).
 # Registered by override.cfg as the first autoload. Everything that has to
 # happen before the game's own scripts load runs in _init().
@@ -14,7 +14,7 @@
 #   user://cleanstrike/cleanstrike.log     plain-text log
 extends Node
 
-const LOADER_VERSION := "1.1.0"
+const LOADER_VERSION := "1.2.0"
 const API_VERSION := 1
 const ARCHIVE_EXTS := ["csmod", "vmz", "zip", "pck"]
 const BOOT_OK_SECONDS := 20.0
@@ -256,10 +256,12 @@ func _apply_extends(m: Dictionary, cfg: ConfigFile) -> String:
 			elif ext.get_base_script() != base:
 				fail = "%s must start with: extends \"%s\"" % [ext_path.get_file(), target]
 			elif String(base.get_global_name()) != "":
-				if _swaps.has(base):
-					_log("[%s] %s is also extended by another mod; this mod's version wins." % [m.id, target])
-				applied.append(["swap", target, base, _swaps.get(base)])
-				_swaps[base] = ext
+				var prev = _swaps.get(base)
+				if prev != null:
+					fail = _chain_onto(ext, target, prev)
+				if fail == "":
+					applied.append(["swap", target, base, prev])
+					_swaps[base] = ext
 			else:
 				ext.take_over_path(target)
 				applied.append(["path", target, base, null])
@@ -278,6 +280,24 @@ func _apply_extends(m: Dictionary, cfg: ConfigFile) -> String:
 		var tree := Engine.get_main_loop() as SceneTree
 		if not tree.node_added.is_connected(_on_node_added):
 			tree.node_added.connect(_on_node_added)
+	return ""
+
+
+# Several mods extending the same class_name script: point this mod's
+# script at the previous mod's version (instead of vanilla) and recompile,
+# so nodes get one chain with every mod's changes, like path takeover gives.
+func _chain_onto(ext: Script, target: String, prev: Script) -> String:
+	var src: String = ext.source_code
+	var line := 'extends "%s"' % target
+	var at := src.find(line)
+	if at < 0:
+		return "%s can't be combined with other mods (no source to chain)." % ext.resource_path.get_file()
+	ext.source_code = src.substr(0, at) + 'extends "%s"' % prev.resource_path + src.substr(at + line.length())
+	if ext.reload(true) != OK or ext.get_base_script() != prev:
+		ext.source_code = src
+		ext.reload(true)
+		return "%s doesn't combine with %s from another mod (see godot.log)." % [ext.resource_path.get_file(), prev.resource_path]
+	_log("  %s chained onto %s" % [ext.resource_path, prev.resource_path])
 	return ""
 
 

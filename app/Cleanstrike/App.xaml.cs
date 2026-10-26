@@ -11,12 +11,20 @@ public partial class App : Application
     {
         DispatcherUnhandledException += OnUnhandled;
         base.OnStartup(e);
+        var args = e.Args;
+
+        // Cleanstrike.exe [mod files] --silent: install with no window, then exit.
+        if (args.Contains("--silent"))
+        {
+            Shutdown(Services.SilentInstall.Run(args));
+            return;
+        }
+
         var window = new Views.MainWindow();
         MainWindow = window;
 
         // Dev aid: Cleanstrike.exe --screenshot out.png [--delay 3]
         // renders the window off-screen to a PNG and exits.
-        var args = e.Args;
         int shot = Array.IndexOf(args, "--screenshot");
         if (shot >= 0 && shot + 1 < args.Length)
         {

@@ -31,6 +31,7 @@ public sealed class ModItemViewModel : ObservableObject
     public string Name => Mod.Name;
     public string Initial => Mod.Name.Length > 0 ? Mod.Name[..1].ToUpperInvariant() : "?";
     public bool HasThumbnail => Thumbnail != null;
+    public bool IsPremium => Mod.Premium;
     private System.Windows.Media.ImageSource? _thumb;
     private bool _thumbTried;
     public System.Windows.Media.ImageSource? Thumbnail

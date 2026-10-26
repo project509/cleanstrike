@@ -4,7 +4,8 @@
 set -e
 R="$(cd "$(dirname "$0")/.." && pwd)"
 rm -rf "$R/dist/bundled"; mkdir -p "$R/dist/bundled"
-for m in TarkovLooting RoadToTarkov; do
+for d in "$R"/mods/*/; do
+	m="$(basename "$d")"; [ -f "$d/mod.txt" ] || continue
 	python -I "$R/tools/build_mod.py" "$R/mods/$m" --out "$R/dist"
 	cp "$R/dist/$m.csmod" "$R/dist/bundled/"
 done

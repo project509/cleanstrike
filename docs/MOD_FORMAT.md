@@ -6,7 +6,8 @@ A mod is a zip archive (extension `.csmod`, though `.vmz`/`.zip` work too) with 
 MyMod.csmod
   mod.txt
   cleanstrike.settings.json     (optional: settings shown in the app)
-  icon.png / icon.jpg           (optional: square cover art shown in the app, ~512 px)
+  icon.png / icon.jpg           (optional: square cover art shown in the app, ~512 px;
+                                 Cleanstrike's own covers come from tools/make_mod_art.py)
   MyMod/                         mounts as res://MyMod/...
     Main.gd
     Ext/Interface.gd
@@ -31,6 +32,7 @@ game_min="0.2.2.0"          ; optional: oldest game version supported
 game_max=""                 ; optional: newest game version supported
 godot_min="4.6.0"           ; optional
 tags=["UI", "Looting"]
+premium=true                ; Cleanstrike team only: gold "Premium Mod" frame and badge in the app
 
 [script_extend]             ; order matters, see below
 res://Scripts/Item.gd="res://MyMod/Ext/Item.gd"
@@ -72,7 +74,7 @@ The loader picks one of two strategies per script:
 | Vanilla script | Strategy | Notes |
 |---|---|---|
 | no `class_name` (e.g. `Interface.gd`, `Tooltip.gd`) | path takeover | Every later load of the path returns your script. Several mods can chain on the same script. |
-| has a `class_name` (e.g. `Item`, `LootContainer`, `Pickup`) | node swap | Nodes using the vanilla script get yours as they enter the tree, keeping their variables. Taking over these paths breaks `is ClassName` checks across the game, so this path is never used for them. If two mods extend the same class script, the later one wins (logged). |
+| has a `class_name` (e.g. `Item`, `LootContainer`, `Pickup`) | node swap | Nodes using the vanilla script get yours as they enter the tree, keeping their variables. Taking over these paths breaks `is ClassName` checks across the game, so this path is never used for them. If several mods extend the same class script, each later mod's script is recompiled on top of the previous one, so all of them apply (in load order). |
 
 **Order matters.** List leaf scripts (like `Item.gd`) before scripts that preload scenes using them (like `Interface.gd`).
 

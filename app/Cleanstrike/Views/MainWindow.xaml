@@ -209,7 +209,7 @@
                                     <TextBlock x:Name="Grip" Tag="grip" Text="&#xE76F;" FontFamily="{StaticResource Icons}" FontSize="12" Foreground="{StaticResource Faint}"
                                                VerticalAlignment="Center" Cursor="SizeNS" ToolTip="Drag to change load order" Opacity="0.55" />
                                     <!-- monogram -->
-                                    <Border Grid.Column="1" Width="38" Height="38" CornerRadius="9" Margin="4,0,14,0" Background="#1C1F24" BorderBrush="{StaticResource Border}" BorderThickness="1">
+                                    <Border x:Name="Thumb" Grid.Column="1" Width="38" Height="38" CornerRadius="9" Margin="4,0,14,0" Background="#1C1F24" BorderBrush="{StaticResource Border}" BorderThickness="1">
                                         <Grid>
                                             <TextBlock Text="{Binding Initial}" Style="{StaticResource T.Strong}" FontFamily="{StaticResource FontDisplay}" FontSize="16"
                                                        Foreground="{StaticResource Accent}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -225,6 +225,12 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding Name}" Style="{StaticResource T.Strong}" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Version}" Style="{StaticResource T.Caption}" Margin="8,1,0,0" VerticalAlignment="Center" />
+                                            <Border Style="{StaticResource PremiumBadge}" Margin="9,1,0,0" Visibility="{Binding IsPremium, Converter={StaticResource Vis}}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="&#xE735;" FontFamily="{StaticResource Icons}" FontSize="8.5" Foreground="{StaticResource GoldInk}" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                                    <TextBlock Text="PREMIUM MOD" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource GoldInk}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Border>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                                             <TextBlock Text="{Binding StatusKind, Converter={StaticResource StatusIcon}}" FontFamily="{StaticResource Icons}" FontSize="11"
@@ -237,6 +243,10 @@
                                               ToolTip="Turn this mod on or off" />
                                 </Grid>
                                 <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsPremium}" Value="True">
+                                        <Setter TargetName="Thumb" Property="BorderBrush" Value="{StaticResource Gold}" />
+                                        <Setter TargetName="Thumb" Property="BorderThickness" Value="1.5" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding StatusKind}" Value="Problem">
                                         <Setter TargetName="Sub" Property="Text" Value="{Binding StatusText}" />
                                         <Setter TargetName="Sub" Property="Foreground" Value="{StaticResource Danger}" />
@@ -261,11 +271,30 @@
                         </Grid.RowDefinitions>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
                             <StackPanel Margin="22,22,18,16" DataContext="{Binding Selected}">
-                                <Border Width="220" Height="220" HorizontalAlignment="Left" CornerRadius="12" Margin="0,0,0,18" BorderBrush="{StaticResource Border}" BorderThickness="1"
+                                <Border Width="220" Height="220" HorizontalAlignment="Left" CornerRadius="12" Margin="0,0,0,18"
                                         Visibility="{Binding HasThumbnail, Converter={StaticResource Vis}}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPremium}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource Gold}" />
+                                                    <Setter Property="BorderThickness" Value="2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Border.Background>
                                         <ImageBrush ImageSource="{Binding Thumbnail}" Stretch="UniformToFill" />
                                     </Border.Background>
+                                </Border>
+                                <Border Style="{StaticResource PremiumBadge}" HorizontalAlignment="Left" Margin="0,0,0,10" Padding="8,3,9,3"
+                                        Visibility="{Binding IsPremium, Converter={StaticResource Vis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE735;" FontFamily="{StaticResource Icons}" FontSize="10" Foreground="{StaticResource GoldInk}" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                        <TextBlock Text="PREMIUM MOD" FontSize="11" FontWeight="Bold" Foreground="{StaticResource GoldInk}" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </Border>
                                 <TextBlock Text="{Binding Name}" Style="{StaticResource T.Title}" FontSize="20" TextWrapping="Wrap" />
                                 <TextBlock Text="{Binding Byline}" Style="{StaticResource T.Muted}" Margin="0,4,0,0" />

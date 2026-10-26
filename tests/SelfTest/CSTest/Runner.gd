@@ -1,5 +1,15 @@
-# Headless end-to-end test for Road to Tarkov. Writes user://cleanstrike/selftest.json
+# Headless end-to-end test for Cleanstrike's mods. Writes user://cleanstrike/selftest.json
+# Each mod's own checks live in CSTest/Mods/<Mod>.gd and run only when that
+# mod is loaded; the looting and Customs checks below run when theirs are.
 extends Node
+
+# mod id -> test script. A test script is a RefCounted with
+#   func run(r)        checks that leave the game where it was
+#   func run_last(r)   optional, may die/travel; must end back in the Tutorial
+const MOD_TESTS := {
+	"cs_fixes_overhaul": "res://CSTest/Mods/FixesOverhaul.gd",
+	"cs_no_permadeath": "res://CSTest/Mods/NoPermadeath.gd",
+}
 
 var started := false
 var menu_preview_button := false
@@ -27,6 +37,21 @@ func run() -> void:
 		await wait(0.5)
 	await wait(4.0)
 	var cs = Engine.get_meta("Cleanstrike")
+	var mod_tests := []
+	for id in MOD_TESTS:
+		if cs.is_loaded(id):
+			mod_tests.append(load(MOD_TESTS[id]).new())
+	for t in mod_tests:
+		await t.run(self)
+	for t in mod_tests:
+		if t.has_method("run_last"):
+			await t.run_last(self)
+	if cs.is_loaded("tarkov_looting") or cs.is_loaded("road_to_tarkov"):
+		await looting_tests(cs)
+	finish()
+
+
+func looting_tests(cs) -> void:
 	# Looting comes from Tarkov Looting when it is loaded, else Road to Tarkov.
 	var standalone: bool = cs.is_loaded("tarkov_looting")
 	var RTT = load("res://TarkovLooting/TL.gd") if standalone else load("res://RoadToTarkov/RTT.gd")
@@ -58,7 +83,7 @@ func run() -> void:
 			if not c.locked and not c.furniture:
 				target = c; break
 	check("found container", target != null, "%d containers" % containers.size())
-	if target == null: return finish()
+	if target == null: return
 	if target.loot.size() < 2:
 		for i in 3: target.CreateLoot(load("res://Loot/LT_Master.tres").items.pick_random())
 	var n_loot: int = target.loot.size()
@@ -197,7 +222,11 @@ func run() -> void:
 	check("tooltip says Open after search", target.gameData.tooltip.ends_with("[Open]"), target.gameData.tooltip)
 	if cs.is_loaded("road_to_tarkov"):
 		await customs_tests(ui, interface)
-	finish()
+
+# Back to a fresh Tutorial (after a test that died or travelled).
+func reload_tutorial() -> bool:
+	Loader.LoadScene("Tutorial")
+	return await wait_for_map("Tutorial", 60.0)
 
 func map_name() -> String:
 	var m = get_node_or_null("/root/Map")

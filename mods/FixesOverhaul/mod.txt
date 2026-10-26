@@ -1,0 +1,16 @@
+[mod]
+name="CleanStrike Fixes Overhaul"
+id="cs_fixes_overhaul"
+version="1.0.0"
+author="Cleanstrike"
+description="Fixes for Road to Vostok bugs: doors, traders, events, overlapping effect areas and more, all in one mod."
+priority=0
+
+[cleanstrike]
+api=1
+premium=true
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Fixes", "QoL"]
+
+[script_extend]

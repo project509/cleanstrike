@@ -55,6 +55,9 @@ public sealed class GodotConfig
     public int GetInt(string section, string key, int fallback = 0) =>
         Get(section, key) switch { double d => (int)d, string s when int.TryParse(s, out var i) => i, _ => fallback };
 
+    public bool GetBool(string section, string key, bool fallback = false) =>
+        Get(section, key) switch { bool b => b, double d => d != 0, string s => s.Equals("true", StringComparison.OrdinalIgnoreCase), _ => fallback };
+
     public List<string> GetList(string section, string key) =>
         Get(section, key) is List<object?> l ? l.Select(x => Convert.ToString(x, CultureInfo.InvariantCulture) ?? "").ToList() : new();
 

@@ -8,6 +8,7 @@ priority=0
 
 [cleanstrike]
 api=1
+premium=true
 game_min="0.2.2.0"
 godot_min="4.6.0"
 tags=["In Progress", "Maps", "Overhaul"]

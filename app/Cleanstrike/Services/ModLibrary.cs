@@ -109,6 +109,7 @@ public static class ModLibrary
         info.GameMin = cfg.GetString("cleanstrike", "game_min");
         info.GameMax = cfg.GetString("cleanstrike", "game_max");
         info.Tags = cfg.GetList("cleanstrike", "tags");
+        info.Premium = cfg.GetBool("cleanstrike", "premium");
         info.Requires = cfg.GetList("dependencies", "required");
         info.Autoloads = cfg.Entries("autoload")
             .Select(e => new KeyValuePair<string, string>(e.Key, Convert.ToString(e.Value) ?? ""))
