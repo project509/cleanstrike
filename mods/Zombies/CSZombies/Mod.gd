@@ -3,7 +3,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_zombies"
-const VERSION := "0.1.0"
+const VERSION := "0.4.2"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {

@@ -1,7 +1,7 @@
 [mod]
 name="CleanStrike Zombies (In Progress)"
 id="cs_zombies"
-version="0.1.0"
+version="0.4.2"
 author="Cleanstrike"
 description="Vostok becomes a zombie survival game: every enemy is replaced by sound-hunting packs of the dead. Shoot off limbs, watch out for crawlers, and never fire carelessly."
 priority=0
