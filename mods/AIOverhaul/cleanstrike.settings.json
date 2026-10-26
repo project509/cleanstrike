@@ -1,0 +1,116 @@
+{
+  "settings": [
+    {
+      "key": "accuracy",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "label": "Enemy spread (x)",
+      "description": "Lower is deadlier."
+    },
+    {
+      "key": "bandit_spread",
+      "type": "float",
+      "default": 1.25,
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "label": "Bandit spread (x)"
+    },
+    {
+      "key": "guard_spread",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "label": "Guard spread (x)"
+    },
+    {
+      "key": "military_spread",
+      "type": "float",
+      "default": 0.8,
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "label": "Military spread (x)"
+    },
+    {
+      "key": "bandit_sight",
+      "type": "float",
+      "default": 0.85,
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.05,
+      "label": "Bandit sight (x)"
+    },
+    {
+      "key": "guard_sight",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.05,
+      "label": "Guard sight (x)"
+    },
+    {
+      "key": "military_sight",
+      "type": "float",
+      "default": 1.15,
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.05,
+      "label": "Military sight (x)"
+    },
+    {
+      "key": "weather_cover",
+      "type": "bool",
+      "default": true,
+      "label": "Rain and storms hide you"
+    },
+    {
+      "key": "crouch_cover",
+      "type": "bool",
+      "default": true,
+      "label": "Crouching hides you",
+      "description": "Harder to see and hear while crouched."
+    },
+    {
+      "key": "burst_range",
+      "type": "float",
+      "default": 15.0,
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "label": "Full auto within (m)",
+      "description": "0 = the game."
+    },
+    {
+      "key": "self_heal",
+      "type": "bool",
+      "default": true,
+      "label": "Wounded enemies patch up",
+      "description": "Below half health, after 6 quiet seconds."
+    },
+    {
+      "key": "heal_amount",
+      "type": "float",
+      "default": 30.0,
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "label": "Patch-up heals"
+    },
+    {
+      "key": "heal_cooldown",
+      "type": "float",
+      "default": 30.0,
+      "min": 10,
+      "max": 120,
+      "step": 5,
+      "label": "Patch-up cooldown (s)"
+    }
+  ]
+}

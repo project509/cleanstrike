@@ -1,0 +1,17 @@
+[mod]
+name="AI Overhaul"
+id="cs_ai_overhaul"
+version="1.0.0"
+author="Cleanstrike"
+description="Smarter, fairer enemies: fixed aim spread, accuracy and sight by faction, weather and crouching make you harder to spot, close-range bursts, and wounded enemies patch themselves up."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["AI", "Combat"]
+
+[script_extend]
+res://Scripts/AI.gd="res://CSAIOverhaul/Ext/AI.gd"
+res://Scripts/Sensor.gd="res://CSAIOverhaul/Ext/Sensor.gd"
