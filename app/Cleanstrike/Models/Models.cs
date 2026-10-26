@@ -53,6 +53,8 @@ public sealed class ModInfo
     public string GameMax { get; set; } = "";
     public List<string> Tags { get; set; } = new();
     public List<string> Requires { get; set; } = new();
+    /// <summary>[supersedes] other_id="reason": that mod still runs but has nothing to do while this one is on.</summary>
+    public Dictionary<string, string> Supersedes { get; set; } = new();
     public List<KeyValuePair<string, string>> Autoloads { get; set; } = new();
     public List<SettingDef> Settings { get; set; } = new();
     public bool HasManifest { get; set; }

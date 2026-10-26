@@ -143,6 +143,8 @@ public static class ModRules
         }
         var both = enabled.Select(e => (e, reason: ConflictReason(mod, e))).FirstOrDefault(x => x.reason != null);
         if (both.reason != null) return $"Can't run with {both.e.Name}: turn one off";
+        var over = enabled.FirstOrDefault(e => e.Supersedes.ContainsKey(mod.Id));
+        if (over != null) return $"No effect while {over.Name} is on: {over.Supersedes[mod.Id]}";
         var need = mod.Requires.FirstOrDefault(r => enabled.All(e => e.Id != r));
         if (need == null) return null;
         var name = installed.FirstOrDefault(i => i.Id == need)?.Name;

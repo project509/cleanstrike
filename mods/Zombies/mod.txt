@@ -14,6 +14,9 @@ tags=["Zombies", "AI"]
 premium=true
 opt_in=true
 
+[supersedes]
+cs_faction_warfare="zombies replace every soldier, so there are no factions to fight."
+
 [script_extend]
 res://Scripts/AISpawner.gd="res://CSZombies/Ext/AISpawner.gd"
 res://Scripts/WeaponRig.gd="res://CSZombies/Ext/WeaponRig.gd"

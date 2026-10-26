@@ -60,6 +60,13 @@ if (sandbox != null)
     Store.Reconcile(trial, installed, enableNew: true);
     Check("opt-in mod added switched off", sandbox.OptIn && trial.Mods.Any(e => e.Id == sandbox.Id && !e.Enabled) && trial.Mods.Any(e => e.Id != sandbox.Id && e.Enabled));
 }
+var zombies = installed.FirstOrDefault(m => m.Id == "cs_zombies");
+var factions = installed.FirstOrDefault(m => m.Id == "cs_faction_warfare");
+if (zombies != null && factions != null)
+{
+    var note = ModRules.Note(factions, true, new List<Cleanstrike.Models.ModInfo> { zombies }, installed);
+    Check("superseded mod gets a note", note != null && note.StartsWith("No effect while") && ModRules.ConflictReason(zombies, factions) == null, note ?? "none");
+}
 var rtt = installed.FirstOrDefault(m => m.Id == "tarkov_looting") ?? installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 var rttWip = installed.FirstOrDefault(m => m.Id == "road_to_tarkov");
 if (rttWip != null)

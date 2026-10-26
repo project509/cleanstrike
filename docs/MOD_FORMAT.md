@@ -56,6 +56,15 @@ the loader also skips the later one if both somehow end up enabled:
 other_mod_id="Both replace the trader screen."
 ```
 
+A softer note: `[supersedes]` lists mods that still work alongside yours but
+have nothing to do while it is on (the loader ignores it; the app shows the
+other mod a "No effect while ... is on" note):
+
+```ini
+[supersedes]
+other_mod_id="Zombies take over spawning."
+```
+
 Requirements work the same way: turning a mod on offers to turn on what it
 needs, and turning one off offers to turn off what depends on it.
 
