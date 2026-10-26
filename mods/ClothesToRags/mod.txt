@@ -1,0 +1,19 @@
+[mod]
+name="Clothes to Rags"
+id="cs_clothes_to_rags"
+version="1.0.0"
+author="Cleanstrike"
+description="Right-click clothing and tear it into rags. Rags fit in one slot, heal a little and stop bleeding."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Medical", "Crafting"]
+
+[script_extend]
+res://Scripts/Context.gd="res://CSClothesToRags/Ext/Context.gd"
+
+[autoload]
+CSClothesToRagsBoot="res://CSClothesToRags/Boot.gd"
