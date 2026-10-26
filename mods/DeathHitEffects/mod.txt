@@ -1,0 +1,20 @@
+[mod]
+name="Death and Hit Effects"
+id="cs_death_hit_effects"
+version="1.0.0"
+author="Cleanstrike"
+description="Hits feel like hits: a hit marker (red on a kill), blood splatter on walls and floors behind the target, and pools of blood that spread under bodies."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Visual", "Combat"]
+
+[script_extend]
+res://Scripts/WeaponRig.gd="res://CSDeathHitEffects/Ext/WeaponRig.gd"
+res://Scripts/AI.gd="res://CSDeathHitEffects/Ext/AI.gd"
+
+[autoload]
+CSDeathHitEffectsBoot="res://CSDeathHitEffects/Boot.gd"

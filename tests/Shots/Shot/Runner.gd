@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -297,3 +297,23 @@ func reticle_views():
 	q.queue_free()
 	R.overrides = {}
 	R.apply()
+
+
+# Death and Hit Effects: a pool and splats on the floor ahead, kill marker.
+func blood_views():
+	var D = load("res://CSDeathHitEffects/Mod.gd")
+	var cam = get_viewport().get_camera_3d()
+	var player = get_node("/root/Map/Core/Controller")
+	var ahead: Vector3 = player.global_position - Vector3(cam.global_basis.z.x, 0, cam.global_basis.z.z).normalized() * 6.0
+	D.overrides = {"pool_seconds": 0.3}
+	var body := Node3D.new()
+	get_tree().current_scene.add_child(body)
+	body.global_position = ahead
+	D.pool(body)
+	for i in 3:
+		D.splatter(player, ahead + Vector3(randf_range(-1, 1), 1.0, randf_range(-1, 1)), Vector3.DOWN, [player.get_rid()])
+	await wait(1.0)
+	D.marker(get_tree(), true)
+	await wait(0.05)
+	await shot("shot_blood.png")
+	D.overrides = {}

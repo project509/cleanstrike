@@ -1,0 +1,51 @@
+{
+  "settings": [
+    {
+      "key": "hit_marker",
+      "type": "bool",
+      "default": true,
+      "label": "Hit marker",
+      "description": "A small X when you hit someone; red when it kills."
+    },
+    {
+      "key": "splatter",
+      "type": "bool",
+      "default": true,
+      "label": "Blood splatter",
+      "description": "On walls and floors behind the target."
+    },
+    {
+      "key": "pools",
+      "type": "bool",
+      "default": true,
+      "label": "Blood pools under bodies"
+    },
+    {
+      "key": "pool_size",
+      "type": "float",
+      "default": 1.6,
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1,
+      "label": "Pool size (m)"
+    },
+    {
+      "key": "pool_seconds",
+      "type": "float",
+      "default": 20.0,
+      "min": 2,
+      "max": 120,
+      "step": 1,
+      "label": "Pool spreads over (s)"
+    },
+    {
+      "key": "max_decals",
+      "type": "int",
+      "default": 60,
+      "min": 10,
+      "max": 200,
+      "step": 10,
+      "label": "Most blood marks at once"
+    }
+  ]
+}
