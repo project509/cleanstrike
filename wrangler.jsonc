@@ -1,7 +1,12 @@
-// Cloudflare Workers deploy: serves site/ and the download counter API.
+// Cloudflare Workers deploy: serves site/ and the download counter API,
+// and attaches the cleanstrike.app domain on every deploy.
 {
-  "name": "cleanstrike",
+  "name": "cleanstrike-app",
   "main": "worker/index.js",
   "compatibility_date": "2026-10-01",
-  "assets": { "directory": "./site", "binding": "ASSETS", "not_found_handling": "404-page" }
+  "assets": { "directory": "./site", "binding": "ASSETS", "not_found_handling": "404-page" },
+  "routes": [
+    { "pattern": "cleanstrike.app", "custom_domain": true },
+    { "pattern": "www.cleanstrike.app", "custom_domain": true }
+  ]
 }
