@@ -1,0 +1,16 @@
+[mod]
+name="Heli Go Boom"
+id="cs_heli_go_boom"
+version="1.0.0"
+author="Cleanstrike"
+description="Helicopter crashes happen while you're there, and you hear them: a crash comes some time after you arrive, with an explosion you can hear from far away."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Events", "Audio"]
+
+[script_extend]
+res://Scripts/EventSystem.gd="res://CSHeliGoBoom/Ext/EventSystem.gd"

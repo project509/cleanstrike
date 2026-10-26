@@ -1,0 +1,5 @@
+{
+  "settings": [
+    {"key": "max_delay", "type": "int", "default": 300, "min": 0, "max": 900, "step": 15, "label": "Longest wait before a crash (seconds)", "description": "0 = the crash is already there when you arrive (the game)."}
+  ]
+}
