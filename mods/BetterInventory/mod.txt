@@ -1,0 +1,16 @@
+[mod]
+name="Better Inventory and Equipment"
+id="cs_better_inventory"
+version="1.0.0"
+author="Cleanstrike"
+description="Sort your inventory in one click, quick-stack into the open container, search your items, and carry a bit more before you are overweight."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Inventory", "QoL"]
+
+[script_extend]
+res://Scripts/Interface.gd="res://CSBetterInventory/Ext/Interface.gd"
