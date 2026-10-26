@@ -1,9 +1,9 @@
 [mod]
 name="CleanStrike Weapons Pack (In Progress)"
 id="cs_weapons_pack"
-version="0.1.0"
+version="0.3.0"
 author="Cleanstrike"
-description="New weapons that work like the game's own: same attachments, magazines, ammo and handling. First up: the FN SCAR-17 (.308)."
+description="New guns that work like the game's own: found in loot and sold by the Gunsmith, with their own magazines and ammo, the game's attachments, animations and handling. FN SCAR-17 and Desert Eagle so far."
 priority=0
 
 [cleanstrike]
@@ -15,6 +15,7 @@ premium=true
 opt_in=true
 
 [script_extend]
+res://Scripts/WeaponRig.gd="res://CSWeaponsPack/Ext/WeaponRig.gd"
 
 [autoload]
 CSWeaponsPackBoot="res://CSWeaponsPack/Boot.gd"

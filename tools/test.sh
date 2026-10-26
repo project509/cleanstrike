@@ -28,7 +28,7 @@ SAVES="$APPDATA/Road to Vostok"; SNAP="$R/dist/test/save_snapshot"
 rm -rf "$SNAP"; mkdir -p "$SNAP/cs"; cp "$SAVES"/*.tres "$SNAP"/ 2>/dev/null
 for f in data last_launch.json boot.json; do [ -e "$U/$f" ] && cp -r "$U/$f" "$SNAP/cs/"; done
 rm -rf "$U/data"
-(cd "$T" && timeout "${TIMEOUT:-1000}" ./RTV.exe --headless >/dev/null 2>&1); echo "game exit: $?"
+(cd "$T" && timeout "${TIMEOUT:-1000}" ./RTV.exe --headless >"${GAMELOG:-/dev/null}" 2>&1); echo "game exit: $?"
 for f in "$SAVES"/*.tres; do [ -e "$SNAP/$(basename "$f")" ] || rm -f "$f"; done
 cp "$SNAP"/*.tres "$SAVES"/ && echo "player saves restored ($(ls "$SNAP"/*.tres | wc -l) files)"
 cat "$U/cleanstrike.log"

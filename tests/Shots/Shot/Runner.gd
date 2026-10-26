@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar", "scareq"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights", "grades", "zombies", "zgore", "zmap", "zperf", "scar", "scareq", "scaranim"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -626,3 +626,29 @@ func scareq_views():
 	await wait(1.5)
 	await shot("shot_scar_ads.png")
 	gd.isAiming = false
+
+
+# Weapons Pack: the SCAR held still at points through the game's reload and
+# magazine-check animations: do the parts move with the hands?
+func scaranim_views():
+	var WP = load("res://CSWeaponsPack/Mod.gd")
+	while not (Engine.has_meta("cs_items") and Engine.get_meta("cs_items").has("CS_SCAR_Rig")):
+		await wait(0.2)
+	var mgr = await _equip(WP.scar_item(), [])
+	var rig: Node = mgr.get_child(0)
+	var ap: AnimationPlayer = rig.find_children("*", "AnimationPlayer", true, false)[0]
+	for t in rig.find_children("*", "AnimationTree", true, false):
+		t.active = false
+	print("[SCARANIM] ", ap.get_animation_list())
+	var i := 0
+	for anim in ["KAR-21_Reload_Empty", "KAR-21_Magazine_Check"]:
+		if not ap.has_animation(anim):
+			continue
+		var len: float = ap.get_animation(anim).length
+		for f in [0.3, 0.5, 0.7]:
+			ap.play(anim)
+			ap.seek(len * f, true)
+			ap.pause()
+			await wait(0.4)
+			await shot("shot_scaranim_%d.png" % i)
+			i += 1

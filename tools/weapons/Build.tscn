@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://cs_tools/weapons/build_scar.gd" id="1"]
-
-[node name="Build" type="Node"]
-script = ExtResource("1")

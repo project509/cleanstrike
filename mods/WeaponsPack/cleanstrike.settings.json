@@ -1,5 +1,5 @@
 {
   "settings": [
-    {"key": "scar_iron_sights", "type": "bool", "default": true, "label": "SCAR iron sights", "description": "Folding iron sights when no optic is mounted."}
+    {"key": "in_loot", "type": "bool", "default": true, "label": "Found in loot and at traders", "description": "The pack's guns, magazines and ammo turn up in loot and in the Gunsmith's stock, like the game's own."}
   ]
 }
