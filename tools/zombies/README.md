@@ -21,4 +21,7 @@ Runs in the recovered dev project (`C:\RTVDev\RTVProject`) with the Godot
 Status (2026-10-26): pipeline works; all clips retarget and play on the
 zombie; textured export verified by reloading it. The model is split into
 per-limb meshes (Z_Head, Z_L_Forearm, ...), which dismemberment will use.
-Next: mod scaffolding, in-game scale check, zombie AI.
+The model imports at root scale 0.01 (it is in centimetres).
+mods/Zombies (0.1.0, opt-in, In Progress) ships Zombie.scn; its self-test
+checks it loads in the game, limbs, 31 clips, human size, crawl height.
+Next: zombie AI replacing the game's enemies.

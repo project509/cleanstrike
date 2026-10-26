@@ -17,6 +17,11 @@ for f in glob.glob(base + r"\**\*.import", recursive=True):
     mp = "biped" if os.sep + "model" + os.sep in f else "mixamo"
     s = open(f, encoding="utf-8").read()
     s = re.sub(r"_subresources=\{.*", sub(mp), s, flags=re.S)
+    s += "
+fbx/importer=0
+"  # built-in ufbx (Godot falls back to FBX2glTF otherwise)
+    if mp == "biped":
+        s = s.replace("nodes/root_scale=1.0", "nodes/root_scale=0.01")  # the model is in centimetres
     open(f, "w", encoding="utf-8", newline="\n").write(s + "\n")
     n += 1
 print("updated", n)

@@ -1,0 +1,13 @@
+{
+  "settings": [
+    {
+      "key": "health",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 4,
+      "step": 0.25,
+      "label": "Zombie health (x)"
+    }
+  ]
+}
