@@ -1,0 +1,16 @@
+[mod]
+name="Hold Breath"
+id="cs_hold_breath"
+version="1.0.0"
+author="Cleanstrike"
+description="While aiming, hold Shift to steady your aim for a few seconds. It tires your arms faster, and holding too long leaves you catching your breath."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay"]
+
+[script_extend]
+res://Scripts/Noise.gd="res://CSHoldBreath/Ext/Noise.gd"

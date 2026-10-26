@@ -1,0 +1,50 @@
+{
+  "settings": [
+    {
+      "key": "breath_key",
+      "type": "string",
+      "default": "Sprint key",
+      "label": "Hold breath key",
+      "description": "While aiming. 'Sprint key' uses your sprint key (Shift); or a key name like Alt."
+    },
+    {
+      "key": "steadiness",
+      "type": "float",
+      "default": 0.75,
+      "min": 0.1,
+      "max": 0.95,
+      "step": 0.05,
+      "label": "Steadiness",
+      "description": "How much the sway drops while holding (0.75 = 75% less)."
+    },
+    {
+      "key": "max_hold",
+      "type": "float",
+      "default": 8.0,
+      "min": 2.0,
+      "max": 20.0,
+      "step": 0.5,
+      "label": "Longest breath (seconds)",
+      "description": "Hold longer and you're left catching your breath, with extra sway."
+    },
+    {
+      "key": "stamina_drain",
+      "type": "float",
+      "default": 8.0,
+      "min": 0.0,
+      "max": 30.0,
+      "step": 1.0,
+      "label": "Arm stamina drain per second"
+    },
+    {
+      "key": "recover",
+      "type": "float",
+      "default": 3.0,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.5,
+      "label": "Recovery (seconds)",
+      "description": "Before you can hold your breath again."
+    }
+  ]
+}

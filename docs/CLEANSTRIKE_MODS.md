@@ -20,8 +20,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 | 2 | Better Traders | cs_better_traders | Done (1.0.0) |
 | 3 | Loot Settings, Better Enemy Loot | cs_loot_settings, cs_better_enemy_loot | Done (1.0.0) |
 | 4 | Event Hints | cs_event_hints | Done (1.0.0) |
-| 5 | Focus Zoom, Hold Breath | | Next |
-| 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Skeleton |
+| 5 | Focus Zoom, Hold Breath | cs_focus_zoom, cs_hold_breath | Done (1.0.0) |
+| 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Next |
 | 7 | Medical Durability | | Planned |
 | 8 | Gear Spawns | | Planned |
 | | Tarkov Looting (premium) | tarkov_looting | Done (1.2.0) |
@@ -133,6 +133,11 @@ Focus Eye (Gugluv, mod/55962):
 Hold Breath (tetrahydroc, mod/55938):
 - While aiming, hold Shift: much less sway for a short time at the cost of
   faster arm-stamina drain; rebindable. (No numbers published; we tune.)
+Built (1.0.0): Focus Zoom hooks Camera.FOV (target = game's FOV / 1.8 focus,
+/1.3 sprinting, /1.2 ADS on non-magnified sights; key Mouse4 or any key;
+hold or toggle) and Controller._input (sensitivity x tan(fov/2)/tan(base/2)).
+Hold Breath hooks Noise.gd (weapon sway): sway x0.25 while held (sprint key
+while aiming), arm stamina -8/s, max 8 s then 3 s catching breath at x1.6.
 
 ## 6. CleanStrike Fixes Overhaul (premium)
 Fixes from mods: Fixed Doors (mod/56381: doors swing away from the player,

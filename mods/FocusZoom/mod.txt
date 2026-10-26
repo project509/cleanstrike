@@ -1,0 +1,17 @@
+[mod]
+name="Focus Zoom"
+id="cs_focus_zoom"
+version="1.0.0"
+author="Cleanstrike"
+description="Hold a key to focus your eyes: a smooth zoom that helps spot enemies at range, a lighter one while sprinting, and a little extra when aiming down iron sights or red dots."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Gunplay", "QoL"]
+
+[script_extend]
+res://Scripts/Camera.gd="res://CSFocusZoom/Ext/Camera.gd"
+res://Scripts/Controller.gd="res://CSFocusZoom/Ext/Controller.gd"
