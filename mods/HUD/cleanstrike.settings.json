@@ -1,0 +1,63 @@
+{
+  "settings": [
+    {
+      "key": "bars",
+      "type": "bool",
+      "default": true,
+      "label": "Vitals bars",
+      "description": "Health, food, water, mind, temperature and stamina as slim bars."
+    },
+    {
+      "key": "numbers",
+      "type": "bool",
+      "default": false,
+      "label": "Numbers next to the bars"
+    },
+    {
+      "key": "hide_full",
+      "type": "bool",
+      "default": true,
+      "label": "Hide full stamina and temperature bars"
+    },
+    {
+      "key": "hide_game_vitals",
+      "type": "bool",
+      "default": true,
+      "label": "Hide the game vitals text",
+      "description": "The bars replace it."
+    },
+    {
+      "key": "compass",
+      "type": "bool",
+      "default": true,
+      "label": "Compass"
+    },
+    {
+      "key": "dot",
+      "type": "bool",
+      "default": false,
+      "label": "Centre dot at start"
+    },
+    {
+      "key": "dot_key",
+      "type": "string",
+      "default": "O",
+      "label": "Centre dot key"
+    },
+    {
+      "key": "hide_key",
+      "type": "string",
+      "default": "F2",
+      "label": "Hide HUD key"
+    },
+    {
+      "key": "scale",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.6,
+      "max": 2,
+      "step": 0.1,
+      "label": "Size"
+    }
+  ]
+}

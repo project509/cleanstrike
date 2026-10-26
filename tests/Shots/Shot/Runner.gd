@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader"]:
+	for mode in ["loot", "trader", "hud"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -259,3 +259,13 @@ func spawn_views():
 		await wait(2.0)
 		cam.make_current()
 		await shot("shot_%s.png" % tg[0])
+
+
+# Plain gameplay view with the HUD (CleanStrike HUD's bars and compass).
+func hud_views():
+	var gd = load("res://Resources/GameData.tres")
+	gd.health = 72.0
+	gd.bodyStamina = 40.0
+	gd.hydration = 55.0
+	await wait(1.0)
+	await shot("shot_hud.png")

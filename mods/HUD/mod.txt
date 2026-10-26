@@ -1,0 +1,16 @@
+[mod]
+name="CleanStrike HUD"
+id="cs_hud"
+version="1.0.0"
+author="Cleanstrike"
+description="A cleaner HUD: slim vitals and stamina bars, a compass along the top, an optional centre dot (O) and fire mode on switching. F2 hides the whole HUD for screenshots."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["HUD", "UI"]
+
+[script_extend]
+res://Scripts/HUD.gd="res://CSHUD/Ext/HUD.gd"
