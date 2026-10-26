@@ -1,0 +1,8 @@
+{
+  "settings": [
+    {"key": "found_partly_used", "type": "bool", "default": true, "label": "Found items are partly used"},
+    {"key": "split_effects", "type": "bool", "default": true, "label": "Each use gives its share", "description": "A drink with 3 uses gives a third of its water per sip. Off: every use gives the full effect."},
+    {"key": "crafting", "type": "bool", "default": true, "label": "Crafting takes one use"},
+    {"key": "extra", "type": "string", "default": "", "label": "More items", "description": "File=uses, comma separated, e.g. Coffee=3. 1 restores the game."}
+  ]
+}

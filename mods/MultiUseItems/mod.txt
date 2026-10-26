@@ -1,0 +1,19 @@
+[mod]
+name="Multi-Use Items"
+id="cs_multi_use_items"
+version="1.0.0"
+author="Cleanstrike"
+description="Cigarettes, gum, drinks and crafting supplies last several uses, shown as 2/3 on the item. Crafting takes one use, not the whole item. Works with Medical Durability, which keeps handling medical items."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Items", "QoL"]
+
+[script_extend]
+res://Scripts/Item.gd="res://CSMultiUseItems/Ext/Item.gd"
+res://Scripts/LootContainer.gd="res://CSMultiUseItems/Ext/LootContainer.gd"
+res://Scripts/LootSimulation.gd="res://CSMultiUseItems/Ext/LootSimulation.gd"
+res://Scripts/Interface.gd="res://CSMultiUseItems/Ext/Interface.gd"
