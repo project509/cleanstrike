@@ -1,0 +1,17 @@
+[mod]
+name="Loot Settings"
+id="cs_loot_settings"
+version="1.0.0"
+author="Cleanstrike"
+description="Tune how much loot Road to Vostok spawns in containers and on the floor: presets (Balanced, Loot Overhaul, Mega Loot) or your own numbers."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Loot", "Balance"]
+
+[script_extend]
+res://Scripts/LootContainer.gd="res://CSLootSettings/Ext/LootContainer.gd"
+res://Scripts/LootSimulation.gd="res://CSLootSettings/Ext/LootSimulation.gd"

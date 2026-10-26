@@ -18,8 +18,8 @@ for 0.1.x (Build 1); where Build 2 changed things, we follow the game.
 |---|---|---|---|
 | 1 | No Permadeath | cs_no_permadeath | Done (1.0.0) |
 | 2 | Better Traders | cs_better_traders | Done (1.0.0) |
-| 3 | Loot Settings, Better Enemy Loot | | Next |
-| 4 | Event Hints | | Planned |
+| 3 | Loot Settings, Better Enemy Loot | cs_loot_settings, cs_better_enemy_loot | Done (1.0.0) |
+| 4 | Event Hints | | Next |
 | 5 | Focus Zoom, Hold Breath | | Planned |
 | 6 | CleanStrike Fixes Overhaul (premium) | cs_fixes_overhaul | Skeleton |
 | 7 | Medical Durability | | Planned |
@@ -96,6 +96,14 @@ Better Enemy Loot (Bearshades, mod/56230):
 - Bandits civilian loot only; Vostok military: military/industrial/civilian.
 Vanilla: LootContainer.GenerateLoot (rarity roll 1..100, corpses 1..30),
 CreateLoot; AI.Death enables the corpse container.
+Built (1.0.0): Loot Settings presets Vanilla / Balanced (default) / Loot
+Overhaul / Mega Loot / Custom, same roll for containers and floor loot
+(LootSimulation); verified: game-equivalent 80.5% empty, Balanced 50.6%,
+Loot Overhaul 70.5% non-empty, Mega 4.7 items. Better Enemy Loot adds to
+the corpse container on AI.Death: ammo (weaponData.ammo), magazines
+(compatible[0]), consumables, medical; faction filters; amounts
+None/Low/Normal/More/Lots. Game bug noted for Fixes: LootSimulation with a
+custom table and no force never spawns its items.
 
 ## 4. Event Hints (+ configs)
 Source: Event Hints (notyme, mod/55994; vostokmods.net 0.3.2, tested 0.2.2.0).

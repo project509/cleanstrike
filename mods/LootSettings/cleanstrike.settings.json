@@ -1,0 +1,156 @@
+{
+  "settings": [
+    {
+      "key": "preset",
+      "type": "choice",
+      "default": "Balanced",
+      "options": [
+        "Vanilla",
+        "Balanced",
+        "Loot Overhaul",
+        "Mega Loot",
+        "Custom"
+      ],
+      "label": "Preset",
+      "description": "Vanilla: the game's loot. Balanced: the game's chances, plus a second roll for empty containers and a 30% chance of 1-5 extra items. Loot Overhaul: 70% of containers hold something, more rare and medical items. Mega Loot: far more of everything, every stash on the map. Custom: the numbers below."
+    },
+    {
+      "key": "common_chance",
+      "type": "float",
+      "default": 0.2,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "label": "Custom: common loot chance",
+      "description": "Chance a container rolls common items (the game: 0.20)."
+    },
+    {
+      "key": "common_max",
+      "type": "int",
+      "default": 4,
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "label": "Custom: most common items"
+    },
+    {
+      "key": "rare_chance",
+      "type": "float",
+      "default": 0.04,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "label": "Custom: rare loot chance",
+      "description": "The game: 0.04."
+    },
+    {
+      "key": "rare_max",
+      "type": "int",
+      "default": 1,
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Custom: most rare items"
+    },
+    {
+      "key": "legendary_chance",
+      "type": "float",
+      "default": 0.001,
+      "min": 0,
+      "max": 0.1,
+      "step": 0.001,
+      "label": "Custom: legendary chance",
+      "description": "The game: 0.001 (0.1%)."
+    },
+    {
+      "key": "jackpot_chance",
+      "type": "float",
+      "default": 0.01,
+      "min": 0,
+      "max": 0.2,
+      "step": 0.005,
+      "label": "Custom: jackpot chance",
+      "description": "A full container: rare and common items, sometimes a legendary (the game: 0.01)."
+    },
+    {
+      "key": "reroll_empty",
+      "type": "float",
+      "default": 0.5,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Custom: re-roll empty containers",
+      "description": "Chance an empty container rolls a second time."
+    },
+    {
+      "key": "add_chance",
+      "type": "float",
+      "default": 0.3,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Custom: bonus items chance",
+      "description": "Chance of a few extra common items on top."
+    },
+    {
+      "key": "add_min",
+      "type": "int",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "label": "Custom: fewest bonus items"
+    },
+    {
+      "key": "add_max",
+      "type": "int",
+      "default": 5,
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "label": "Custom: most bonus items"
+    },
+    {
+      "key": "condition_min",
+      "type": "int",
+      "default": 25,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "label": "Custom: worst weapon condition",
+      "description": "Weapons, lights and night vision found in containers (the game: 25-100%)."
+    },
+    {
+      "key": "condition_max",
+      "type": "int",
+      "default": 100,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "label": "Custom: best weapon condition"
+    },
+    {
+      "key": "stashes_always",
+      "type": "bool",
+      "default": false,
+      "label": "Custom: every stash on the map",
+      "description": "Stashes normally appear only 10% of the time."
+    },
+    {
+      "key": "no_empty_cans",
+      "type": "bool",
+      "default": false,
+      "label": "Custom: no empty cans"
+    },
+    {
+      "key": "key_weight",
+      "type": "float",
+      "default": 1.0,
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "label": "Custom: keys more common",
+      "description": "1 = the game. 4 = keys four times as likely."
+    }
+  ]
+}

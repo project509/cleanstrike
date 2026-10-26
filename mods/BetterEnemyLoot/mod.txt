@@ -1,0 +1,16 @@
+[mod]
+name="Better Enemy Loot"
+id="cs_better_enemy_loot"
+version="1.0.0"
+author="Cleanstrike"
+description="Enemies you kill carry extra loot: ammo and spare magazines for their gun, food, drink and medical supplies, by faction."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Loot", "AI"]
+
+[script_extend]
+res://Scripts/AI.gd="res://CSBetterEnemyLoot/Ext/AI.gd"

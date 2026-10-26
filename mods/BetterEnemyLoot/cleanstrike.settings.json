@@ -1,0 +1,104 @@
+{
+  "settings": [
+    {
+      "key": "ammo_amount",
+      "type": "choice",
+      "default": "Normal",
+      "options": [
+        "None",
+        "Low",
+        "Normal",
+        "More",
+        "Lots"
+      ],
+      "label": "Ammo for their gun",
+      "description": "Loose rounds for the weapon the enemy used. Low: usually little. Normal: a fair amount. More / Lots: generous."
+    },
+    {
+      "key": "ammo_max",
+      "type": "int",
+      "default": 10,
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "label": "Most rounds"
+    },
+    {
+      "key": "magazines_amount",
+      "type": "choice",
+      "default": "Low",
+      "options": [
+        "None",
+        "Low",
+        "Normal",
+        "More",
+        "Lots"
+      ],
+      "label": "Spare magazines",
+      "description": "For the weapon the enemy used, partly loaded."
+    },
+    {
+      "key": "magazines_max",
+      "type": "int",
+      "default": 2,
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "label": "Most magazines"
+    },
+    {
+      "key": "consumables_amount",
+      "type": "choice",
+      "default": "Normal",
+      "options": [
+        "None",
+        "Low",
+        "Normal",
+        "More",
+        "Lots"
+      ],
+      "label": "Food and drink"
+    },
+    {
+      "key": "consumables_max",
+      "type": "int",
+      "default": 2,
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "label": "Most food and drink"
+    },
+    {
+      "key": "medical_amount",
+      "type": "choice",
+      "default": "Low",
+      "options": [
+        "None",
+        "Low",
+        "Normal",
+        "More",
+        "Lots"
+      ],
+      "label": "Medical supplies"
+    },
+    {
+      "key": "medical_max",
+      "type": "int",
+      "default": 2,
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "label": "Most medical supplies"
+    },
+    {
+      "key": "rare_chance",
+      "type": "float",
+      "default": 0.25,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "label": "Rare item chance",
+      "description": "How often food, drink and medical finds are rare items."
+    }
+  ]
+}
