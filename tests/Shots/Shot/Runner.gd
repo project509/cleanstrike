@@ -727,7 +727,7 @@ func gif_views():
 	var mag = d.compatible[0]
 	var mgr = await _equip(d, [mag])
 	var rig = mgr.get_child(0)
-	rig.slotData.amount = 3
+	rig.slotData.amount = int(OS.get_environment("WPROUNDS")) if OS.get_environment("WPROUNDS") != "" else 3
 	rig.slotData.chamber = true
 	rig.slotData.mode = 1
 	var spare := SlotData.new()
@@ -745,7 +745,8 @@ func gif_views():
 	var times := []
 	var t0 := Time.get_ticks_msec()
 	var last := -1000
-	while Time.get_ticks_msec() - t0 < 7500:
+	var dur := int(OS.get_environment("WPDUR")) if OS.get_environment("WPDUR") != "" else 7500
+	while Time.get_ticks_msec() - t0 < dur:
 		await RenderingServer.frame_post_draw
 		var now := Time.get_ticks_msec() - t0
 		if now - last >= 40:
@@ -763,15 +764,24 @@ func gif_views():
 	print("[GIF] ", frames.size(), " frames")
 
 
+# WPSEQ: F fire, R reload, A aim on, U aim off; each step's wait after it in
+# seconds (F0.6,R1.5,...). Default: four shots, then a reload.
 func _gif_actions():
-	for i in 4:
-		await wait(0.55)
-		Input.action_press("fire")
-		await get_tree().physics_frame
-		await get_tree().physics_frame
-		Input.action_release("fire")
-	await wait(0.8)
-	Input.action_press("reload")
-	await get_tree().physics_frame
-	await get_tree().physics_frame
-	Input.action_release("reload")
+	var seq := OS.get_environment("WPSEQ")
+	if seq == "":
+		seq = "F0.55,F0.55,F0.55,F0.8,R2"
+	await wait(0.5)
+	for step in seq.split(","):
+		var k := step.substr(0, 1)
+		var t := float(step.substr(1)) if step.length() > 1 else 0.6
+		if k == "A":
+			Input.action_press("aim")
+		elif k == "U":
+			Input.action_release("aim")
+		else:
+			var act := "fire" if k == "F" else "reload"
+			Input.action_press(act)
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			Input.action_release(act)
+		await wait(t)

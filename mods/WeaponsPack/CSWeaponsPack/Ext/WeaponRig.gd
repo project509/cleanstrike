@@ -8,14 +8,18 @@ const WPR = preload("res://CSWeaponsPack/Mod.gd")
 
 
 func FireEvent():
-	var before = fireTimer
-	var rounds = slotData.amount if slotData else 0
+	if slotData == null:
+		super()
+		return
+	var rounds = slotData.amount
+	var chambered = slotData.chamber
 	if data and data.has_meta("cs_head_damage"):
 		Engine.set_meta("cs_head_damage", data.get_meta("cs_head_damage"))
 	super()
 	if Engine.has_meta("cs_head_damage"):
 		Engine.remove_meta("cs_head_damage")
-	if fireTimer == 0.0 and before > 0.0:
+	# a shot went off: the chambered round is spent (fed from the magazine, or the last one)
+	if slotData.amount < rounds or (chambered and not slotData.chamber):
 		if data.has_meta("cs_bolt"):
 			slotData.amount = rounds          # the next round stays in the magazine
 			slotData.chamber = false
