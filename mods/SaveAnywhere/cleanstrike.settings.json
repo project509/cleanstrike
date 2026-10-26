@@ -1,0 +1,5 @@
+{
+  "settings": [
+    {"key": "enabled", "type": "bool", "default": true, "label": "Save where you quit", "description": "Quitting away from a shelter keeps your gear and your spot; Continue takes you back there once. Off: the game rule (quitting outside a shelter loses what you carry)."}
+  ]
+}

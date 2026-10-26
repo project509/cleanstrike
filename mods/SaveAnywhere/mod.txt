@@ -1,0 +1,18 @@
+[mod]
+name="Save Anywhere"
+id="cs_save_anywhere"
+version="1.0.0"
+author="Cleanstrike"
+description="Quit anywhere and pick up exactly where you left off: quitting away from a shelter saves your spot, and Continue puts you back there (once)."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["QoL", "Survival"]
+
+[script_extend]
+res://Scripts/Settings.gd="res://CSSaveAnywhere/Ext/Settings.gd"
+res://Scripts/Loader.gd="res://CSSaveAnywhere/Ext/Loader.gd"
+res://Scripts/Compiler.gd="res://CSSaveAnywhere/Ext/Compiler.gd"
