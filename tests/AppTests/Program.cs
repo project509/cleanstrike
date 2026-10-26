@@ -67,6 +67,11 @@ if (zombies != null && factions != null)
     var note = ModRules.Note(factions, true, new List<Cleanstrike.Models.ModInfo> { zombies }, installed);
     Check("superseded mod gets a note", note != null && note.StartsWith("No effect while") && ModRules.ConflictReason(zombies, factions) == null, note ?? "none");
 }
+// --- premium mods lead the list
+var mixed = new[] { ("a", false), ("p1", true), ("b", false), ("p2", true), ("c", false) };
+var sorted = Cleanstrike.ViewModels.MainViewModel.PremiumFirst(mixed, x => x.Item2).Select(x => x.Item1);
+Check("premium mods sort to the top", string.Join(",", sorted) == "p1,p2,a,b,c", string.Join(",", sorted));
+
 // --- auto-update
 Check("update: tag parsing", Updater.ParseTag("v1.2.0") == new Version(1, 2, 0) && Updater.ParseTag("1.3") == new Version(1, 3, 0) && Updater.ParseTag("beta") == null);
 Check("update: newer only", Updater.IsNewer(new Version(1, 2, 0), new Version(1, 1, 0, 0)) && !Updater.IsNewer(new Version(1, 1, 0), new Version(1, 1, 0, 0)) && !Updater.IsNewer(new Version(1, 0, 9), new Version(1, 1, 0)));

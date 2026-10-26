@@ -14,6 +14,12 @@ public static class ModLibrary
     // Installs the mods bundled in the app. Each bundled version is installed
     // once: if the player removes a mod, it stays removed until a newer
     // version ships with Cleanstrike.
+    static string FileHash(string path)
+    {
+        using var f = File.OpenRead(path);
+        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(f))[..16];
+    }
+
     public static void InstallBundled(GameInstall game)
     {
         var asm = System.Reflection.Assembly.GetExecutingAssembly();
@@ -28,11 +34,14 @@ public static class ModLibrary
                 using (var src = asm.GetManifestResourceStream(name)!)
                 using (var dst = File.Create(tmp)) src.CopyTo(dst);
                 var info = Read(tmp);
-                var key = info.Id + "@" + info.Version;
+                var hash = FileHash(tmp);
+                var key = info.Id + "@" + info.Version + "#" + hash;
                 if (seen.Contains(key)) continue;
                 var installed = Scan(game);
                 var current = installed.FirstOrDefault(m => m.Id == info.Id);
-                if (current == null || CompareVersions(current.Version, info.Version) < 0)
+                // Newer, or the same version rebuilt (a fix without a version bump): install.
+                int cmp = current == null ? -1 : CompareVersions(current.Version, info.Version);
+                if (current == null || cmp < 0 || (cmp == 0 && File.Exists(current.FullPath) && FileHash(current.FullPath) != hash))
                 {
                     Install(game, tmp, installed);
                     Log.Write($"Installed bundled {key}");

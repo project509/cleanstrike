@@ -170,6 +170,14 @@
                                 <TextBlock Text="Add mod" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource Btn.Ghost}" Command="{Binding AllOffCommand}" Padding="10,0" Margin="0,0,6,0"
+                                ToolTip="Turn every mod off">
+                            <TextBlock Text="All off" VerticalAlignment="Center" />
+                        </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource Btn.Ghost}" Command="{Binding AllOnCommand}" Padding="10,0" Margin="0,0,6,0"
+                                ToolTip="Turn every mod on (opt-in mods like Road to Hell stay as they are)">
+                            <TextBlock Text="All on" VerticalAlignment="Center" />
+                        </Button>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="Mods" Style="{StaticResource T.Title}" />
                             <Border Background="{StaticResource Surface2}" CornerRadius="9" Padding="8,1" Margin="10,2,0,0" VerticalAlignment="Center"

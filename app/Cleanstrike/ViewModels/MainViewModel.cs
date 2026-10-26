@@ -36,6 +36,8 @@ public sealed class MainViewModel : ObservableObject
         PlayCommand = new RelayCommand(() => Play(false), () => CanPlay);
         PlayVanillaCommand = new RelayCommand(() => Play(true), () => CanPlay);
         AddModCommand = new RelayCommand(AddModsFromDialog, () => Game != null);
+        AllOnCommand = new RelayCommand(() => SetAll(true), () => Mods.Count > 0);
+        AllOffCommand = new RelayCommand(() => SetAll(false), () => Mods.Count > 0);
         RemoveModCommand = new RelayCommand(p => RemoveMod(p as ModItemViewModel ?? Selected), p => (p ?? Selected) != null);
         LocateGameCommand = new RelayCommand(LocateGame);
         SearchAgainCommand = new RelayCommand(() => _ = DetectGameAsync(ignoreSaved: true));
@@ -146,6 +148,8 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand PlayCommand { get; }
     public RelayCommand PlayVanillaCommand { get; }
     public RelayCommand AddModCommand { get; }
+    public RelayCommand AllOnCommand { get; }
+    public RelayCommand AllOffCommand { get; }
     public RelayCommand RemoveModCommand { get; }
     public RelayCommand LocateGameCommand { get; }
     public RelayCommand SearchAgainCommand { get; }
@@ -264,11 +268,18 @@ public sealed class MainViewModel : ObservableObject
         ModLibrary.InstallBundled(Game);
         var mods = ModLibrary.Scan(Game);
         _profile = Store.LoadProfile(ActiveProfile);
-        // Mods that appear in the folder are on in the profile you're using.
-        if (Store.Reconcile(_profile, mods, enableNew: true)) Store.SaveProfile(_profile);
+        // Mods that appear in the folder start off: you switch on what you want.
+        if (Store.Reconcile(_profile, mods, enableNew: false)) Store.SaveProfile(_profile);
 
         Mods.Clear();
         var report = Launcher.ReadReport(Game);
+        // Premium mods always lead the list (and the load order); the rest keep theirs.
+        var ordered = PremiumFirst(_profile.Mods, e => mods.FirstOrDefault(m => string.Equals(m.Id, e.Id, StringComparison.OrdinalIgnoreCase))?.Premium == true);
+        if (!ordered.SequenceEqual(_profile.Mods))
+        {
+            _profile.Mods = ordered;
+            Store.SaveProfile(_profile);
+        }
         foreach (var entry in _profile.Mods)
         {
             var mod = mods.FirstOrDefault(m => string.Equals(m.Id, entry.Id, StringComparison.OrdinalIgnoreCase));
@@ -384,6 +395,36 @@ public sealed class MainViewModel : ObservableObject
         return fixes;
     }
 
+    /// <summary>
+    /// Every mod on or off at once. "On" leaves opt-in mods (cheats, total
+    /// conversions) alone and settles any clashes the usual way.
+    /// </summary>
+    public void SetAll(bool on)
+    {
+        var skipped = new List<string>();
+        foreach (var vm in Mods)
+        {
+            if (on && vm.Mod.OptIn && !vm.IsEnabled)
+            {
+                skipped.Add(vm.Mod.Name);
+                continue;
+            }
+            vm.SetEnabledQuietly(on);
+        }
+        SaveProfile();
+        var held = on ? SettleConflicts() : new List<ModRules.LaunchFix>();
+        RefreshRuleNotes();
+        Raise(nameof(Summary));
+        if (!on) Toast("All mods off", "info");
+        else
+        {
+            var msg = "All mods on";
+            if (skipped.Count > 0) msg += $" (not opt-in: {Join(skipped)})";
+            if (held.Count > 0) msg += $"; kept off to avoid clashes: {Join(held.Select(h => h.Mod.Name))}";
+            Toast(msg, "success");
+        }
+    }
+
     private void SaveProfile()
     {
         _profile.Name = ActiveProfile;
@@ -391,10 +432,20 @@ public sealed class MainViewModel : ObservableObject
         Store.SaveProfile(_profile);
     }
 
+    /// <summary>Premium entries first, everything else after, each keeping its order.</summary>
+    public static List<T> PremiumFirst<T>(IEnumerable<T> items, Func<T, bool> isPremium)
+    {
+        var list = items.ToList();
+        return list.Where(isPremium).Concat(list.Where(i => !isPremium(i))).ToList();
+    }
+
     public void Move(ModItemViewModel item, int newIndex)
     {
         int old = Mods.IndexOf(item);
         newIndex = Math.Clamp(newIndex, 0, Mods.Count - 1);
+        // Drags stay on their side of the premium line.
+        int premium = Mods.Count(m => m.Mod.Premium);
+        newIndex = item.Mod.Premium ? Math.Min(newIndex, premium - 1) : Math.Max(newIndex, premium);
         if (old < 0 || old == newIndex) return;
         Mods.Move(old, newIndex);
         SaveProfile();
@@ -433,12 +484,7 @@ public sealed class MainViewModel : ObservableObject
             }
             var current = Store.LoadProfile(ActiveProfile);
             Store.Reconcile(current, installed, enableNew: false);
-            foreach (var r in done)
-            {
-                var e = current.Mods.First(x => x.Id == r.Mod.Id);
-                if (r.Replaced == null) e.Enabled = true;
-            }
-            Store.SaveProfile(current);
+            Store.SaveProfile(current);   // new mods arrive switched off
             LoadLibrary(done[^1].Mod.Id);
 
             var first = done[0];
@@ -447,6 +493,7 @@ public sealed class MainViewModel : ObservableObject
                     ? $"Updated {first.Mod.Name} {first.Replaced.Version} → {first.Mod.Version}"
                     : first.Replaced != null ? $"Reinstalled {first.Mod.Name}" : $"Installed {first.Mod.Name}";
             if (done.Any(d => d.Repaired)) msg += " (fixed its packaging)";
+            if (done.Any(d => d.Replaced == null)) msg += ". Switch it on in the list when you're ready";
             Toast(msg, "success");
 
             // A new mod that can't run with one that's already on stays off,

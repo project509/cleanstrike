@@ -41,17 +41,11 @@ public static class SilentInstall
             }
         }
 
-        // Same rule as the app: new mods are on in the active profile, off elsewhere.
+        // Same rule as the app: new mods arrive switched off, in every profile.
         foreach (var name in Store.ProfileNames())
         {
             var p = Store.LoadProfile(name);
             bool changed = Store.Reconcile(p, installed, enableNew: false);
-            if (name == config.ActiveProfile)
-                foreach (var e in p.Mods.Where(m => fresh.Contains(m.Id) && !m.Enabled && !installed.Any(i => i.Id == m.Id && i.OptIn)))
-                {
-                    e.Enabled = true;
-                    changed = true;
-                }
             if (name == config.ActiveProfile)
             {
                 // Same as the app: a mod that can't run with one already on stays off.
