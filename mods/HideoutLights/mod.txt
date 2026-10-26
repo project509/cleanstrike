@@ -1,0 +1,18 @@
+[mod]
+name="Hideout Lights"
+id="cs_hideout_lights"
+version="1.0.0"
+author="Cleanstrike"
+description="Light up your shelter: candles, a kerosene lantern, a floor lamp, tube, round and bulkhead lights and an exit sign, sold by traders. Place them in decor mode; press Use to switch them on and off. Pick them all up before uninstalling."
+priority=0
+
+[cleanstrike]
+api=1
+game_min="0.2.2.0"
+godot_min="4.6.0"
+tags=["Shelter", "Furniture"]
+
+[script_extend]
+
+[autoload]
+CSHideoutLightsBoot="res://CSHideoutLights/Boot.gd"

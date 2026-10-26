@@ -1,0 +1,30 @@
+{
+  "settings": [
+    {
+      "key": "price",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.25,
+      "max": 4,
+      "step": 0.25,
+      "label": "Trader prices (x)"
+    },
+    {
+      "key": "brightness",
+      "type": "float",
+      "default": 1.0,
+      "min": 0.3,
+      "max": 3,
+      "step": 0.1,
+      "label": "Brightness (x)",
+      "description": "Takes effect next launch."
+    },
+    {
+      "key": "shadows",
+      "type": "bool",
+      "default": false,
+      "label": "Lights cast shadows",
+      "description": "Prettier, costs frame rate."
+    }
+  ]
+}

@@ -23,7 +23,7 @@ func run():
 		await wait(0.5)
 	await wait(3.0)
 	# SHOTS=<mode> tools/shots.sh renders one UI instead of the maps.
-	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills"]:
+	for mode in ["loot", "trader", "hud", "reticle", "blood", "skills", "icons", "lights"]:
 		if FileAccess.file_exists("user://cleanstrike/shot_mode_" + mode):
 			await call(mode + "_views")
 			get_tree().quit()
@@ -335,3 +335,71 @@ func skills_views():
 	interface.PG_Show(true)
 	await wait(0.5)
 	await shot("shot_skills.png")
+
+
+# Item icons: each scene in user://cleanstrike/icon_list.txt rendered alone on
+# a transparent background, 3/4 view, to dist/shots/icon_<name>.png.
+func icons_views():
+	var f := FileAccess.open("user://cleanstrike/icon_list.txt", FileAccess.READ)
+	if f == null:
+		return
+	for line in f.get_as_text().split("
+", false):
+		var path := line.strip_edges()
+		if path == "":
+			continue
+		var vp := SubViewport.new()
+		vp.size = Vector2i(512, 512)
+		vp.transparent_bg = true
+		vp.own_world_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		add_child(vp)
+		var env := WorldEnvironment.new()
+		env.environment = Environment.new()
+		env.environment.background_mode = Environment.BG_CLEAR_COLOR
+		env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.environment.ambient_light_color = Color(0.55, 0.55, 0.55)
+		vp.add_child(env)
+		var obj = load(path).instantiate()
+		vp.add_child(obj)
+		var box := AABB()
+		var first := true
+		for m in obj.find_children("*", "MeshInstance3D", true, false):
+			if m.mesh and m.visible and m.layers != 0:
+				var b: AABB = m.global_transform * m.get_aabb()
+				box = b if first else box.merge(b)
+				first = false
+		var sun := DirectionalLight3D.new()
+		sun.rotation_degrees = Vector3(-40, -35, 0)
+		vp.add_child(sun)
+		var cam := Camera3D.new()
+		cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+		cam.size = maxf(box.size.y, maxf(box.size.x, box.size.z)) * 1.25
+		vp.add_child(cam)
+		var c := box.get_center()
+		cam.look_at_from_position(c + Vector3(1.0, 0.7, 1.2).normalized() * 10.0, c)
+		await wait(0.5)
+		var img := vp.get_texture().get_image()
+		img.save_png("user://cleanstrike/shot_icon_%s.png" % path.get_file().get_basename())
+		vp.queue_free()
+
+
+# Hideout Lights: every fixture in a row, turned the way it faces when placed
+# (+z out of the wall, towards the camera).
+func lights_views():
+	var HL = load("res://CSHideoutLights/Mod.gd")
+	while HL.scenes.size() < HL.FIXTURES.size():
+		await wait(0.2)
+	var cam = get_viewport().get_camera_3d()
+	var player = get_node("/root/Map/Core/Controller")
+	var fwd: Vector3 = -Vector3(cam.global_basis.z.x, 0, cam.global_basis.z.z).normalized()
+	var right: Vector3 = fwd.cross(Vector3.UP)
+	var i := 0
+	for f in HL.FIXTURES:
+		var fx = HL.scenes[f].instantiate()
+		get_tree().current_scene.add_child(fx)
+		fx.global_basis = Basis.looking_at(fwd, Vector3.UP)   # +z towards the camera
+		fx.global_position = player.global_position + fwd * 3.0 + right * (i - 3) * 0.7 + Vector3(0, 0.6 if HL.FIXTURES[f][3] else 0.0, 0)
+		i += 1
+	await wait(1.0)
+	await shot("shot_lights.png")
