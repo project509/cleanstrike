@@ -2,7 +2,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_sound_indicators"
-const VERSION := "1.0.0"
+const VERSION := "1.0.1"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {

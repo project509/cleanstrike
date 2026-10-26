@@ -1,7 +1,7 @@
 [mod]
 name="Sound Indicators"
 id="cs_sound_indicators"
-version="1.0.0"
+version="1.0.1"
 author="Cleanstrike"
 description="See where sounds come from: markers around the crosshair show enemy gunshots and footsteps. Also tune your own footstep volume and hear enemy footsteps from farther away."
 priority=0

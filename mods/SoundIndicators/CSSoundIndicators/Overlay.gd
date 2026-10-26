@@ -43,7 +43,7 @@ func angle_to(at: Vector3) -> float:
 
 
 func _draw() -> void:
-	var c := size / 2.0
+	var c := get_viewport_rect().size / 2.0   # not size: the overlay can end up 0x0
 	var r := float(M.setting("circle_size"))
 	var s := float(M.setting("icon_size"))
 	for m in marks:
