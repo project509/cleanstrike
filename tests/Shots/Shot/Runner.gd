@@ -675,6 +675,15 @@ func gun_views():
 	await shot("shot_gun_aim.png")
 	Input.action_release("aim")
 	await wait(1.0)
+	if OS.get_environment("WPOPTIC") != "":           # again with an optic on its rail
+		mgr = await _equip(d, [d.compatible[0], load(OS.get_environment("WPOPTIC"))])
+		await wait(1.0)
+		await shot("shot_gun_optic_hip.png")
+		Input.action_press("aim")
+		await wait(1.5)
+		await shot("shot_gun_optic_aim.png")
+		Input.action_release("aim")
+		await wait(0.5)
 	var rig: Node = mgr.get_child(0)
 	var ap: AnimationPlayer = rig.find_children("*", "AnimationPlayer", true, false)[0]
 	for t in rig.find_children("*", "AnimationTree", true, false):

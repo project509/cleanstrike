@@ -203,6 +203,15 @@ func build(id: String, s: Dictionary) -> void:
 			cen[str(m.name)] = (xform_of(m, src) * m.get_aabb()).get_center()
 		fwd_v = cen[s.orient[0]] - cen[s.orient[1]]
 		up_v = cen[s.orient[2]] - cen[s.orient[3]]
+		if s.has("axis"):                 # a long part parallel to the bore: its principal axis
+			var pts := PackedVector3Array()
+			for m in src.find_children("*", "MeshInstance3D", true, false):
+				if str(m.name) == s.axis:
+					var xf := xform_of(m, src)
+					for v in m.mesh.get_faces():
+						pts.append(xf * v)
+			var ax := _principal(pts)
+			fwd_v = ax if ax.dot(fwd_v) > 0.0 else -ax
 	var fwd: Vector3 = fwd_v.normalized()
 	var up: Vector3 = (up_v - fwd * up_v.dot(fwd)).normalized()
 	var R := Basis(up.cross(fwd), up, fwd).transposed()
@@ -355,12 +364,27 @@ func build(id: String, s: Dictionary) -> void:
 		var rb := box_of(_role_list(role_arrs, "SightRear"))
 		L.sight_rear = Vector3(rb.get_center().x, rb.end.y, rb.get_center().z)
 		L.sight_rear_box = rb
+	if s.get("sight", "") == "auto":         # moulded-in sights: the highest centreline point just behind the muzzle
+		var best := -INF
+		for a in _role_list(role_arrs, "Body"):
+			for p in a[Mesh.ARRAY_VERTEX]:
+				if p.z > L.muzzle.z - s.get("sight_window", 0.12) and p.z < L.muzzle.z - 0.005 and absf(p.x - L.muzzle.x) < s.get("sight_width", 0.0025) and p.y > best:
+					best = p.y
+					L.sight_front = p
 	if s.has("sight_line"):              # sights that are not separate parts (source space)
 		L.sight_front = F * (R * s.sight_line)
 	if s.has("rail"):
 		var rl: AABB = box_of(_select(named, s.rail, F))
 		L.rail_top = rl.end.y
 		L.rail_z = Vector2(rl.position.z, rl.end.z)
+	if s.has("rail_span"):                 # a moulded-in rail: its top over a stretch of the gun (rig z)
+		var top := -INF
+		for a in _role_list(role_arrs, "Body"):
+			for p in a[Mesh.ARRAY_VERTEX]:
+				if p.z > s.rail_span.x and p.z < s.rail_span.y and absf(p.x - L.muzzle.x) < 0.012:
+					top = maxf(top, p.y)
+		L.rail_top = top
+		L.rail_z = s.rail_span
 	L.box = box_of(all_arrs)
 	L.scale = k
 	if role_arrs.has("Magazine"):
@@ -746,3 +770,20 @@ func _cyl(r0: float, r1: float, h: float, zc: float) -> Array:
 	var st2 := SurfaceTool.new()
 	st2.append_from(m, 0, xf)
 	return st2.commit_to_arrays()
+
+
+# The main direction of a point cloud (power iteration on its covariance).
+static func _principal(pts: PackedVector3Array) -> Vector3:
+	var c := Vector3.ZERO
+	for p in pts:
+		c += p
+	c /= maxf(1.0, pts.size())
+	var xx := 0.0; var xy := 0.0; var xz := 0.0; var yy := 0.0; var yz := 0.0; var zz := 0.0
+	for p in pts:
+		var d := p - c
+		xx += d.x * d.x; xy += d.x * d.y; xz += d.x * d.z
+		yy += d.y * d.y; yz += d.y * d.z; zz += d.z * d.z
+	var v := Vector3(1, 1, 1).normalized()
+	for i in 50:
+		v = Vector3(xx * v.x + xy * v.y + xz * v.z, xy * v.x + yy * v.y + yz * v.z, xz * v.x + yz * v.y + zz * v.z).normalized()
+	return v

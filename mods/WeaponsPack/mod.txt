@@ -1,9 +1,9 @@
 [mod]
 name="CleanStrike Weapons Pack (In Progress)"
 id="cs_weapons_pack"
-version="0.4.0"
+version="0.5.0"
 author="Cleanstrike"
-description="New guns that work like the game's own: found in loot and sold by the Gunsmith, with their own magazines and ammo, the game's attachments, animations and handling. FN SCAR-17, Desert Eagle and KRISS Vector so far."
+description="New guns that work like the game's own: found in loot and sold by the Gunsmith, with their own magazines and ammo, the game's attachments, animations and handling. FN SCAR-17, Desert Eagle, KRISS Vector and Ruger Mini-14 so far."
 priority=0
 
 [cleanstrike]

@@ -23,11 +23,16 @@ func _process_modification_with_delta(_delta: float) -> void:
 		return
 	var g := sk.get_bone_global_pose(body)
 	var w := sk.get_bone_global_pose(wrist)
-	var off := g.basis * rest_shift * _near(w.origin.distance_to(g * rest_point), 0.05, 0.12)
+	# one at a time: on the handguard; else working the magazine; else the handle
+	var on_rest := _near(w.origin.distance_to(g * rest_point), 0.05, 0.12)
+	var off := g.basis * rest_shift * on_rest
+	var free := 1.0 - on_rest
 	if mag >= 0 and mag_shift != Vector3.ZERO:
-		off += g.basis * mag_shift * _near(w.origin.distance_to(sk.get_bone_global_pose(mag).origin), 0.09, 0.17)
+		var on_mag := _near(w.origin.distance_to(sk.get_bone_global_pose(mag).origin), 0.09, 0.17) * free
+		off += g.basis * mag_shift * on_mag
+		free *= 1.0 - on_mag
 	if charge >= 0 and charge_shift != Vector3.ZERO:
-		off += g.basis * charge_shift * _near(w.origin.distance_to(sk.get_bone_global_pose(charge).origin), 0.07, 0.13)
+		off += g.basis * charge_shift * _near(w.origin.distance_to(sk.get_bone_global_pose(charge).origin), 0.07, 0.13) * free
 	if off.length_squared() > 0.0000002:
 		_reach(sk, w, w.origin + off)
 

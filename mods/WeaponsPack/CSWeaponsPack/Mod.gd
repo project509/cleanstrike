@@ -4,7 +4,7 @@
 extends RefCounted
 
 const MOD_ID := "cs_weapons_pack"
-const VERSION := "0.4.0"
+const VERSION := "0.5.0"
 const DEFAULTS := {
 	"in_loot": true,               # found in loot and at traders
 }
@@ -393,11 +393,20 @@ static func _fit_attachments(rig: Node3D, sk: Skeleton3D, L: Dictionary, g: Dict
 		for m in dsk.get_children():
 			if m is MeshInstance3D and str(m.name).ends_with("Body") and m.mesh:
 				dtop = m.get_aabb().end.y
+		var to_att := ab.affine_inverse()
 		for c in dh.get_children():
 			var ad = c.get("attachmentData")
 			if ad and ad.subtype in ["Optic", "Laser"]:
 				var n: Node3D = c.duplicate()
-				n.position = ab.affine_inverse() * (dab * c.position + Vector3(0, L.rail_top - dtop, 0))
+				var p: Vector3 = dab * c.position + Vector3(0, L.rail_top - dtop, 0)
+				if L.has("rail_z"):                # on this gun's rail, and slides only along it
+					p.z = clampf(p.z, L.rail_z.x + 0.03, L.rail_z.y - 0.03)
+					if "minPosition" in n:
+						n.minPosition = (to_att * Vector3(p.x, p.y, L.rail_z.x + 0.02)).z
+						n.maxPosition = (to_att * Vector3(p.x, p.y, L.rail_z.y - 0.02)).z
+				n.position = to_att * p
+				if "defaultPosition" in n:
+					n.defaultPosition = n.position.z
 				holder.add_child(n)
 				n.owner = rig
 		donor.free()

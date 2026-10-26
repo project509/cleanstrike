@@ -47,5 +47,16 @@
         "emission": "KSVR_emissive.jpeg"
       }
     }
+  },
+  "MINI14": {
+    "dir": "C:/RTVDev/RTVProject/cs_assets/mini14/images",
+    "materials": {
+      "Mini 14": {
+        "albedo": "Mini_14_albedo.jpg",
+        "normal": "Mini_14_normal.png",
+        "metallic": "Mini_14_metallic.jpg",
+        "roughness": "Mini_14_roughness.jpg"
+      }
+    }
   }
 }
