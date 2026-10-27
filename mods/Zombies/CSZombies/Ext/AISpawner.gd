@@ -26,6 +26,12 @@ func CreatePools():
 	zs_base_limit = activeEnemyLimit
 	zs_base_distance = spawnDistance
 	ZS.spawners.append(self)
+	# The ones already about wait for the navigation mesh, so they walk it from the start
+	var map := get_world_3d().get_navigation_map()
+	var frames := 0
+	while NavigationServer3D.map_get_iteration_id(map) == 0 and frames < 120 and is_inside_tree():
+		await get_tree().physics_frame
+		frames += 1
 	for i in int(activeEnemyLimit * float(ZS.setting("start_share"))):
 		if activeEnemies < activeEnemyLimit and EPool.get_child_count() > 0:
 			SpawnEnemy()

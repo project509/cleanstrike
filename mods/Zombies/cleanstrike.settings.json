@@ -31,6 +31,16 @@
       "description": "Movement and animation together, so feet stay planted."
     },
     {
+      "key": "hunt_speed",
+      "type": "float",
+      "default": 2.0,
+      "min": 1,
+      "max": 2.4,
+      "step": 0.1,
+      "label": "Hunting pace (m/s)",
+      "description": "Once one is after you. You walk at 2.5 and sprint at 5; wanderers drift at about 0.6, enraged ones sprint at 1.6 times this (Speed above 1 is held to what their run can keep up with)."
+    },
+    {
       "key": "rage_chance",
       "type": "float",
       "default": 0.12,
@@ -66,7 +76,7 @@
       "max": 3,
       "step": 0.25,
       "label": "Hearing (x)",
-      "description": "At 1, gunshots carry 140 m, running 30 m, walking 10 m."
+      "description": "At 1, gunshots carry 140 m, running 40 m, walking 15 m, crouching 6 m."
     },
     {
       "key": "sight",

@@ -3,13 +3,14 @@
 extends RefCounted
 
 const MOD_ID := "cs_zombies"
-const VERSION := "1.1.1"
+const VERSION := "1.1.2"
 
 # Defaults; each can be changed in the Cleanstrike app (cleanstrike.settings.json).
 const DEFAULTS := {
 	"health": 1.0,            # zombie health (x); 250 at 1
 	"damage": 60.0,           # a blow takes 15-30 health before armour
 	"speed": 1.0,             # how fast they move (and animate) (x)
+	"hunt_speed": 2.0,        # m/s once they are after you (you walk 2.5, sprint 5)
 	"rage_chance": 0.12,      # shot at, a zombie may charge you for a few seconds
 	"horde": 4.0,             # how many more than the game's enemies
 	"respawn": true,          # the dead are replaced, 30-90 s later
@@ -30,7 +31,7 @@ const ZHITBOX := preload("res://CSZombies/ZHitbox.gd")
 # Natural speed of each moving clip (m/s): how fast the planted foot sweeps back
 # (measured from the clips). Zombies move at exactly this times the clip rate,
 # so feet never skate.
-const CLIP_SPEED := {"walk": 0.27, "walk_2": 0.46, "walk_3": 0.27, "stumble": 0.08, "run": 1.65, "run_2": 1.63, "crawl": 0.36, "crawl_run": 1.6}
+const CLIP_SPEED := {"walk": 0.45, "walk_2": 0.59, "walk_3": 0.46, "stumble": 0.32, "run": 2.13, "run_2": 2.17, "crawl": 0.49, "crawl_run": 1.93}
 
 # part: [bone, to bone, radius, meshes it carries, parts that go with it, health]
 const PARTS := {
@@ -141,7 +142,9 @@ static func limb_health(part: String) -> float:
 
 # ---------------------------------------------------------------- the zombie
 
-# One packed zombie: model, navigation, a hitbox per body part.
+# One packed zombie: model, navigation, a hitbox per body part. Body and
+# navigation agent as the game's own enemies have them (AI_Bandit.tscn), so it
+# can walk wherever they walk.
 static func scene() -> PackedScene:
 	if _scene:
 		return _scene
@@ -159,10 +162,28 @@ static func scene() -> PackedScene:
 		n.owner = root
 	var agent := NavigationAgent3D.new()
 	agent.name = "Agent"
-	agent.path_desired_distance = 0.5
+	agent.path_desired_distance = 0.2
+	agent.path_height_offset = 0.2
 	agent.target_desired_distance = 1.0
 	root.add_child(agent)
 	agent.owner = root
+	# A solid capsule on layer 2: the player bumps into it; bullets, sight and
+	# the zombies' own rays pass it by (none of them look at layer 2).
+	var solid := StaticBody3D.new()
+	solid.name = "Collision"
+	solid.collision_layer = 2
+	solid.collision_mask = 2
+	root.add_child(solid)
+	solid.owner = root
+	var solid_shape := CollisionShape3D.new()
+	solid_shape.name = "Shape"
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = 0.25
+	capsule.height = 1.4
+	solid_shape.shape = capsule
+	solid_shape.position = Vector3(0, 1.2, 0)
+	solid.add_child(solid_shape)
+	solid_shape.owner = root
 	var sk: Skeleton3D = model.find_children("*", "Skeleton3D", true, false)[0]
 	var to_model := _rel(sk, model)
 	for part in PARTS:
@@ -307,8 +328,8 @@ static func break_door(d: Node3D) -> void:
 			sh.size = bm.size
 			cs.shape = sh
 			piece.add_child(cs)
-			piece.collision_layer = 1
-			piece.collision_mask = 1
+			piece.collision_layer = 256     # like the game's ragdolls: lands on every floor, walked through
+			piece.collision_mask = 25
 			d.get_tree().current_scene.add_child(piece)
 			piece.global_transform = m.global_transform * Transform3D(Basis(), box.position + box.size * Vector3(randf(), randf(), 0.5))
 			piece.apply_central_impulse(Vector3(randf_range(-2, 2), randf_range(0.5, 2.5), randf_range(-2, 2)))
@@ -407,8 +428,8 @@ static func sever(z, part: String, vector: Vector3) -> void:
 		cs.shape = sh
 		cs.position = box.get_center()
 		piece.add_child(cs)
-		piece.collision_layer = 1
-		piece.collision_mask = 1
+		piece.collision_layer = 256         # like the game's ragdolls: lands on every floor, walked through
+		piece.collision_mask = 25
 		piece.mass = 4.0
 		piece.name = "CS_Limb"
 		z.get_tree().current_scene.add_child(piece)

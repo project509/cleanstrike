@@ -1,7 +1,7 @@
 [mod]
 name="Road to Hell"
 id="cs_zombies"
-version="1.1.1"
+version="1.1.2"
 author="Cleanstrike"
 description="Vostok becomes a zombie survival game: every enemy is replaced by the dead, hunting by sound in growing packs. Shoot off limbs, beware crawlers and the ones that charge when shot, trust no door, and never fire carelessly. Turn it on when you are ready."
 priority=0

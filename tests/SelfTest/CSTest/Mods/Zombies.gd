@@ -54,6 +54,21 @@ func run(r) -> void:
 	var head_hb = sk.get_node("HB_head/Hitbox")
 	r.check("Zombies: head hitbox sits on the head", head_hb.global_position.distance_to(head) < 0.35, "%.2f m" % head_hb.global_position.distance_to(head))
 
+	# Built like the game's enemies: the same solid body and navigation agent
+	var ours: SceneState = ZM.scene().get_state()
+	var theirs: SceneState = load("res://AI/Bandit/AI_Bandit.tscn").get_state()
+	var same := []
+	for n in ["Collision", "Collision/Shape", "Agent"]:
+		var a := _props(ours, n)
+		var b := _props(theirs, n)
+		for k in ["collision_layer", "collision_mask", "transform", "path_desired_distance", "path_height_offset", "navigation_layers"]:
+			if a.get(k) != b.get(k):
+				same.append("%s.%s %s vs %s" % [n, k, str(a.get(k)), str(b.get(k))])
+		if b.has("shape") and (a.get("shape") == null or a.shape.radius != b.shape.radius or a.shape.height != b.shape.height):
+			same.append(n + ".shape")
+	r.check("Zombies: body and navigation agent as the game's enemies", same.is_empty(), str(same))
+	r.check("Zombies: the body blocks the player, not bullets or sight", int(_props(ours, "Collision").collision_layer) & (93 | z.SIGHT_MASK | z.GROUND_MASK | z.PROBE_MASK) == 0)
+
 	# Its voice: every sound loads, and it speaks
 	var bad := []
 	for kind in ZM.VOICES:
@@ -85,13 +100,17 @@ func run(r) -> void:
 	while z.last_heard < 0.0 and tw < 2.0:            # until it has had a moment to think
 		await r.wait(0.05)
 		tw += 0.05
-	r.check("Zombies: a gunshot brings it", z.state in [z.S.INVESTIGATE, z.S.CHASE], "state %d heard %.2f shot %.2f now %.2f dist %.1f active %s proc %s think %.2f" % [z.state, z.last_heard, ZM.last_shot, Time.get_ticks_msec() / 1000.0, ZM.last_shot_at.distance_to(z.global_position), z.active, z.can_process(), z.think])
-	var d0: float = z.global_position.distance_to(feet)
-	var tm := 0.0
-	while z.global_position.distance_to(feet) > d0 - 0.6 and tm < 6.0:   # slow frames in the suite
-		await r.wait(0.1)
-		tm += 0.1
-	r.check("Zombies: it walks towards you", z.global_position.distance_to(feet) < d0 - 0.5, "%.1f -> %.1f m" % [d0, z.global_position.distance_to(feet)])
+	r.check("Zombies: a gunshot brings it", z.state in [z.S.INVESTIGATE, z.S.CHASE], "state %d heard %.2f shot %.2f now %.2f dist %.1f active %s proc %s think %.2f" % [z.state, z.last_heard, ZM.last_shot, z._now(), ZM.last_shot_at.distance_to(z.global_position), z.active, z.can_process(), z.think])
+	r.check("Zombies: it heads for the sound", z.target.distance_to(feet) < 1.0 and z._hunting(), "target %.1f m off" % z.target.distance_to(feet))
+	# The Tutorial has no navigation mesh: like the game's enemies, it stands
+	# rather than walk straight through whatever is in the way.
+	var nav_here: bool = NavigationServer3D.map_get_closest_point(z._map(), feet) != Vector3.ZERO
+	var p0: Vector3 = z.global_position
+	await _frames(r, 60)
+	if nav_here:
+		r.check("Zombies: it walks towards you", z.global_position.distance_to(feet) < p0.distance_to(feet) - 0.3)
+	else:
+		r.check("Zombies: no navigation mesh, no beeline through walls", z.global_position.distance_to(p0) < 0.05, "%.2f m" % z.global_position.distance_to(p0))
 
 	# The pack hears the call (from calm: earlier gunfire in the suite raises the swarm's heat)
 	ZM.heat = 0.0
@@ -99,38 +118,47 @@ func run(r) -> void:
 	var z3 := _zombie(r, feet + fwd * 80.0)
 	await _frames(r, 2)
 	var n: int = ZM.alert_near(z, feet)
-	await r.wait(2.5)
-	r.check("Zombies: nearby zombies come too", n >= 1 and z2.state in [z2.S.INVESTIGATE, z2.S.CHASE], str(z2.state))
+	var ta := 0.0
+	while z2.state == z2.S.WANDER and ta < 4.0:     # the call reaches them within 1.8 s
+		await r.wait(0.1)
+		ta += 0.1
+	r.check("Zombies: nearby zombies come too", n >= 1 and z2.state in [z2.S.INVESTIGATE, z2.S.CHASE], "n %d state %d target %.1f m off, %.1f m away, path %d, heard %.1f s ago" % [n, z2.state, z2.target.distance_to(feet), z2.global_position.distance_to(feet), z2.agent.get_current_navigation_path().size(), z2._now() - z2.last_heard])
 	r.check("Zombies: but not ones far away", z3.state == z3.S.WANDER)
 
 	# Shot at, now and then one charges (never otherwise)
-	r.check("Zombies: they shamble", not z2._enraged() and z2._speed() < 1.5)
+	r.check("Zombies: wanderers shamble", z3.state == z3.S.WANDER and z3._speed() > 0.5 and z3._speed() < 1.0, "%.2f m/s" % z3._speed())
+	z2.state = z2.S.CHASE
+	z2.last_seen = z2._now()
+	var hunt: float = z2._speed()
+	r.check("Zombies: hunters come at a brisk pace", not z2._enraged() and hunt > 1.7 and hunt < 2.6, "%.2f m/s" % hunt)
 	ZM.overrides = {"rage_chance": 1.0}
 	z2.Hit("torso", 1.0, fwd, player.get_node_or_null("../Camera/ID") if player.get_node_or_null("../Camera/ID") else r.get_tree().get_first_node_in_group("Player"), z2.global_position + Vector3.UP)
 	ZM.overrides = {}
-	r.check("Zombies: enraged by a shot, it charges", z2._enraged() and z2._speed() > 2.0)
+	r.check("Zombies: enraged by a shot, it sprints", z2._enraged() and z2._speed() > 2.8, "%.2f m/s" % z2._speed())
 	z2.enraged_until = -1000.0
 
 	# Up close it attacks, and it hurts
 	feet = gd.playerPosition
 	z2.global_position = feet + fwd * 1.2
-	z2.last_seen = Time.get_ticks_msec() / 1000.0
+	z2.last_seen = z2._now()
 	z2.target = feet
 	z2.state = z2.S.CHASE
 	gd.health = 100.0
 	z2.think = 0.0
 	var t := 0.0
 	while gd.health >= 100.0 and t < 4.0:
-		z2.last_seen = Time.get_ticks_msec() / 1000.0
+		z2.last_seen = z2._now()
+		if z2.state != z2.S.ATTACK and z2.global_position.distance_to(gd.playerPosition) > 1.5:
+			z2.global_position = gd.playerPosition + fwd * 1.2     # the player settling: keep it in reach
 		await r.wait(0.1)
 		t += 0.1
-	r.check("Zombies: its blows hurt", gd.health < 100.0, "%.1f health after %.1f s; state %d d %.2f dead %s seen %s" % [gd.health, t, z2.state, z2.global_position.distance_to(feet), z2.dead, z2.Sees()])
+	r.check("Zombies: its blows hurt", gd.health < 100.0, "%.1f health after %.1f s; state %d d %.2f dead %s seen %s; you dead %s at %.2f m; %s busy %s" % [gd.health, t, z2.state, z2.global_position.distance_to(feet), z2.dead, z2.Sees(), gd.isDead, z2.global_position.distance_to(gd.playerPosition), z2.current_anim, z2._busy()])
 	gd.health = keep_health
 
 	# Out of sight for three minutes (and nothing heard), it loses interest
 	var zf := _zombie(r, feet + fwd * 30.0)
 	await _frames(r, 2)
-	var now := Time.get_ticks_msec() / 1000.0
+	var now: float = zf._now()
 	zf.state = zf.S.CHASE
 	zf.target = feet
 	zf.last_seen = now - 60.0
@@ -258,4 +286,145 @@ func run(r) -> void:
 			m.queue_free()
 	for l in r.get_tree().current_scene.find_children("CS_Limb", "RigidBody3D", true, false):
 		l.queue_free()
+	await _frames(r, 2)
+
+
+func _props(st: SceneState, path: String) -> Dictionary:
+	for i in st.get_node_count():
+		if str(st.get_node_path(i)) == "./" + path:
+			var out := {}
+			for p in st.get_node_property_count(i):
+				out[str(st.get_node_property_name(i, p))] = st.get_node_property_value(i, p)
+			return out
+	return {}
+
+
+# On a real map: a zombie follows you from outside, in through the door and up
+# the stairs to an upper floor, the way the game's enemies get there.
+func run_last(r) -> void:
+	Loader.LoadScene("Village")
+	var ok: bool = await r.wait_for_map("Village", 120.0)
+	r.check("Zombies: Village loads for the chase", ok)
+	if ok:
+		await _chase_indoors(r)
+	r.check("Zombies: back to Tutorial", await r.reload_tutorial())
+
+
+func _chase_indoors(r) -> void:
+	var gd = load("res://Resources/GameData.tres")
+	var keep_health: float = gd.health
+	for sp in ZM.spawners:
+		if is_instance_valid(sp):
+			sp.active = false
+	for other in ZM.living.duplicate():
+		if is_instance_valid(other) and other.active:
+			other.Deactivate()
+	var player = r.get_node("/root/Map/Core/Controller")
+	var map: RID = player.get_world_3d().get_navigation_map()
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	await _frames(r, 10)
+	# An upper floor indoors (another level of the navigation mesh right under
+	# it, a roof over it), and a way up to it from outside.
+	var region: NavigationRegion3D = r.get_tree().current_scene.find_children("*", "NavigationRegion3D", true, false)[0]
+	var verts: PackedVector3Array = region.navigation_mesh.get_vertices()
+	var home: Vector3 = player.global_position
+	var near := []
+	for i in range(0, verts.size(), 5):
+		var v: Vector3 = region.global_transform * verts[i]
+		if v.distance_to(home) < 250.0:
+			near.append(v)
+	near.sort_custom(func(a, b): return a.distance_to(home) < b.distance_to(home))
+	var from := Vector3.INF
+	var to := Vector3.INF
+	var route := 0.0
+	for v in near.slice(0, 4000):
+		var low := NavigationServer3D.map_get_closest_point(map, v - Vector3(0, 2.6, 0))
+		if v.y - low.y < 2.2 or ((low - v) * Vector3(1, 0, 1)).length() > 1.0:
+			continue
+		if space.intersect_ray(PhysicsRayQueryParameters3D.create(v + Vector3.UP * 0.5, v + Vector3.UP * 6.0, 49)).is_empty():
+			continue
+		for k in 8:
+			var s := NavigationServer3D.map_get_closest_point(map, Vector3(v.x + cos(k * TAU / 8) * 15.0, low.y, v.z + sin(k * TAU / 8) * 15.0))
+			if absf(s.y - low.y) > 1.0 or not space.intersect_ray(PhysicsRayQueryParameters3D.create(s + Vector3.UP * 0.5, s + Vector3.UP * 10.0, 49)).is_empty():
+				continue
+			var q := NavigationPathQueryParameters3D.new()
+			q.map = map
+			q.start_position = s
+			q.target_position = v
+			var res := NavigationPathQueryResult3D.new()
+			NavigationServer3D.query_path(q, res)
+			var path := res.get_path()
+			var length := 0.0
+			for j in range(1, path.size()):
+				length += path[j].distance_to(path[j - 1])
+			if path.size() > 2 and path[-1].distance_to(v) < 0.5 and length < 70.0:
+				from = s
+				to = v
+				route = length
+				break
+		if from != Vector3.INF:
+			break
+	r.check("Zombies: an upper floor indoors on the Village map", from != Vector3.INF)
+	if from == Vector3.INF:
+		return
+	player.global_position = to + Vector3.UP * 0.15
+	player.velocity = Vector3.ZERO
+	await _frames(r, 20)
+	var z := _zombie(r, from - Vector3.UP * 0.2)
+	await _frames(r, 2)
+	z.last_seen = z._now()
+	z.target = gd.playerPosition
+	z._set_state(z.S.CHASE)
+	var worst_off := 0.0          # furthest from the walkable mesh (into a wall)
+	var worst_gap := 0.0          # feet off the floor under it
+	var floating := 0
+	var top := -1000.0
+	var moved := 0.0
+	var run_time := 0.0
+	var last: Vector3 = z.global_position
+	var frames := 0
+	while frames < 9000 and z.state != z.S.ATTACK and z.global_position.distance_to(gd.playerPosition) > 2.0:
+		await _frames(r, 6)
+		frames += 6
+		gd.health = 100.0
+		var at: Vector3 = z.global_position + Vector3.UP * z.HEIGHT_OFFSET
+		var c := NavigationServer3D.map_get_closest_point(map, at)
+		worst_off = maxf(worst_off, ((c - at) * Vector3(1, 0, 1)).length())
+		var feet: Vector3 = z.model.global_position
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(feet + Vector3.UP * 0.6, feet + Vector3.DOWN * 0.8, z.GROUND_MASK))
+		if hit.is_empty():
+			floating += 1
+		else:
+			worst_gap = maxf(worst_gap, absf(feet.y - hit.position.y))
+		top = maxf(top, z.global_position.y)
+		var step: float = z.global_position.distance_to(last)
+		if z.state == z.S.CHASE and step > 0.01 and not z._busy():
+			moved += step
+			run_time += 6.0 / Engine.physics_ticks_per_second
+		last = z.global_position
+	var reached: bool = z.state == z.S.ATTACK or z.global_position.distance_to(gd.playerPosition) <= 2.0
+	r.check("Zombies: follows you indoors and up to the next floor", reached and top > from.y + 1.8, "%s after %.0f s, %.1f m up (route %.0f m, %.1f m up), %.1f m left" % [reached, frames / float(Engine.physics_ticks_per_second), top - from.y, route, to.y - from.y, z.global_position.distance_to(gd.playerPosition)])
+	r.check("Zombies: never inside a wall", worst_off < 0.35, "%.2f m off the walkable mesh" % worst_off)
+	r.check("Zombies: feet on the floor all the way", floating == 0 and worst_gap < 0.3, "%d samples floating, worst gap %.2f m" % [floating, worst_gap])
+	r.check("Zombies: hunts at a real pace", run_time > 0.0 and moved / run_time > 1.5, "%.2f m/s" % (moved / maxf(run_time, 0.001)))
+	# A one-shot (a stagger) plays where it stands, then it gets going again
+	z.global_position = from - Vector3.UP * 0.2
+	z.last_seen = z._now()
+	z._set_state(z.S.CHASE)
+	await _frames(r, 90)
+	var played: bool = z._play("hit", 0.0, true, 1.3)
+	var p0: Vector3 = z.global_position
+	await _frames(r, 40)
+	r.check("Zombies: no sliding while a one-shot plays", played and z.global_position.distance_to(p0) < 0.01, "%.2f m" % z.global_position.distance_to(p0))
+	var w := 0
+	while z._busy() and w < 1200:
+		await _frames(r, 1)
+		w += 1
+	z.last_seen = z._now()
+	await _frames(r, 30)
+	var clip: Animation = z.anim.get_animation(z.current_anim)
+	r.check("Zombies: no frozen pose after a one-shot", z.anim.is_playing() and clip.loop_mode != Animation.LOOP_NONE and z.global_position.distance_to(p0) > 0.05, "%s playing %s" % [z.current_anim, z.anim.is_playing()])
+	ZM.overrides = {}
+	gd.health = keep_health
+	z.queue_free()
 	await _frames(r, 2)
