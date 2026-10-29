@@ -1,6 +1,6 @@
 # CleanStrike Zombies: one of the dead. Tough and hits hard; hunts by sound
-# first, sight second; calls the others; stays on your trail for a while after
-# losing sight of you and loses interest after three minutes; breaks doors;
+# first, sight second; calls the others; stays on your trail while it has
+# seen you in the last ten seconds and loses you after that; breaks doors;
 # loses limbs; crawls when its legs are gone. Speaks the spawner's language
 # (Initialize/Activate/Deactivate, sensor, currentPoint...) so it can stand in
 # for the game's enemies, and moves the way they do: along the navigation mesh
@@ -21,7 +21,9 @@ const SIGHT_MASK := 268435481
 const PROBE_MASK := 57
 const HEIGHT_OFFSET := 0.2      # as the game's agents: the path runs this far above the root
 const ATTACK_RATE := 1.2        # swings play a little quicker than the clips
-const MAX_RATE := 2.0           # moving clips play at most this fast
+const MIN_RATE := 0.35          # moving clips play at least this fast
+const MAX_RATE := 2.0           # ...and at most this fast
+const CRAWL_KEEP := 0.49 / 0.43  # the crawl clip re-measured slower: slow crawlers keep their old pace, less the quarter
 
 var gameData = preload("res://Resources/GameData.tres")
 
@@ -48,7 +50,7 @@ var hitboxes: Array = []
 
 # Mind
 var state := S.IDLE
-var health := 250.0
+var health := 125.0
 var parts := {}             # part -> damage taken
 var lost := {}              # part -> true once severed
 var crawler := false
@@ -90,7 +92,7 @@ func _ready() -> void:
 	for hb in find_children("*", "StaticBody3D", true, false):
 		if hb.has_method("ApplyDamage"):
 			hitboxes.append(hb)
-	health = 250.0 * float(ZM.setting("health"))
+	health = 125.0 * float(ZM.setting("health"))
 	think = randf() * 0.3
 	flank = float(get_instance_id() % 16) / 16.0 * TAU
 	pace = 0.92 + float(get_instance_id() % 7) * 0.027
@@ -175,7 +177,8 @@ func Sees() -> bool:
 	if d > float(ZM.setting("sight")):
 		return false
 	var fwd := -global_basis.z
-	if d > 3.0 and rad_to_deg(fwd.angle_to((you - me) * Vector3(1, 0, 1))) > 70.0:
+	# a hunter keeps you in view all round; only a broken line of sight loses you
+	if d > 3.0 and not _aggro() and rad_to_deg(fwd.angle_to((you - me) * Vector3(1, 0, 1))) > 70.0:
 		return false
 	var q := PhysicsRayQueryParameters3D.create(me, you, SIGHT_MASK)
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
@@ -236,18 +239,19 @@ func _decide() -> void:
 		target = you
 		if state != S.ATTACK and state != S.DOOR:
 			_set_state(S.CHASE)
-	elif state == S.CHASE and now - last_seen < _track_time() and d < 50.0 and not gameData.isDead:
+	elif state == S.CHASE and now - last_seen < _aggro_time() and not gameData.isDead:
 		target = you                       # on your trail: round the corner, up the stairs
 	if state == S.CHASE or state == S.INVESTIGATE:
 		var flat_d := ((you - global_position) * Vector3(1, 0, 1)).length()
 		if flat_d < (1.3 if crawler else 1.7) and d < (1.7 if crawler else 2.2) and now - last_seen < 1.5 and not gameData.isDead:
 			_set_state(S.ATTACK)
-		elif state == S.CHASE and now - last_seen > float(ZM.setting("forget_seconds")) and now - last_heard > 20.0:
-			_set_state(S.WANDER)                              # lost you
-		elif state == S.CHASE and now - last_seen > _track_time() and _arrived():
-			_search()                                         # trail gone cold: looks about
+		elif state == S.CHASE and (now - last_seen >= _aggro_time() or gameData.isDead):
+			_set_state(S.WANDER)                              # out of sight too long: lost you
 		elif state == S.INVESTIGATE and _arrived() and now - last_seen > 3.0:
 			_set_state(S.WANDER)
+	elif state == S.DOOR and (gameData.isDead or (now - maxf(last_seen, last_heard) >= _aggro_time() and now - heard_loud >= 20.0)):
+		door = null                                           # nothing seen or heard behind it for a while: gives up
+		_set_state(S.WANDER)
 	if state == S.WANDER and _arrived():
 		_pick_wander()
 
@@ -265,9 +269,14 @@ func _set_state(s: int) -> void:
 		path_to = Vector3.INF          # repath on the next move
 
 
-# How long it keeps following you unseen (longer while the swarm is roused).
-func _track_time() -> float:
-	return 15.0 + 15.0 * ZM.heat
+func _aggro() -> bool:
+	return state in [S.CHASE, S.ATTACK, S.DOOR] and _now() - last_seen < _aggro_time()
+
+
+# How long it keeps after you with the line of sight broken; every glimpse
+# starts it again.
+func _aggro_time() -> float:
+	return float(ZM.setting("aggro_seconds"))
 
 
 # There, or as near as the navigation mesh lets it get.
@@ -278,11 +287,6 @@ func _arrived() -> bool:
 		return false
 	var p := agent.get_current_navigation_path()
 	return not p.is_empty() and global_position.distance_to(p[p.size() - 1] - Vector3.UP * HEIGHT_OFFSET) < 1.5
-
-
-func _search() -> void:
-	target = _on_mesh(target + Vector3(randf_range(-6, 6), 0, randf_range(-6, 6)))
-	_set_state(S.INVESTIGATE)
 
 
 func _pick_wander() -> void:
@@ -338,17 +342,18 @@ func _lunging() -> bool:
 # shamble briskly, hunters jog, enraged ones sprint, and a last lunge.
 func _speed() -> float:
 	var natural := float(ZM.CLIP_SPEED.get(_move_anim(), 0.4))
-	var want := natural * 1.25
+	var keep := CRAWL_KEEP if _move_anim() == "crawl" else 1.0
+	var want := natural * keep * 0.94
 	if _hunting():
-		want = float(ZM.setting("hunt_speed")) * pace * (0.7 if crawler else 1.0)
+		want = float(ZM.setting("chase_speed")) * pace * (0.7 if crawler else 1.0)
 		if _enraged():
 			want *= 1.6
 		elif _lunging():
 			want *= 1.3
 	elif state != S.WANDER:
-		want = natural * 1.6
+		want = natural * keep * 1.2
 	want *= float(ZM.setting("speed"))
-	return natural * clampf(want / natural, 0.5, MAX_RATE)
+	return natural * clampf(want / natural, MIN_RATE, MAX_RATE)
 
 
 # One step along the path, in 3D like the game's enemies: the path's own
@@ -573,13 +578,13 @@ func _bash(delta: float) -> void:
 func _door_blow() -> void:
 	if dead or state != S.DOOR or door == null or not is_instance_valid(door):
 		return
-	if ZM.hit_door(door):
+	if ZM.hit_door(door, global_position):
 		_door_done()
 
 
 func _door_done() -> void:
 	door = null
-	_set_state(S.CHASE if _now() - last_seen < 10.0 else S.INVESTIGATE)
+	_set_state(S.CHASE if _now() - last_seen < _aggro_time() else S.INVESTIGATE)
 
 
 # ---------------------------------------------------------------- damage
@@ -635,7 +640,7 @@ func Sever(part: String, vector: Vector3) -> void:
 	ZM.sever(self, part, vector)
 	if part.begins_with("leg") and not crawler:
 		crawler = true
-		health = maxf(health, 60.0)
+		health = maxf(health, 30.0)
 		# It goes down (the first half of a fall) and crawls on from there
 		if _play("dying", 0.0, true, 1.0, true):
 			anim.set_meta("cs_once_until", _now() + anim.current_animation_length * 0.55)
@@ -719,7 +724,7 @@ func _play(clip: String, move_speed: float, once := false, rate := 1.0, force_it
 	elif once:
 		anim.seek(0.0, true)                           # the same swing again, from the start
 	if move_speed > 0.0:
-		anim.speed_scale = clampf(move_speed / float(ZM.CLIP_SPEED.get(clip, 1.0)), 0.3, MAX_RATE)
+		anim.speed_scale = clampf(move_speed / float(ZM.CLIP_SPEED.get(clip, 1.0)), MIN_RATE * 0.3, MAX_RATE)   # down to the slowest turn
 	elif ZM.CLIP_SPEED.has(clip):
 		anim.speed_scale = 1.0 if _now() - played_at < 0.3 else 0.0   # a crawler at rest settles, then lies still
 	else:

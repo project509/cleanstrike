@@ -126,15 +126,15 @@ func run(r) -> void:
 	r.check("Zombies: but not ones far away", z3.state == z3.S.WANDER)
 
 	# Shot at, now and then one charges (never otherwise)
-	r.check("Zombies: wanderers shamble", z3.state == z3.S.WANDER and z3._speed() > 0.5 and z3._speed() < 1.0, "%.2f m/s" % z3._speed())
+	r.check("Zombies: wanderers shamble", z3.state == z3.S.WANDER and z3._speed() > 0.35 and z3._speed() < 0.75, "%.2f m/s" % z3._speed())
 	z2.state = z2.S.CHASE
 	z2.last_seen = z2._now()
 	var hunt: float = z2._speed()
-	r.check("Zombies: hunters come at a brisk pace", not z2._enraged() and hunt > 1.7 and hunt < 2.6, "%.2f m/s" % hunt)
+	r.check("Zombies: hunters come at a brisk pace (25% slower than 1.1.2)", not z2._enraged() and hunt > 1.25 and hunt < 1.95, "%.2f m/s" % hunt)
 	ZM.overrides = {"rage_chance": 1.0}
 	z2.Hit("torso", 1.0, fwd, player.get_node_or_null("../Camera/ID") if player.get_node_or_null("../Camera/ID") else r.get_tree().get_first_node_in_group("Player"), z2.global_position + Vector3.UP)
 	ZM.overrides = {}
-	r.check("Zombies: enraged by a shot, it sprints", z2._enraged() and z2._speed() > 2.8, "%.2f m/s" % z2._speed())
+	r.check("Zombies: enraged by a shot, it sprints", z2._enraged() and z2._speed() > 2.1 and z2._speed() < 3.2, "%.2f m/s" % z2._speed())
 	z2.enraged_until = -1000.0
 
 	# Up close it attacks, and it hurts
@@ -155,24 +155,76 @@ func run(r) -> void:
 	r.check("Zombies: its blows hurt", gd.health < 100.0, "%.1f health after %.1f s; state %d d %.2f dead %s seen %s; you dead %s at %.2f m; %s busy %s" % [gd.health, t, z2.state, z2.global_position.distance_to(feet), z2.dead, z2.Sees(), gd.isDead, z2.global_position.distance_to(gd.playerPosition), z2.current_anim, z2._busy()])
 	gd.health = keep_health
 
-	# Out of sight for three minutes (and nothing heard), it loses interest
+	# Ten seconds with the line of sight broken, it loses you; a glimpse starts the count again
+	r.check("Zombies: loses you after 10 s out of sight (default)", float(ZM.setting("aggro_seconds")) == 10.0 and float(ZM.DEFAULTS.aggro_seconds) == 10.0)
 	var zf := _zombie(r, feet + fwd * 30.0)
 	await _frames(r, 2)
-	var now: float = zf._now()
+	zf.active = false                                # driven by hand: its clock and its senses
 	zf.state = zf.S.CHASE
 	zf.target = feet
-	zf.last_seen = now - 60.0
-	zf.last_heard = now - 60.0
-	zf.global_basis = Basis.looking_at(-fwd * -1.0, Vector3.UP)
+	zf.last_seen = zf._now()
+	zf.last_heard = zf._now()
+	ZM.overrides = {"sight": 0.1}                    # nothing in view: the line of sight is broken
+	zf.clock += 9.0
 	zf._decide()
-	r.check("Zombies: a minute unseen, it still hunts", zf.state == zf.S.CHASE or zf.state == zf.S.DOOR or zf.Sees())
-	zf.last_seen = now - 185.0
-	zf.last_heard = now - 185.0
-	if not zf.Sees():
-		zf._decide()
-		r.check("Zombies: three minutes unseen, it gives up", zf.state == zf.S.WANDER, str(zf.state))
-	else:
-		r.check("Zombies: three minutes unseen, it gives up", true, "in view here; skipped")
+	r.check("Zombies: 9 s out of sight, it still hunts", zf.state in [zf.S.CHASE, zf.S.DOOR, zf.S.ATTACK] and zf.target.distance_to(gd.playerPosition) < 0.5, str(zf.state))
+	ZM.overrides = {}
+	zf.global_position = gd.playerPosition + fwd * 2.6           # in plain view
+	var glimpse: bool = zf.Sees()
+	zf._decide()
+	ZM.overrides = {"sight": 0.1}
+	zf.state = zf.S.CHASE
+	zf.clock += 9.0
+	zf._decide()
+	r.check("Zombies: a glimpse starts the 10 s again", glimpse and zf.state == zf.S.CHASE, "seen %s state %d" % [glimpse, zf.state])
+	zf.clock += 1.5
+	zf._decide()
+	r.check("Zombies: 10 s out of sight, it gives up", zf.state == zf.S.WANDER, "state %d, %.1f s unseen" % [zf.state, zf._now() - zf.last_seen])
+	ZM.overrides = {}
+	zf.state = zf.S.CHASE
+	zf.last_seen = zf._now() - 1.0
+	var space3: PhysicsDirectSpaceState3D = r.get_tree().current_scene.get_world_3d().direct_space_state
+	var eye: Vector3 = gd.playerPosition + Vector3.UP * 1.2
+	var dir := fwd
+	for c in [fwd, -fwd, fwd.cross(Vector3.UP), -fwd.cross(Vector3.UP)]:     # a spot with a clear line to you
+		var from3: Vector3 = gd.playerPosition + c * 5.0 + Vector3.UP * 1.6
+		if space3.intersect_ray(PhysicsRayQueryParameters3D.create(from3, eye, zf.SIGHT_MASK)).is_empty():
+			dir = c
+			break
+	zf.global_basis = Basis.looking_at(dir, Vector3.UP)          # its back to you, a few metres off
+	zf.global_position = gd.playerPosition + dir * 5.0
+	await r.get_tree().physics_frame
+	r.check("Zombies: a hunter keeps you in view behind it", zf.Sees(), "aggro %s" % zf._aggro())
+	# Real cover: a wall between you and it, ten seconds on, it is gone
+	var wall := StaticBody3D.new()
+	wall.collision_layer = 1
+	var wcs := CollisionShape3D.new()
+	var wsh := BoxShape3D.new()
+	wsh.size = Vector3(6, 6, 0.3)
+	wcs.shape = wsh
+	wall.add_child(wcs)
+	r.get_tree().current_scene.add_child(wall)
+	wall.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), gd.playerPosition + dir * 2.5 + Vector3.UP)
+	await r.get_tree().physics_frame
+	await r.get_tree().physics_frame
+	var covered: bool = not zf.Sees()
+	zf.last_seen = zf._now()
+	zf.last_heard = zf._now() - 30.0
+	zf.clock += 10.5
+	zf._decide()
+	r.check("Zombies: behind real cover, 10 s on it gives up", covered and zf.state == zf.S.WANDER, "covered %s state %d" % [covered, zf.state])
+	# ...even with a shut door to break: it stops swinging
+	zf.state = zf.S.DOOR
+	zf.door = zf
+	zf.last_seen = zf._now()
+	zf.clock += 9.0
+	zf._decide()
+	var bashing: bool = zf.state == zf.S.DOOR
+	zf.clock += 1.5
+	zf._decide()
+	r.check("Zombies: at a door, 10 s unseen it gives up", bashing and zf.state == zf.S.WANDER and zf.door == null, "bashing at 9 s %s, state %d" % [bashing, zf.state])
+	wall.queue_free()
+	zf.queue_free()
 
 	# Shoot a leg off: a crawler, and the leg on the floor
 	var leg = sk.get_node("HB_leg_l_lower/Hitbox")
@@ -185,7 +237,10 @@ func run(r) -> void:
 	r.check("Zombies: a severed part can't be hit again", leg.collision_layer == 0)
 	r.check("Zombies: the stump keeps bleeding", sk.get_node("HB_leg_l_lower").get_node_or_null("CS_Stump") != null)
 
-	# Headshots kill; the body can be searched
+	# Headshots kill; the body can be searched. Top the health up first so the
+	# kill comes from the decapitating blow, not attrition: a legless crawler is
+	# already near death, and a headshot does three times the damage.
+	z.health = 1000.0
 	var hp: float = z.health
 	head_hb.ApplyDamage(30.0, fwd, null)
 	r.check("Zombies: headshots hit hard", hp - z.health >= 90.0, "%.0f" % (hp - z.health))
@@ -245,6 +300,55 @@ func run(r) -> void:
 	broke = ZM.hit_door(dn)
 	await _frames(r, 2)
 	r.check("Zombies: the tenth breaks it", broke and dn.isOpen and not dn.visible)
+	# ...into boards of its own wood (never the hidden navigation blocker's white boxes)
+	var pieces: Array = ZM.debris.filter(func(p): return is_instance_valid(p))
+	var bad_src := []
+	var no_mat := 0
+	var biggest := 0.0
+	var scaled := 0
+	for p in pieces:
+		var src = r.get_node_or_null(NodePath(str(p.get_meta("cs_src"))))
+		if src == null or src.layers == 0 or str(src.get_path()).contains("Navblock"):
+			bad_src.append(str(p.get_meta("cs_src")))
+		var mi: MeshInstance3D = p.get_child(0)
+		if mi.get_active_material(0) == null:
+			no_mat += 1
+		if absf(p.global_basis.get_scale().length() - sqrt(3.0)) > 0.01 or p.collision_mask != 25:
+			scaled += 1                                  # ...and it falls like the game's ragdolls, never shoving loot
+		var box: AABB = mi.get_aabb()
+		biggest = maxf(biggest, maxf(box.size.x, maxf(box.size.y, box.size.z)))
+	r.check("Zombies: a wooden door splits into 8-14 boards", pieces.size() >= 8 and pieces.size() <= 14, "%d pieces" % pieces.size())
+	r.check("Zombies: door pieces come from the door itself", bad_src.is_empty(), str(bad_src))
+	r.check("Zombies: door pieces wear the door's material", no_mat == 0, "%d without" % no_mat)
+	r.check("Zombies: door pieces are board sized and unscaled", scaled == 0 and biggest < 1.3 and biggest > 0.05, "%d scaled, biggest %.2f m" % [scaled, biggest])
+	var fx: Node = r.get_tree().current_scene
+	r.check("Zombies: splinters and dust burst from it", fx.find_children("CS_Splinters", "GPUParticles3D", true, false).size() > 0 and fx.find_children("CS_Dust", "GPUParticles3D", true, false).size() > 0)
+	var extra_doors := []
+	for i in 10:
+		var d2 = load("res://Assets/Shack_A/Shack_A_Door_L.tscn").instantiate()
+		r.get_tree().current_scene.add_child(d2)
+		d2.global_position = feet + Vector3(i * 3.0, -60, 0)
+		ZM.break_door(ZM.door_of(d2.find_children("*", "CollisionShape3D", true, false)[0]), d2.global_position + Vector3(0, 1, -1))
+		extra_doors.append(d2)
+	await _frames(r, 2)
+	r.check("Zombies: door debris is capped", ZM.debris.filter(func(p): return is_instance_valid(p) and not p.is_queued_for_deletion()).size() <= ZM.MAX_DEBRIS, "%d" % ZM.debris.size())
+	for d2 in extra_doors:
+		d2.queue_free()
+	for p in ZM.debris:
+		if is_instance_valid(p):
+			p.queue_free()
+	ZM.debris.clear()
+	# A steel container door comes off whole, never in wooden boards
+	var cd = load("res://Assets/Container_Shipping/Container_Shipping_Door_L.tscn").instantiate()
+	r.get_tree().current_scene.add_child(cd)
+	cd.global_position = feet + Vector3(0, -70, 0)
+	var cdn = ZM.door_of(cd.find_children("*", "CollisionShape3D", true, false)[0])
+	var cpanel: MeshInstance3D = null
+	for m in ZM._door_meshes(cdn):
+		if cpanel == null or ZM._area(m.get_aabb()) > ZM._area(cpanel.get_aabb()):
+			cpanel = m
+	r.check("Zombies: a container door is metal", cdn != null and ZM._surface_of(cdn, cpanel) == "Metal" and ZM._surface_of(dn, dn.find_children("*", "MeshInstance3D", true, false)[0]) == "Wood")
+	cd.queue_free()
 
 	# The spawner fills its pools with the dead
 	var sp = load("res://Resources/AISpawner.tscn").instantiate()
@@ -370,6 +474,7 @@ func _chase_indoors(r) -> void:
 	player.global_position = to + Vector3.UP * 0.15
 	player.velocity = Vector3.ZERO
 	await _frames(r, 20)
+	ZM.overrides = {"aggro_seconds": 600.0}         # the way up, not losing you: it stays on your trail
 	var z := _zombie(r, from - Vector3.UP * 0.2)
 	await _frames(r, 2)
 	z.last_seen = z._now()
@@ -406,7 +511,7 @@ func _chase_indoors(r) -> void:
 	r.check("Zombies: follows you indoors and up to the next floor", reached and top > from.y + 1.8, "%s after %.0f s, %.1f m up (route %.0f m, %.1f m up), %.1f m left" % [reached, frames / float(Engine.physics_ticks_per_second), top - from.y, route, to.y - from.y, z.global_position.distance_to(gd.playerPosition)])
 	r.check("Zombies: never inside a wall", worst_off < 0.35, "%.2f m off the walkable mesh" % worst_off)
 	r.check("Zombies: feet on the floor all the way", floating == 0 and worst_gap < 0.3, "%d samples floating, worst gap %.2f m" % [floating, worst_gap])
-	r.check("Zombies: hunts at a real pace", run_time > 0.0 and moved / run_time > 1.5, "%.2f m/s" % (moved / maxf(run_time, 0.001)))
+	r.check("Zombies: hunts at a real pace", run_time > 0.0 and moved / run_time > 1.1, "%.2f m/s" % (moved / maxf(run_time, 0.001)))
 	# A one-shot (a stagger) plays where it stands, then it gets going again
 	z.global_position = from - Vector3.UP * 0.2
 	z.last_seen = z._now()

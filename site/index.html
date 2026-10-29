@@ -122,6 +122,13 @@ ol.steps span{color:var(--muted);font-size:15px}
 .final h2{margin-bottom:12px}
 .final .cta{justify-content:center}
 
+/* safety */
+.safe-note{margin-top:40px;display:flex;gap:16px;align-items:flex-start;padding:22px 24px;border:1px solid var(--line);border-left:3px solid var(--olive);background:rgba(93,107,58,.08);border-radius:12px}
+.safe-note svg{flex:none;color:#b9cf86;margin-top:3px}
+.safe-note b{color:var(--text)}
+.safe-note p{color:var(--muted);font-size:15px}
+.safe-note code{font-family:"JetBrains Mono",monospace;font-size:13px;background:rgba(0,0,0,.4);padding:2px 7px;border-radius:5px;color:var(--text);white-space:nowrap}
+
 footer{padding:50px 0;border-top:1px solid var(--line);color:var(--faint);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
 footer a:hover{color:var(--text)}
@@ -142,7 +149,7 @@ footer a:hover{color:var(--text)}
 
 <nav><div class="wrap">
   <a class="brand" href="#"><img src="img/logo.png" alt="">Cleanstrike</a>
-  <ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#mods">Mods</a></li><li><a href="https://github.com/project509/cleanstrike">GitHub</a></li></ul>
+  <ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#mods">Mods</a></li><li><a href="#safe">Is it safe?</a></li><li><a href="https://github.com/project509/cleanstrike">GitHub</a></li></ul>
   <a class="btn btn-sm dl-link" href="#">Download</a>
 </div></nav>
 
@@ -206,8 +213,8 @@ footer a:hover{color:var(--text)}
         <h3 class="stencil">Road to Hell</h3>
         <p style="color:var(--muted)">Vostok becomes a zombie survival game. Every enemy is replaced by the dead, and they hunt by sound.</p>
         <ul>
-          <li>Packs that hear your gunshots from 140 m and call the others into crowds</li>
-          <li>Shoot limbs off; legless zombies keep coming as crawlers</li>
+          <li>Hunt by sound: a gunshot carries 140 m, and a zombie that spots you calls only the nearby dead, not the whole map</li>
+          <li>Limbs come off fast under fire; legless zombies keep coming as crawlers</li>
           <li>Slow and tough, but every blow hurts, and some charge when shot</li>
           <li>Doors give way after ten blows; bodies can hold a few rounds or food</li>
           <li>Off by default: switch it on in Cleanstrike when you're ready</li>
@@ -302,6 +309,40 @@ footer a:hover{color:var(--text)}
     <li>Visuals</li>
     <li>Sandbox Mode (opt-in)</li>
   </ul>
+</div></section>
+
+<section id="safe" style="padding-top:20px"><div class="wrap">
+  <p class="kicker reveal">Is it safe?</p>
+  <h2 class="stencil reveal">Not a virus. Here's the proof.</h2>
+  <p class="sub reveal">Windows may show a blue <b>SmartScreen</b> box the first time you run Cleanstrike, and a few antivirus tools may flag it in the days after a fresh release. That's a false positive. Here is exactly why it happens — and why the app is safe.</p>
+  <div class="grid">
+    <div class="card reveal">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div>
+      <h3>"Unknown publisher"</h3>
+      <p>Cleanstrike is a free, independent app without an expensive code-signing certificate. SmartScreen warns about <em>any</em> new, unsigned app until enough people have run it. The warning is about reputation, not about anything the app does.</p>
+    </div>
+    <div class="card reveal">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 14h4"/></svg></div>
+      <h3>Why antivirus pings it</h3>
+      <p>It's one portable .exe that carries the whole .NET runtime inside it, unpacks to a temp folder on launch, then reads the Steam registry to find your game. Generic heuristics flag that self-extract-and-scan shape — the same reason many honest game tools get tagged. It's a guess from the file's shape, not a real detection of anything malicious.</p>
+    </div>
+    <div class="card reveal">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>
+      <h3>Run it anyway</h3>
+      <p>On the blue SmartScreen box, click <b>More info</b>, then <b>Run anyway</b>. You only do this once. As each release is downloaded more, the warning stops appearing for everyone.</p>
+    </div>
+    <div class="card reveal">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <h3>Check for yourself</h3>
+      <p>Cleanstrike is fully open source. Read every line on <a href="https://github.com/project509/cleanstrike" style="color:var(--amber)">GitHub</a>, build the identical .exe yourself, or drop the download on <a href="https://www.virustotal.com" style="color:var(--amber)">VirusTotal</a> — you'll see only a couple of heuristic engines guess, never a named, agreed-upon threat.</p>
+    </div>
+  </div>
+  <div class="safe-note reveal">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+    <div>
+      <p><b>The short version:</b> an unsigned, self-contained Windows app that scans your drives to find a game looks, to an automated scanner, a lot like something it shouldn't — so it warns just in case. Nothing in Cleanstrike collects your data, touches your files outside the game, or talks to anything but GitHub for updates. Click <code>More info → Run anyway</code> and raid on.</p>
+    </div>
+  </div>
 </div></section>
 
 <section style="padding-top:20px"><div class="wrap">
